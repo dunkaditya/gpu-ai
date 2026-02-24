@@ -15,6 +15,13 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FOUND-04**: Redis connection initializes and verifies connectivity on startup
 - [x] **FOUND-05**: Database migrations apply cleanly to create full schema
 
+### Schema Improvements
+
+- [ ] **SCHEMA-01**: Rename all primary keys to self-documenting `{table}_id` format and update foreign key references
+- [ ] **SCHEMA-02**: Add NOT NULL constraints on mandatory foreign keys, explicit ON DELETE behavior on all FKs, CHECK constraint on instances.status, UNIQUE on instances.hostname, composite unique index on (upstream_provider, upstream_id)
+- [ ] **SCHEMA-03**: Remove wg_private_key_enc column (ephemeral key, security liability to store)
+- [ ] **SCHEMA-04**: Add internal_token column to instances for per-instance callback authentication, add updated_at column to instances
+
 ### Provider Integration
 
 - [ ] **PROV-01**: Provider interface defines standard contract (Name, ListAvailable, Provision, GetStatus, Terminate)
@@ -44,6 +51,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
 - [ ] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
 - [ ] **INST-07**: Instance ready callback transitions status from booting to running
+- [ ] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
 
 ### Authentication
 
@@ -67,6 +75,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **BILL-04**: Usage batched and reported to Stripe Billing Meters every 60 seconds as integer GPU-seconds
 - [ ] **BILL-05**: User can view their usage history and costs
 - [ ] **BILL-06**: Billing records include GPU type, count, duration, and cost
+- [ ] **BILL-07**: Configurable per-org spending limit with automatic instance termination when exceeded
 
 ### Availability
 
@@ -87,12 +96,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **API-07**: GET /api/v1/billing/usage returns billing history
 - [x] **API-08**: GET /health returns service health status
 - [ ] **API-09**: Error responses never leak upstream provider details
+- [ ] **API-10**: All list endpoints support cursor-based pagination with configurable page size
+- [ ] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
+- [ ] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
 
 ### Health Monitoring
 
 - [ ] **HLTH-01**: Background goroutine monitors instance health every 60 seconds
 - [ ] **HLTH-02**: Spot instance interruption detected and billing stopped automatically
 - [ ] **HLTH-03**: Instance ready callback received from booted instances
+- [ ] **HLTH-04**: Spot interruption and instance failure events trigger webhook notification to org's configured callback URL
 
 ### Dashboard
 
@@ -123,7 +136,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ### Advanced Features
 
-- **ADV-01**: Spend limits and billing alerts
+- ~~**ADV-01**: Spend limits and billing alerts~~ *(promoted to v1 as BILL-07)*
 - **ADV-02**: Team/org management with role-based access
 - **ADV-03**: CLI tool for programmatic instance management
 
@@ -153,6 +166,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
+| SCHEMA-01 | Phase 2 | Pending |
+| SCHEMA-02 | Phase 2 | Pending |
+| SCHEMA-03 | Phase 2 | Pending |
+| SCHEMA-04 | Phase 2 | Pending |
 | PROV-01 | Phase 2 | Pending |
 | PROV-02 | Phase 2 | Pending |
 | PROV-03 | Phase 2 | Pending |
@@ -174,6 +191,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INST-05 | Phase 4 | Pending |
 | INST-06 | Phase 4 | Pending |
 | INST-07 | Phase 4 | Pending |
+| INST-08 | Phase 4 | Pending |
 | AUTH-01 | Phase 4 | Pending |
 | AUTH-02 | Phase 4 | Pending |
 | AUTH-03 | Phase 4 | Pending |
@@ -188,6 +206,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BILL-04 | Phase 5 | Pending |
 | BILL-05 | Phase 5 | Pending |
 | BILL-06 | Phase 5 | Pending |
+| BILL-07 | Phase 5 | Pending |
 | AVAIL-01 | Phase 6 | Pending |
 | AVAIL-02 | Phase 6 | Pending |
 | AVAIL-03 | Phase 6 | Pending |
@@ -202,9 +221,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-07 | Phase 5 | Pending |
 | API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Pending |
+| API-10 | Phase 4 | Pending |
+| API-11 | Phase 4 | Pending |
+| API-12 | Phase 4 | Pending |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |
 | HLTH-03 | Phase 6 | Pending |
+| HLTH-04 | Phase 6 | Pending |
 | DASH-01 | Phase 7 | Pending |
 | DASH-02 | Phase 7 | Pending |
 | DASH-03 | Phase 7 | Pending |
@@ -215,8 +238,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-08 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 65 total
-- Mapped to phases: 65
+- v1 requirements: 75 total
+- Mapped to phases: 75
 - Unmapped: 0
 
 ---
