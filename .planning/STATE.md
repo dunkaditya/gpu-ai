@@ -78,6 +78,12 @@ Recent decisions affecting current work:
 - [03-01]: WG_ENCRYPTION_KEY validated as 64 hex chars with decoded bytes stored on Config struct
 - [03-01]: CustomerInstance uses defense-by-omission: upstream fields structurally absent, not filtered
 - [03-01]: Test for invalid AES key uses 15 bytes (not 16) since AES-128 with 16 bytes is valid
+- [03-02]: Advisory lock constant 0x475055414950414D (GPUAIPAM) for deterministic lock ID
+- [03-02]: IPAM receives pgx.Tx from caller; advisory lock is transaction-scoped and auto-releases
+- [03-02]: Manager accepts WGClient and CommandRunner interfaces for full testability without root
+- [03-02]: AddPeer rolls back WG peer if iptables DNAT/FORWARD setup fails
+- [03-02]: RemovePeer treats iptables cleanup as best-effort (logs but does not fail)
+- [03-02]: Port formula 10000 + ip[2]*256 + ip[3] maps full /16 to ports 10002-75535
 - [03-03]: text/template used instead of html/template to avoid HTML-escaping bash characters
 - [03-03]: Single-quoted heredocs prevent bash variable expansion; Go template expands before script runs
 - [03-03]: SSH key validation combines format regex with shell injection character blocklist
@@ -96,5 +102,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 03-03-PLAN.md (Cloud-Init Template)
+Stopped at: Completed 03-02-PLAN.md (IPAM & WireGuard Manager)
 Resume file: None
