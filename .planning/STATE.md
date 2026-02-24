@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 of 7 (Privacy Layer)
-Plan: 1 of 3 in current phase
+Plan: 3 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-24 -- Completed 03-01 (Privacy Layer Foundation)
+Last activity: 2026-02-24 -- Completed 03-03 (Cloud-Init Template)
 
-Progress: [████░░░░░░] 38%
+Progress: [█████░░░░░] 48%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 10
 - Average duration: 1.8min
-- Total execution time: 0.2 hours
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████░░░░░░] 38%
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 6min | 1.5min |
 | 02-provider-abstraction | 3 | 7min | 2.3min |
-| 03-privacy-layer | 1 | 2min | 2.0min |
+| 03-privacy-layer | 3 | 6min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 01-04 (1min), 02-01 (1min), 02-02 (2min), 02-03 (4min), 03-01 (2min)
+- Last 5 plans: 02-02 (2min), 02-03 (4min), 03-01 (2min), 03-02 (2min), 03-03 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -78,6 +78,10 @@ Recent decisions affecting current work:
 - [03-01]: WG_ENCRYPTION_KEY validated as 64 hex chars with decoded bytes stored on Config struct
 - [03-01]: CustomerInstance uses defense-by-omission: upstream fields structurally absent, not filtered
 - [03-01]: Test for invalid AES key uses 15 bytes (not 16) since AES-128 with 16 bytes is valid
+- [03-03]: text/template used instead of html/template to avoid HTML-escaping bash characters
+- [03-03]: Single-quoted heredocs prevent bash variable expansion; Go template expands before script runs
+- [03-03]: SSH key validation combines format regex with shell injection character blocklist
+- [03-03]: CallbackURL is pre-rendered by Go code (full URL), not constructed in bash
 
 ### Pending Todos
 
@@ -92,5 +96,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 03-01-PLAN.md (Privacy Layer Foundation)
+Stopped at: Completed 03-03-PLAN.md (Cloud-Init Template)
 Resume file: None

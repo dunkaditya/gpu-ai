@@ -37,9 +37,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **PRIV-02**: WireGuard peers added to proxy server programmatically via wgctrl-go
 - [ ] **PRIV-03**: WireGuard peers removed from proxy server on instance termination
 - [ ] **PRIV-04**: IPAM allocates unique WireGuard addresses from subnet pool backed by PostgreSQL
-- [ ] **PRIV-05**: Instance init template renders with WireGuard config, SSH keys, hostname, firewall rules
+- [x] **PRIV-05**: Instance init template renders with WireGuard config, SSH keys, hostname, firewall rules
 - [ ] **PRIV-06**: Customer SSH connections route through WireGuard proxy with branded hostname
-- [ ] **PRIV-07**: Upstream provider identity (name, IP, env vars, metadata endpoint) hidden from customer
+- [x] **PRIV-07**: Upstream provider identity (name, IP, env vars, metadata endpoint) hidden from customer
 - [x] **PRIV-08**: All customer-facing API responses structurally exclude upstream provider details
 
 ### Instance Lifecycle
@@ -180,9 +180,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRIV-02 | Phase 3 | Pending |
 | PRIV-03 | Phase 3 | Pending |
 | PRIV-04 | Phase 3 | Pending |
-| PRIV-05 | Phase 3 | Pending |
+| PRIV-05 | Phase 3 | Complete |
 | PRIV-06 | Phase 3 | Pending |
-| PRIV-07 | Phase 3 | Pending |
+| PRIV-07 | Phase 3 | Complete |
 | PRIV-08 | Phase 3 | Complete |
 | INST-01 | Phase 4 | Pending |
 | INST-02 | Phase 4 | Pending |
