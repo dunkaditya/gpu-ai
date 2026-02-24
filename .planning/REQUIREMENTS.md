@@ -44,20 +44,20 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Instance Lifecycle
 
-- [ ] **INST-01**: User can create a GPU instance specifying type, count, region, tier, SSH keys
-- [ ] **INST-02**: User can list their active instances with status and connection info
-- [ ] **INST-03**: User can get details of a specific instance by ID
-- [ ] **INST-04**: User can terminate an instance and billing stops
-- [ ] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
-- [ ] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
+- [x] **INST-01**: User can create a GPU instance specifying type, count, region, tier, SSH keys
+- [x] **INST-02**: User can list their active instances with status and connection info
+- [x] **INST-03**: User can get details of a specific instance by ID
+- [x] **INST-04**: User can terminate an instance and billing stops
+- [x] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
+- [x] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
 - [ ] **INST-07**: Instance ready callback transitions status from booting to running
-- [ ] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
+- [x] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
 
 ### Authentication
 
 - [x] **AUTH-01**: All customer API endpoints require valid Clerk JWT
 - [x] **AUTH-02**: JWT verification extracts user_id and org_id into request context
-- [ ] **AUTH-03**: Users can only access instances belonging to their organization
+- [x] **AUTH-03**: Users can only access instances belonging to their organization
 - [x] **AUTH-04**: Internal endpoints restricted to localhost only
 
 ### SSH Key Management
@@ -96,7 +96,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **API-07**: GET /api/v1/billing/usage returns billing history
 - [x] **API-08**: GET /health returns service health status
 - [x] **API-09**: Error responses never leak upstream provider details
-- [ ] **API-10**: All list endpoints support cursor-based pagination with configurable page size
+- [x] **API-10**: All list endpoints support cursor-based pagination with configurable page size
 - [ ] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
 - [x] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
 
@@ -184,17 +184,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRIV-06 | Phase 3 | Complete |
 | PRIV-07 | Phase 3 | Complete |
 | PRIV-08 | Phase 3 | Complete |
-| INST-01 | Phase 4 | Pending |
-| INST-02 | Phase 4 | Pending |
-| INST-03 | Phase 4 | Pending |
-| INST-04 | Phase 4 | Pending |
-| INST-05 | Phase 4 | Pending |
-| INST-06 | Phase 4 | Pending |
+| INST-01 | Phase 4 | Complete |
+| INST-02 | Phase 4 | Complete |
+| INST-03 | Phase 4 | Complete |
+| INST-04 | Phase 4 | Complete |
+| INST-05 | Phase 4 | Complete |
+| INST-06 | Phase 4 | Complete |
 | INST-07 | Phase 4 | Pending |
-| INST-08 | Phase 4 | Pending |
+| INST-08 | Phase 4 | Complete |
 | AUTH-01 | Phase 4 | Complete |
 | AUTH-02 | Phase 4 | Complete |
-| AUTH-03 | Phase 4 | Pending |
+| AUTH-03 | Phase 4 | Complete |
 | AUTH-04 | Phase 1 | Complete |
 | SSHK-01 | Phase 5 | Pending |
 | SSHK-02 | Phase 5 | Pending |
@@ -221,7 +221,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-07 | Phase 5 | Pending |
 | API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Complete |
-| API-10 | Phase 4 | Pending |
+| API-10 | Phase 4 | Complete |
 | API-11 | Phase 4 | Pending |
 | API-12 | Phase 4 | Complete |
 | HLTH-01 | Phase 6 | Pending |

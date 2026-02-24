@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 4 of 7 (Auth & Instance Lifecycle)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-24 -- Completed 04-01 (Auth & Cross-cutting Infrastructure)
+Last activity: 2026-02-24 -- Completed 04-02 (Instance State Machine, DB Layer, and Provisioning Engine)
 
-Progress: [██████░░░░] 52%
+Progress: [██████░░░░] 57%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 1.8min
-- Total execution time: 0.3 hours
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [██████░░░░] 52%
 | 01-foundation | 4 | 6min | 1.5min |
 | 02-provider-abstraction | 3 | 7min | 2.3min |
 | 03-privacy-layer | 3 | 6min | 2.0min |
-| 04-auth-instance-lifecycle | 1 | 2min | 2.0min |
+| 04-auth-instance-lifecycle | 2 | 6min | 3.0min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (4min), 03-01 (2min), 03-02 (2min), 03-03 (2min), 04-01 (2min)
+- Last 5 plans: 03-01 (2min), 03-02 (2min), 03-03 (2min), 04-01 (2min), 04-02 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -94,6 +94,12 @@ Recent decisions affecting current work:
 - [04-01]: ClaimsFromContext wraps Clerk SessionClaimsFromContext mapping Subject->UserID and ActiveOrganizationID->OrgID
 - [04-01]: Rate limiter uses sync.Map with limiterEntry wrapper for thread-safe lastSeen tracking
 - [04-01]: Cursor format uses RFC3339 timestamp + pipe + ID, base64url encoded (no padding)
+- [04-02]: State machine allows stopping from any non-terminal state and retry-terminate from error
+- [04-02]: EnsureOrgAndUser uses clerk_org_id as org name placeholder for auto-creation
+- [04-02]: EngineDeps struct injection matching ServerDeps pattern (not functional options)
+- [04-02]: WireGuard is fully conditional in engine: nil wgMgr skips key gen, IPAM, and cloud-init
+- [04-02]: Provider selection iterates registry with first-match (Phase 6 adds best-price)
+- [04-02]: isDuplicateKeyError checks SQLState 23505 via errors.As for pgx compatibility
 
 ### Pending Todos
 
@@ -108,5 +114,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 04-01-PLAN.md (Auth & Cross-cutting Infrastructure)
+Stopped at: Completed 04-02-PLAN.md (Instance State Machine, DB Layer, and Provisioning Engine)
 Resume file: None
