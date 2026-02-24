@@ -13,7 +13,7 @@ GPU.ai goes from scaffolded codebase to working dev milestone in 7 phases. Found
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Compilable binary with config, database, Redis, migrations, and health endpoint
-- [ ] **Phase 2: Provider Abstraction + RunPod Adapter** - Provider interface, registry, and RunPod GraphQL adapter
+- [x] **Phase 2: Provider Abstraction + RunPod Adapter** - Provider interface, registry, and RunPod GraphQL adapter (completed 2026-02-24)
 - [ ] **Phase 3: Privacy Layer** - WireGuard key management, peer management, IPAM, init template, and privacy filtering
 - [ ] **Phase 4: Auth + Instance Lifecycle** - Clerk JWT auth, instance CRUD with state machine, and core API endpoints
 - [ ] **Phase 5: SSH Keys + Billing** - SSH key management, per-second billing ledger, and Stripe metering
@@ -154,7 +154,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-02-24 |
-| 2. Provider Abstraction + RunPod Adapter | 0/3 | Not started | - |
+| 2. Provider Abstraction + RunPod Adapter | 0/3 | Complete    | 2026-02-24 |
 | 3. Privacy Layer | 0/3 | Not started | - |
 | 4. Auth + Instance Lifecycle | 0/3 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
