@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"strings"
 
 	"github.com/gpuai/gpuctl/internal/config"
@@ -336,11 +337,32 @@ func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 
 	// 6. Clean up WireGuard peer if configured.
 	if e.wgMgr != nil && inst.WGPublicKey != nil && inst.WGAddress != nil {
-		e.logger.Info("WireGuard cleanup would happen here",
-			slog.String("instance_id", instanceID),
-		)
-		// Full WG cleanup (RemovePeer) requires parsing tunnel IP and computing port.
-		// Deferred to handler integration in Plan 03 where we have full context.
+		// WGAddress may contain a CIDR suffix (e.g., "10.0.0.2/16") from the INET column.
+		// Strip the prefix length before parsing.
+		addrStr, _, _ := strings.Cut(*inst.WGAddress, "/")
+		tunnelIP := net.ParseIP(addrStr)
+		if tunnelIP == nil {
+			e.logger.Error("failed to parse WG address for cleanup",
+				slog.String("instance_id", instanceID),
+				slog.String("wg_address", *inst.WGAddress),
+			)
+		} else {
+			externalPort := wireguard.PortFromTunnelIP(tunnelIP)
+			if err := e.wgMgr.RemovePeer(ctx, *inst.WGPublicKey, tunnelIP, externalPort); err != nil {
+				// Log but don't fail termination -- WG cleanup is best-effort.
+				// The instance is already terminated in the DB and provider.
+				e.logger.Error("WireGuard peer cleanup failed (best-effort)",
+					slog.String("instance_id", instanceID),
+					slog.String("error", err.Error()),
+				)
+			} else {
+				e.logger.Info("WireGuard peer removed",
+					slog.String("instance_id", instanceID),
+					slog.String("tunnel_ip", tunnelIP.String()),
+					slog.Int("external_port", externalPort),
+				)
+			}
+		}
 	}
 
 	e.logger.Info("instance terminated",
