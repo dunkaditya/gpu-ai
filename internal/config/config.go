@@ -2,6 +2,7 @@
 package config
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
@@ -24,6 +25,25 @@ type Config struct {
 	// RunPodAPIKey is the RunPod API key for GPU provisioning. Optional.
 	// The RunPod adapter is only created if this key is present.
 	RunPodAPIKey string
+
+	// WGEncryptionKey is the hex-encoded AES-256-GCM key for encrypting
+	// WireGuard private keys at rest. Must be exactly 64 hex characters (32 bytes).
+	WGEncryptionKey string
+
+	// WGEncryptionKeyBytes is the decoded 32-byte encryption key derived from
+	// WGEncryptionKey. Not loaded from env; computed during Load().
+	WGEncryptionKeyBytes []byte
+
+	// WGProxyEndpoint is the public IP:port of the WireGuard proxy server.
+	// Example: "203.0.113.1:51820".
+	WGProxyEndpoint string
+
+	// WGProxyPublicKey is the proxy server's WireGuard public key (base64).
+	WGProxyPublicKey string
+
+	// WGInterfaceName is the WireGuard interface name on the proxy server.
+	// Default: "wg0".
+	WGInterfaceName string
 }
 
 // Load reads configuration from environment variables, validates required
@@ -46,6 +66,21 @@ func Load() (*Config, error) {
 		missing = append(missing, "INTERNAL_API_TOKEN")
 	}
 
+	wgEncryptionKey := os.Getenv("WG_ENCRYPTION_KEY")
+	if wgEncryptionKey == "" {
+		missing = append(missing, "WG_ENCRYPTION_KEY")
+	}
+
+	wgProxyEndpoint := os.Getenv("WG_PROXY_ENDPOINT")
+	if wgProxyEndpoint == "" {
+		missing = append(missing, "WG_PROXY_ENDPOINT")
+	}
+
+	wgProxyPublicKey := os.Getenv("WG_PROXY_PUBLIC_KEY")
+	if wgProxyPublicKey == "" {
+		missing = append(missing, "WG_PROXY_PUBLIC_KEY")
+	}
+
 	if len(missing) > 0 {
 		return nil, fmt.Errorf("missing required environment variables: %s", strings.Join(missing, ", "))
 	}
@@ -54,12 +89,26 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("INTERNAL_API_TOKEN must be changed from default value 'change-me'")
 	}
 
+	// Validate WG_ENCRYPTION_KEY: must be exactly 64 hex characters (32 bytes).
+	if len(wgEncryptionKey) != 64 {
+		return nil, fmt.Errorf("WG_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes), got %d", len(wgEncryptionKey))
+	}
+	wgEncryptionKeyBytes, err := hex.DecodeString(wgEncryptionKey)
+	if err != nil {
+		return nil, fmt.Errorf("WG_ENCRYPTION_KEY is not valid hex: %w", err)
+	}
+
 	return &Config{
-		Port:             getEnvDefault("GPUCTL_PORT", "9090"),
-		DatabaseURL:      databaseURL,
-		RedisURL:         redisURL,
-		InternalAPIToken: internalAPIToken,
-		RunPodAPIKey:     os.Getenv("RUNPOD_API_KEY"),
+		Port:                 getEnvDefault("GPUCTL_PORT", "9090"),
+		DatabaseURL:          databaseURL,
+		RedisURL:             redisURL,
+		InternalAPIToken:     internalAPIToken,
+		RunPodAPIKey:         os.Getenv("RUNPOD_API_KEY"),
+		WGEncryptionKey:      wgEncryptionKey,
+		WGEncryptionKeyBytes: wgEncryptionKeyBytes,
+		WGProxyEndpoint:      wgProxyEndpoint,
+		WGProxyPublicKey:     wgProxyPublicKey,
+		WGInterfaceName:      getEnvDefault("WG_INTERFACE_NAME", "wg0"),
 	}, nil
 }
 
