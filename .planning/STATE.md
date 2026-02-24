@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 1 of 7 (Foundation)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-02-24 -- Completed 01-02 (Database Schema & Migration Runner)
+Plan: 3 of 3 in current phase
+Status: Phase Complete
+Last activity: 2026-02-24 -- Completed 01-03 (Runtime Wiring)
 
-Progress: [██░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 14%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 1.5min
-- Total execution time: 0.05 hours
+- Total plans completed: 3
+- Average duration: 1.7min
+- Total execution time: 0.08 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 2 | 3min | 1.5min |
+| 01-foundation | 3 | 5min | 1.7min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1min), 01-02 (2min)
-- Trend: -
+- Last 5 plans: 01-01 (1min), 01-02 (2min), 01-03 (2min)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -52,6 +52,10 @@ Recent decisions affecting current work:
 - [01-02]: TIMESTAMPTZ for all time columns to avoid timezone bugs
 - [01-02]: wg_private_key_enc suffix to clarify encryption at rest
 - [01-02]: Per-migration transactions with rollback on error
+- [01-03]: Redis client used directly (no wrapper) -- go-redis Client sufficient for Phase 1
+- [01-03]: Health endpoint behind InternalAuthMiddleware -- prevents unauthenticated probing
+- [01-03]: ConnectWithRetry as package-level function in db -- reusable for any service
+- [01-03]: ServerDeps struct for constructor injection -- clean dependency boundary for testing
 
 ### Pending Todos
 
@@ -66,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 01-02-PLAN.md (Database Schema & Migration Runner)
+Stopped at: Completed 01-03-PLAN.md (Runtime Wiring) -- Phase 01-foundation complete
 Resume file: None

@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUND-01**: Go binary compiles and runs with health endpoint on configurable port
+- [x] **FOUND-01**: Go binary compiles and runs with health endpoint on configurable port
 - [x] **FOUND-02**: Config loads from environment variables with validation and sensible defaults
-- [ ] **FOUND-03**: PostgreSQL connection pool initializes and verifies connectivity on startup
-- [ ] **FOUND-04**: Redis connection initializes and verifies connectivity on startup
+- [x] **FOUND-03**: PostgreSQL connection pool initializes and verifies connectivity on startup
+- [x] **FOUND-04**: Redis connection initializes and verifies connectivity on startup
 - [x] **FOUND-05**: Database migrations apply cleanly to create full schema
 
 ### Provider Integration
@@ -50,7 +50,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AUTH-01**: All customer API endpoints require valid Clerk JWT
 - [ ] **AUTH-02**: JWT verification extracts user_id and org_id into request context
 - [ ] **AUTH-03**: Users can only access instances belonging to their organization
-- [ ] **AUTH-04**: Internal endpoints restricted to localhost only
+- [x] **AUTH-04**: Internal endpoints restricted to localhost only
 
 ### SSH Key Management
 
@@ -85,7 +85,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **API-05**: GET /api/v1/gpu/available returns GPU availability with optional filters
 - [ ] **API-06**: GET/POST/DELETE /api/v1/ssh-keys manages SSH keys
 - [ ] **API-07**: GET /api/v1/billing/usage returns billing history
-- [ ] **API-08**: GET /health returns service health status
+- [x] **API-08**: GET /health returns service health status
 - [ ] **API-09**: Error responses never leak upstream provider details
 
 ### Health Monitoring
@@ -148,10 +148,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
-| FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Complete |
+| FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | PROV-01 | Phase 2 | Pending |
 | PROV-02 | Phase 2 | Pending |
@@ -177,7 +177,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 4 | Pending |
 | AUTH-02 | Phase 4 | Pending |
 | AUTH-03 | Phase 4 | Pending |
-| AUTH-04 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Complete |
 | SSHK-01 | Phase 5 | Pending |
 | SSHK-02 | Phase 5 | Pending |
 | SSHK-03 | Phase 5 | Pending |
@@ -200,7 +200,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-05 | Phase 6 | Pending |
 | API-06 | Phase 5 | Pending |
 | API-07 | Phase 5 | Pending |
-| API-08 | Phase 1 | Pending |
+| API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Pending |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |
