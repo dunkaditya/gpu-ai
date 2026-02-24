@@ -52,7 +52,10 @@ func RunPodGPUName(gpuType provider.GPUType) (string, bool) {
 }
 
 // regionMap maps RunPod datacenter location prefixes to GPU.ai region codes.
+// RunPod uses formats like "US-TX-3", "EU-RO-1", "CA-MTL-1". We match
+// longest prefix first (e.g., "EU-RO" before "EU") in the NormalizeRegion function.
 var regionMap = map[string]string{
+	// US locations.
 	"US-CA": "us-west",
 	"US-OR": "us-west",
 	"US-WA": "us-west",
@@ -63,14 +66,23 @@ var regionMap = map[string]string{
 	"US-NY": "us-east",
 	"US-IL": "us-central",
 	"US-KS": "us-central",
-	"EU":    "eu-west",
-	"CA":    "ca-central",
-	"SE":    "eu-north",
-	"NO":    "eu-north",
-	"RO":    "eu-east",
-	"CZ":    "eu-east",
-	"BG":    "eu-east",
-	"IS":    "eu-north",
+	// EU locations (RunPod format: EU-{country}-{number}).
+	"EU-RO": "eu-east",
+	"EU-CZ": "eu-east",
+	"EU-BG": "eu-east",
+	"EU-SE": "eu-north",
+	"EU-NO": "eu-north",
+	"EU-IS": "eu-north",
+	"EU":    "eu-west", // Fallback for unmapped EU locations.
+	// Canada.
+	"CA": "ca-central",
+	// Standalone country codes (if RunPod uses them directly).
+	"SE": "eu-north",
+	"NO": "eu-north",
+	"RO": "eu-east",
+	"CZ": "eu-east",
+	"BG": "eu-east",
+	"IS": "eu-north",
 }
 
 // NormalizeRegion maps a RunPod location string to a GPU.ai region code
