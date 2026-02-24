@@ -67,12 +67,12 @@ Plans:
   3. IPAM allocates unique tunnel addresses from the 10.0.0.0/16 subnet and reclaims them on termination
   4. Instance init template renders correctly with WireGuard config, SSH keys, hostname, and firewall rules
   5. Customer SSH connections route through WireGuard proxy with branded hostname -- upstream provider IP, name, and metadata are never visible
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Schema migration, config updates, WireGuard key generation, AES-256-GCM encryption, privacy types (CustomerInstance)
+- [ ] 03-02-PLAN.md — PostgreSQL-backed IPAM with advisory lock, WireGuard peer manager with iptables port mapping
+- [ ] 03-03-PLAN.md — Cloud-init Go template with privacy scrubbing, template renderer with input validation
 
 ### Phase 4: Auth + Instance Lifecycle
 **Goal**: Authenticated users can create, list, view, and terminate GPU instances through REST API endpoints, with a full state machine governing instance transitions, organization-scoped access control, rate limiting, idempotency, and pagination
