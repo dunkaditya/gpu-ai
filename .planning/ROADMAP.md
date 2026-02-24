@@ -86,12 +86,13 @@ Plans:
   5. All API error responses and instance details structurally exclude upstream provider identity -- no provider name, IP, or metadata leaks
   6. POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate creation on network retries
   7. All customer API endpoints are rate-limited per organization
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Schema migration, config update, Clerk auth middleware, RFC 7807 errors, rate limiter, pagination utilities
-- [ ] 04-02-PLAN.md — Instance state machine, DB CRUD (instances, orgs, idempotency), provisioning engine
-- [ ] 04-03-PLAN.md — Instance API handlers, idempotency middleware, SSE status streaming, internal callback, route wiring
+- [x] 04-01-PLAN.md — Schema migration, config update, Clerk auth middleware, RFC 7807 errors, rate limiter, pagination utilities
+- [x] 04-02-PLAN.md — Instance state machine, DB CRUD (instances, orgs, idempotency), provisioning engine
+- [x] 04-03-PLAN.md — Instance API handlers, idempotency middleware, SSE status streaming, internal callback, route wiring
+- [ ] 04-04-PLAN.md — Gap closure: Fix idempotency org_id type mismatch, implement WireGuard peer cleanup on termination
 
 ### Phase 5: SSH Keys + Billing
 **Goal**: Users can manage SSH keys that are injected into new instances, per-second billing tracks usage accurately in a PostgreSQL ledger with batched reporting to Stripe, and per-org spending limits prevent bill shock
@@ -156,7 +157,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 1. Foundation | 4/4 | Complete | 2026-02-24 |
 | 2. Provider Abstraction + RunPod Adapter | 0/3 | Complete    | 2026-02-24 |
 | 3. Privacy Layer | 0/3 | Complete    | 2026-02-24 |
-| 4. Auth + Instance Lifecycle | 0/3 | Not started | - |
+| 4. Auth + Instance Lifecycle | 0/4 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
 | 6. Availability + Health Monitoring | 0/3 | Not started | - |
 | 7. Dashboard | 0/3 | Not started | - |
