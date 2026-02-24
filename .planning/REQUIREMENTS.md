@@ -50,7 +50,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INST-04**: User can terminate an instance and billing stops
 - [x] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
 - [x] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
-- [ ] **INST-07**: Instance ready callback transitions status from booting to running
+- [x] **INST-07**: Instance ready callback transitions status from booting to running
 - [x] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
 
 ### Authentication
@@ -87,17 +87,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### API
 
-- [ ] **API-01**: POST /api/v1/instances creates a new GPU instance
-- [ ] **API-02**: GET /api/v1/instances lists user's instances
-- [ ] **API-03**: GET /api/v1/instances/{id} returns instance details
-- [ ] **API-04**: DELETE /api/v1/instances/{id} terminates an instance
+- [x] **API-01**: POST /api/v1/instances creates a new GPU instance
+- [x] **API-02**: GET /api/v1/instances lists user's instances
+- [x] **API-03**: GET /api/v1/instances/{id} returns instance details
+- [x] **API-04**: DELETE /api/v1/instances/{id} terminates an instance
 - [ ] **API-05**: GET /api/v1/gpu/available returns GPU availability with optional filters
 - [ ] **API-06**: GET/POST/DELETE /api/v1/ssh-keys manages SSH keys
 - [ ] **API-07**: GET /api/v1/billing/usage returns billing history
 - [x] **API-08**: GET /health returns service health status
 - [x] **API-09**: Error responses never leak upstream provider details
 - [x] **API-10**: All list endpoints support cursor-based pagination with configurable page size
-- [ ] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
+- [x] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
 - [x] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
 
 ### Health Monitoring
@@ -190,7 +190,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INST-04 | Phase 4 | Complete |
 | INST-05 | Phase 4 | Complete |
 | INST-06 | Phase 4 | Complete |
-| INST-07 | Phase 4 | Pending |
+| INST-07 | Phase 4 | Complete |
 | INST-08 | Phase 4 | Complete |
 | AUTH-01 | Phase 4 | Complete |
 | AUTH-02 | Phase 4 | Complete |
@@ -212,17 +212,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AVAIL-03 | Phase 6 | Pending |
 | AVAIL-04 | Phase 6 | Pending |
 | AVAIL-05 | Phase 6 | Pending |
-| API-01 | Phase 4 | Pending |
-| API-02 | Phase 4 | Pending |
-| API-03 | Phase 4 | Pending |
-| API-04 | Phase 4 | Pending |
+| API-01 | Phase 4 | Complete |
+| API-02 | Phase 4 | Complete |
+| API-03 | Phase 4 | Complete |
+| API-04 | Phase 4 | Complete |
 | API-05 | Phase 6 | Pending |
 | API-06 | Phase 5 | Pending |
 | API-07 | Phase 5 | Pending |
 | API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Complete |
 | API-10 | Phase 4 | Complete |
-| API-11 | Phase 4 | Pending |
+| API-11 | Phase 4 | Complete |
 | API-12 | Phase 4 | Complete |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |
