@@ -1,6 +1,9 @@
 package provider
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // GPUType enumerates supported GPU models.
 type GPUType string
@@ -84,4 +87,58 @@ type InstanceStatus struct {
 	CostPerHour   float64       `json:"cost_per_hour,omitempty"`
 	UptimeSeconds int           `json:"uptime_seconds,omitempty"`
 	Ports         []PortMapping `json:"ports,omitempty"`
+}
+
+// CustomerInstance is the customer-facing representation of an instance.
+// It structurally excludes all upstream provider details (defense by omission).
+// If a field does not exist here, it can never leak via json.Marshal.
+type CustomerInstance struct {
+	ID           string    `json:"id"`
+	Hostname     string    `json:"hostname"`
+	SSHCommand   string    `json:"ssh_command"`
+	Status       string    `json:"status"`
+	GPUType      string    `json:"gpu_type"`
+	GPUCount     int       `json:"gpu_count"`
+	Tier         string    `json:"tier"`
+	Region       string    `json:"region"`
+	PricePerHour float64   `json:"price_per_hour"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+// Instance represents the full internal instance with upstream details.
+// Only used by provisioning engine and DB layer -- never serialized to customers.
+type Instance struct {
+	InstanceID       string
+	OrgID            string
+	UserID           string
+	UpstreamProvider string
+	UpstreamID       string
+	UpstreamIP       string
+	Hostname         string
+	WGPublicKey      string
+	WGAddress        string
+	GPUType          string
+	GPUCount         int
+	Tier             string
+	Region           string
+	PricePerHour     float64
+	Status           string
+	CreatedAt        time.Time
+}
+
+// ToCustomer converts an internal Instance to a customer-safe representation.
+// Upstream provider, ID, and IP are structurally absent from the result.
+func (i *Instance) ToCustomer() CustomerInstance {
+	return CustomerInstance{
+		ID:           i.InstanceID,
+		Hostname:     i.Hostname,
+		SSHCommand:   fmt.Sprintf("ssh root@%s", i.Hostname),
+		Status:       i.Status,
+		GPUType:      i.GPUType,
+		GPUCount:     i.GPUCount,
+		Tier:         i.Tier,
+		Region:       i.Region,
+		PricePerHour: i.PricePerHour,
+		CreatedAt:    i.CreatedAt,
+	}
 }
