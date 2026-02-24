@@ -10,7 +10,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Foundation
 
 - [ ] **FOUND-01**: Go binary compiles and runs with health endpoint on configurable port
-- [ ] **FOUND-02**: Config loads from environment variables with validation and sensible defaults
+- [x] **FOUND-02**: Config loads from environment variables with validation and sensible defaults
 - [ ] **FOUND-03**: PostgreSQL connection pool initializes and verifies connectivity on startup
 - [ ] **FOUND-04**: Redis connection initializes and verifies connectivity on startup
 - [ ] **FOUND-05**: Database migrations apply cleanly to create full schema
@@ -149,7 +149,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
 | FOUND-05 | Phase 1 | Pending |
