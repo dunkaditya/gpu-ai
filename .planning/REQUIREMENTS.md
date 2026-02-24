@@ -55,8 +55,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: All customer API endpoints require valid Clerk JWT
-- [ ] **AUTH-02**: JWT verification extracts user_id and org_id into request context
+- [x] **AUTH-01**: All customer API endpoints require valid Clerk JWT
+- [x] **AUTH-02**: JWT verification extracts user_id and org_id into request context
 - [ ] **AUTH-03**: Users can only access instances belonging to their organization
 - [x] **AUTH-04**: Internal endpoints restricted to localhost only
 
@@ -95,10 +95,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **API-06**: GET/POST/DELETE /api/v1/ssh-keys manages SSH keys
 - [ ] **API-07**: GET /api/v1/billing/usage returns billing history
 - [x] **API-08**: GET /health returns service health status
-- [ ] **API-09**: Error responses never leak upstream provider details
+- [x] **API-09**: Error responses never leak upstream provider details
 - [ ] **API-10**: All list endpoints support cursor-based pagination with configurable page size
 - [ ] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
-- [ ] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
+- [x] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
 
 ### Health Monitoring
 
@@ -192,8 +192,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INST-06 | Phase 4 | Pending |
 | INST-07 | Phase 4 | Pending |
 | INST-08 | Phase 4 | Pending |
-| AUTH-01 | Phase 4 | Pending |
-| AUTH-02 | Phase 4 | Pending |
+| AUTH-01 | Phase 4 | Complete |
+| AUTH-02 | Phase 4 | Complete |
 | AUTH-03 | Phase 4 | Pending |
 | AUTH-04 | Phase 1 | Complete |
 | SSHK-01 | Phase 5 | Pending |
@@ -220,10 +220,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-06 | Phase 5 | Pending |
 | API-07 | Phase 5 | Pending |
 | API-08 | Phase 1 | Complete |
-| API-09 | Phase 4 | Pending |
+| API-09 | Phase 4 | Complete |
 | API-10 | Phase 4 | Pending |
 | API-11 | Phase 4 | Pending |
-| API-12 | Phase 4 | Pending |
+| API-12 | Phase 4 | Complete |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |
 | HLTH-03 | Phase 6 | Pending |

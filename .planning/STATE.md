@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 3: Privacy Layer
+**Current focus:** Phase 4: Auth & Instance Lifecycle
 
 ## Current Position
 
-Phase: 3 of 7 (Privacy Layer)
-Plan: 3 of 3 in current phase
+Phase: 4 of 7 (Auth & Instance Lifecycle)
+Plan: 1 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-24 -- Completed 03-03 (Cloud-Init Template)
+Last activity: 2026-02-24 -- Completed 04-01 (Auth & Cross-cutting Infrastructure)
 
-Progress: [█████░░░░░] 48%
+Progress: [██████░░░░] 52%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 1.8min
 - Total execution time: 0.3 hours
 
@@ -30,9 +30,10 @@ Progress: [█████░░░░░] 48%
 | 01-foundation | 4 | 6min | 1.5min |
 | 02-provider-abstraction | 3 | 7min | 2.3min |
 | 03-privacy-layer | 3 | 6min | 2.0min |
+| 04-auth-instance-lifecycle | 1 | 2min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (2min), 02-03 (4min), 03-01 (2min), 03-02 (2min), 03-03 (2min)
+- Last 5 plans: 02-03 (4min), 03-01 (2min), 03-02 (2min), 03-03 (2min), 04-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -88,6 +89,11 @@ Recent decisions affecting current work:
 - [03-03]: Single-quoted heredocs prevent bash variable expansion; Go template expands before script runs
 - [03-03]: SSH key validation combines format regex with shell injection character blocklist
 - [03-03]: CallbackURL is pre-rendered by Go code (full URL), not constructed in bash
+- [04-01]: Clerk SDK v2 RequireHeaderAuthorization used directly instead of custom JWT parsing
+- [04-01]: Empty CLERK_SECRET_KEY returns 401 (not silent pass-through) for dev safety
+- [04-01]: ClaimsFromContext wraps Clerk SessionClaimsFromContext mapping Subject->UserID and ActiveOrganizationID->OrgID
+- [04-01]: Rate limiter uses sync.Map with limiterEntry wrapper for thread-safe lastSeen tracking
+- [04-01]: Cursor format uses RFC3339 timestamp + pipe + ID, base64url encoded (no padding)
 
 ### Pending Todos
 
@@ -102,5 +108,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 03-02-PLAN.md (IPAM & WireGuard Manager)
+Stopped at: Completed 04-01-PLAN.md (Auth & Cross-cutting Infrastructure)
 Resume file: None
