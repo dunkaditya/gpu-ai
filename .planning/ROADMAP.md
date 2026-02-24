@@ -12,7 +12,7 @@ GPU.ai goes from scaffolded codebase to working dev milestone in 7 phases. Found
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Compilable binary with config, database, Redis, migrations, and health endpoint
+- [x] **Phase 1: Foundation** - Compilable binary with config, database, Redis, migrations, and health endpoint
 - [ ] **Phase 2: Provider Abstraction + RunPod Adapter** - Provider interface, registry, and RunPod GraphQL adapter
 - [ ] **Phase 3: Privacy Layer** - WireGuard key management, peer management, IPAM, init template, and privacy filtering
 - [ ] **Phase 4: Auth + Instance Lifecycle** - Clerk JWT auth, instance CRUD with state machine, and core API endpoints
@@ -35,10 +35,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Config loading, Docker Compose, Go dependencies
-- [ ] 01-02-PLAN.md — Database migration SQL fix and Python migration runner
-- [ ] 01-03-PLAN.md — Database pool, Redis client, API server, health endpoint, main.go wiring
-- [ ] 01-04-PLAN.md — Gap closure: Add localhost-only IP restriction to internal endpoints (AUTH-04)
+- [x] 01-01-PLAN.md — Config loading, Docker Compose, Go dependencies
+- [x] 01-02-PLAN.md — Database migration SQL fix and Python migration runner
+- [x] 01-03-PLAN.md — Database pool, Redis client, API server, health endpoint, main.go wiring
+- [x] 01-04-PLAN.md — Gap closure: Add localhost-only IP restriction to internal endpoints (AUTH-04)
 
 ### Phase 2: Provider Abstraction + RunPod Adapter
 **Goal**: A clean provider interface that any GPU cloud can implement, with a working RunPod adapter that can list GPUs, provision pods, check status, and terminate
@@ -148,7 +148,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/4 | Planned | - |
+| 1. Foundation | 4/4 | Complete | 2026-02-24 |
 | 2. Provider Abstraction + RunPod Adapter | 0/3 | Not started | - |
 | 3. Privacy Layer | 0/3 | Not started | - |
 | 4. Auth + Instance Lifecycle | 0/3 | Not started | - |

@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 1 of 7 (Foundation)
-Plan: 3 of 3 in current phase
+Plan: 4 of 4 in current phase
 Status: Phase Complete
-Last activity: 2026-02-24 -- Completed 01-03 (Runtime Wiring)
+Last activity: 2026-02-24 -- Completed 01-04 (Localhost IP Restriction)
 
-Progress: [██░░░░░░░░] 14%
+Progress: [██░░░░░░░░] 18%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 1.7min
-- Total execution time: 0.08 hours
+- Total plans completed: 4
+- Average duration: 1.5min
+- Total execution time: 0.10 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 3 | 5min | 1.7min |
+| 01-foundation | 4 | 6min | 1.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1min), 01-02 (2min), 01-03 (2min)
+- Last 5 plans: 01-01 (1min), 01-02 (2min), 01-03 (2min), 01-04 (1min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -56,6 +56,9 @@ Recent decisions affecting current work:
 - [01-03]: Health endpoint behind InternalAuthMiddleware -- prevents unauthenticated probing
 - [01-03]: ConnectWithRetry as package-level function in db -- reusable for any service
 - [01-03]: ServerDeps struct for constructor injection -- clean dependency boundary for testing
+- [01-04]: 404 Not Found for rejected non-loopback IPs -- avoids revealing endpoint existence to scanners
+- [01-04]: net.SplitHostPort for IP extraction -- handles both IPv4 and IPv6 RemoteAddr correctly
+- [01-04]: LocalhostOnly as outermost middleware -- rejects external IPs before token check
 
 ### Pending Todos
 
@@ -70,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 01-03-PLAN.md (Runtime Wiring) -- Phase 01-foundation complete
+Stopped at: Completed 01-04-PLAN.md (Localhost IP Restriction) -- Phase 01-foundation fully complete (including gap closure)
 Resume file: None
