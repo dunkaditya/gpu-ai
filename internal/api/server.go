@@ -36,8 +36,8 @@ func NewServer(deps ServerDeps) *Server {
 		config: deps.Config,
 	}
 
-	// Health endpoint behind internal token auth
-	s.mux.Handle("GET /health", InternalAuthMiddleware(deps.Config.InternalAPIToken, http.HandlerFunc(s.handleHealth)))
+	// Health endpoint behind localhost restriction + internal token auth
+	s.mux.Handle("GET /health", LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken, http.HandlerFunc(s.handleHealth))))
 
 	return s
 }
