@@ -50,12 +50,12 @@ Plans:
   3. Provider registry holds multiple adapters and looks up providers by name
   4. RunPod adapter translates GPU availability queries into RunPod GraphQL API calls and returns normalized results
   5. RunPod adapter provisions a pod with a custom Docker image and startup configuration, and can query its status and terminate it
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Schema v1 migration (self-documenting PKs, constraints, security fixes)
+- [ ] 02-02-PLAN.md — Provider interface refinement, types update, registry with tests
+- [ ] 02-03-PLAN.md — RunPod GraphQL adapter (client, mapping, all 5 methods, tests)
 
 ### Phase 3: Privacy Layer
 **Goal**: Complete WireGuard-based privacy infrastructure that generates keys, manages peers, allocates tunnel IPs, renders init templates, and ensures no upstream provider details ever reach the customer
