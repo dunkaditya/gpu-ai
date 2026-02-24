@@ -66,6 +66,8 @@ Recent decisions affecting current work:
 - [02-02]: DatacenterLocation added to GPUOffering for datacenter drill-down info
 - [02-02]: Re-registration allowed in registry for config reload scenarios
 - [Phase 02-01]: Operations ordered: renames -> constraints -> column drops -> column adds -> triggers
+- [Phase 02-01]: CHECK constraint includes expanded state machine: creating, provisioning, booting, running, stopping, terminated, error
+- [Phase 02-01]: ON DELETE RESTRICT on instances prevents accidental cascade deletion of billing data
 
 ### Pending Todos
 
@@ -80,5 +82,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 02-02-PLAN.md (Provider Interface & Registry)
+Stopped at: Re-executed 02-01-PLAN.md (Schema v1 Improvements) -- updated migration and Go stubs
 Resume file: None

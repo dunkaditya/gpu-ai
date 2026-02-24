@@ -17,10 +17,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Schema Improvements
 
-- [ ] **SCHEMA-01**: Rename all primary keys to self-documenting `{table}_id` format and update foreign key references
-- [ ] **SCHEMA-02**: Add NOT NULL constraints on mandatory foreign keys, explicit ON DELETE behavior on all FKs, CHECK constraint on instances.status, UNIQUE on instances.hostname, composite unique index on (upstream_provider, upstream_id)
-- [ ] **SCHEMA-03**: Remove wg_private_key_enc column (ephemeral key, security liability to store)
-- [ ] **SCHEMA-04**: Add internal_token column to instances for per-instance callback authentication, add updated_at column to instances
+- [x] **SCHEMA-01**: Rename all primary keys to self-documenting `{table}_id` format and update foreign key references
+- [x] **SCHEMA-02**: Add NOT NULL constraints on mandatory foreign keys, explicit ON DELETE behavior on all FKs, CHECK constraint on instances.status, UNIQUE on instances.hostname, composite unique index on (upstream_provider, upstream_id)
+- [x] **SCHEMA-03**: Remove wg_private_key_enc column (ephemeral key, security liability to store)
+- [x] **SCHEMA-04**: Add internal_token column to instances for per-instance callback authentication, add updated_at column to instances
 
 ### Provider Integration
 
@@ -166,10 +166,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
-| SCHEMA-01 | Phase 2 | Pending |
-| SCHEMA-02 | Phase 2 | Pending |
-| SCHEMA-03 | Phase 2 | Pending |
-| SCHEMA-04 | Phase 2 | Pending |
+| SCHEMA-01 | Phase 2 | Complete |
+| SCHEMA-02 | Phase 2 | Complete |
+| SCHEMA-03 | Phase 2 | Complete |
+| SCHEMA-04 | Phase 2 | Complete |
 | PROV-01 | Phase 2 | Complete |
 | PROV-02 | Phase 2 | Complete |
 | PROV-03 | Phase 2 | Pending |
