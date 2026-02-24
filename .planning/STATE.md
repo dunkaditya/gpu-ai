@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 2: Provider Abstraction + RunPod Adapter
+**Current focus:** Phase 3: Privacy Layer
 
 ## Current Position
 
-Phase: 2 of 7 (Provider Abstraction + RunPod Adapter)
-Plan: 3 of 3 in current phase (PHASE COMPLETE)
-Status: Phase 2 Complete
-Last activity: 2026-02-24 -- Completed 02-03 (RunPod Adapter Implementation)
+Phase: 3 of 7 (Privacy Layer)
+Plan: 1 of 3 in current phase
+Status: Executing
+Last activity: 2026-02-24 -- Completed 03-01 (Privacy Layer Foundation)
 
-Progress: [████░░░░░░] 32%
+Progress: [████░░░░░░] 38%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 1.7min
+- Total plans completed: 8
+- Average duration: 1.8min
 - Total execution time: 0.2 hours
 
 **By Phase:**
@@ -29,9 +29,10 @@ Progress: [████░░░░░░] 32%
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 6min | 1.5min |
 | 02-provider-abstraction | 3 | 7min | 2.3min |
+| 03-privacy-layer | 1 | 2min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (2min), 01-04 (1min), 02-01 (1min), 02-02 (2min), 02-03 (4min)
+- Last 5 plans: 01-04 (1min), 02-01 (1min), 02-02 (2min), 02-03 (4min), 03-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -73,6 +74,10 @@ Recent decisions affecting current work:
 - [02-03]: EU region mapping uses EU-XX prefix format to match RunPod location strings
 - [02-03]: bidPerGpu set to 0 for spot pods -- lets RunPod set market price
 - [02-03]: Default Docker image runpod/pytorch:latest when none specified in ProvisionRequest
+- [03-01]: AES-256-GCM with random 12-byte nonce prepended to ciphertext, hex-encoded for storage
+- [03-01]: WG_ENCRYPTION_KEY validated as 64 hex chars with decoded bytes stored on Config struct
+- [03-01]: CustomerInstance uses defense-by-omission: upstream fields structurally absent, not filtered
+- [03-01]: Test for invalid AES key uses 15 bytes (not 16) since AES-128 with 16 bytes is valid
 
 ### Pending Todos
 
@@ -87,5 +92,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 02-03-PLAN.md (RunPod Adapter Implementation) -- Phase 2 complete
+Stopped at: Completed 03-01-PLAN.md (Privacy Layer Foundation)
 Resume file: None
