@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 2 of 7 (Provider Abstraction + RunPod Adapter)
-Plan: 2 of 3 in current phase
-Status: In Progress
-Last activity: 2026-02-24 -- Completed 02-02 (Provider Interface & Registry)
+Plan: 3 of 3 in current phase (PHASE COMPLETE)
+Status: Phase 2 Complete
+Last activity: 2026-02-24 -- Completed 02-03 (RunPod Adapter Implementation)
 
-Progress: [███░░░░░░░] 27%
+Progress: [████░░░░░░] 32%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 1.5min
-- Total execution time: 0.15 hours
+- Total plans completed: 7
+- Average duration: 1.7min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 6min | 1.5min |
-| 02-provider-abstraction | 2 | 3min | 1.5min |
+| 02-provider-abstraction | 3 | 7min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (2min), 01-03 (2min), 01-04 (1min), 02-01 (1min), 02-02 (2min)
+- Last 5 plans: 01-03 (2min), 01-04 (1min), 02-01 (1min), 02-02 (2min), 02-03 (4min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -68,6 +68,11 @@ Recent decisions affecting current work:
 - [Phase 02-01]: Operations ordered: renames -> constraints -> column drops -> column adds -> triggers
 - [Phase 02-01]: CHECK constraint includes expanded state machine: creating, provisioning, booting, running, stopping, terminated, error
 - [Phase 02-01]: ON DELETE RESTRICT on instances prevents accidental cascade deletion of billing data
+- [02-03]: Raw net/http for RunPod GraphQL client -- no library, matches project convention and RunPod CLI
+- [02-03]: Functional ClientOption pattern (WithBaseURL, WithHTTPClient) for test injection
+- [02-03]: EU region mapping uses EU-XX prefix format to match RunPod location strings
+- [02-03]: bidPerGpu set to 0 for spot pods -- lets RunPod set market price
+- [02-03]: Default Docker image runpod/pytorch:latest when none specified in ProvisionRequest
 
 ### Pending Todos
 
@@ -82,5 +87,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Re-executed 02-01-PLAN.md (Schema v1 Improvements) -- updated migration and Go stubs
+Stopped at: Completed 02-03-PLAN.md (RunPod Adapter Implementation) -- Phase 2 complete
 Resume file: None

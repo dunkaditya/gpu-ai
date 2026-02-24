@@ -26,10 +26,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PROV-01**: Provider interface defines standard contract (Name, ListAvailable, Provision, GetStatus, Terminate)
 - [x] **PROV-02**: Provider registry manages multiple adapters with lookup by name
-- [ ] **PROV-03**: RunPod adapter lists available GPU types with pricing via GraphQL API
-- [ ] **PROV-04**: RunPod adapter provisions a pod with custom Docker image and startup scripts
-- [ ] **PROV-05**: RunPod adapter queries pod status by upstream ID
-- [ ] **PROV-06**: RunPod adapter terminates a pod by upstream ID
+- [x] **PROV-03**: RunPod adapter lists available GPU types with pricing via GraphQL API
+- [x] **PROV-04**: RunPod adapter provisions a pod with custom Docker image and startup scripts
+- [x] **PROV-05**: RunPod adapter queries pod status by upstream ID
+- [x] **PROV-06**: RunPod adapter terminates a pod by upstream ID
 
 ### Privacy Layer
 
@@ -172,10 +172,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCHEMA-04 | Phase 2 | Complete |
 | PROV-01 | Phase 2 | Complete |
 | PROV-02 | Phase 2 | Complete |
-| PROV-03 | Phase 2 | Pending |
-| PROV-04 | Phase 2 | Pending |
-| PROV-05 | Phase 2 | Pending |
-| PROV-06 | Phase 2 | Pending |
+| PROV-03 | Phase 2 | Complete |
+| PROV-04 | Phase 2 | Complete |
+| PROV-05 | Phase 2 | Complete |
+| PROV-06 | Phase 2 | Complete |
 | PRIV-01 | Phase 3 | Pending |
 | PRIV-02 | Phase 3 | Pending |
 | PRIV-03 | Phase 3 | Pending |
