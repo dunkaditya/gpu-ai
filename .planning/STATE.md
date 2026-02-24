@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 1: Foundation
+**Current focus:** Phase 2: Provider Abstraction + RunPod Adapter
 
 ## Current Position
 
-Phase: 1 of 7 (Foundation)
-Plan: 4 of 4 in current phase
-Status: Phase Complete
-Last activity: 2026-02-24 -- Completed 01-04 (Localhost IP Restriction)
+Phase: 2 of 7 (Provider Abstraction + RunPod Adapter)
+Plan: 2 of 3 in current phase
+Status: In Progress
+Last activity: 2026-02-24 -- Completed 02-02 (Provider Interface & Registry)
 
-Progress: [██░░░░░░░░] 18%
+Progress: [███░░░░░░░] 27%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 6
 - Average duration: 1.5min
-- Total execution time: 0.10 hours
+- Total execution time: 0.15 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 4 | 6min | 1.5min |
+| 02-provider-abstraction | 2 | 3min | 1.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1min), 01-02 (2min), 01-03 (2min), 01-04 (1min)
+- Last 5 plans: 01-02 (2min), 01-03 (2min), 01-04 (1min), 02-01 (1min), 02-02 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -59,6 +60,12 @@ Recent decisions affecting current work:
 - [01-04]: 404 Not Found for rejected non-loopback IPs -- avoids revealing endpoint existence to scanners
 - [01-04]: net.SplitHostPort for IP extraction -- handles both IPv4 and IPv6 RemoteAddr correctly
 - [01-04]: LocalhostOnly as outermost middleware -- rejects external IPs before token check
+- [02-02]: Two tiers only for v1 (on_demand and spot) -- TierReserved removed per CONTEXT.md
+- [02-02]: Async fire-and-return provisioning model -- Provision returns upstream ID, GetStatus polls separately
+- [02-02]: WireGuardPrivateKey removed from ProvisionRequest -- key generation deferred to Phase 3
+- [02-02]: DatacenterLocation added to GPUOffering for datacenter drill-down info
+- [02-02]: Re-registration allowed in registry for config reload scenarios
+- [Phase 02-01]: Operations ordered: renames -> constraints -> column drops -> column adds -> triggers
 
 ### Pending Todos
 
@@ -73,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 01-04-PLAN.md (Localhost IP Restriction) -- Phase 01-foundation fully complete (including gap closure)
+Stopped at: Completed 02-02-PLAN.md (Provider Interface & Registry)
 Resume file: None
