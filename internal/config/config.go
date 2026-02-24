@@ -44,6 +44,10 @@ type Config struct {
 	// WGInterfaceName is the WireGuard interface name on the proxy server.
 	// Default: "wg0".
 	WGInterfaceName string
+
+	// ClerkSecretKey is the Clerk API secret key for JWT verification.
+	// Optional -- empty disables Clerk auth for local dev.
+	ClerkSecretKey string
 }
 
 // Load reads configuration from environment variables, validates required
@@ -109,6 +113,7 @@ func Load() (*Config, error) {
 		WGProxyEndpoint:      wgProxyEndpoint,
 		WGProxyPublicKey:     wgProxyPublicKey,
 		WGInterfaceName:      getEnvDefault("WG_INTERFACE_NAME", "wg0"),
+		ClerkSecretKey:       os.Getenv("CLERK_SECRET_KEY"),
 	}, nil
 }
 
