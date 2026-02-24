@@ -13,7 +13,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FOUND-02**: Config loads from environment variables with validation and sensible defaults
 - [ ] **FOUND-03**: PostgreSQL connection pool initializes and verifies connectivity on startup
 - [ ] **FOUND-04**: Redis connection initializes and verifies connectivity on startup
-- [ ] **FOUND-05**: Database migrations apply cleanly to create full schema
+- [x] **FOUND-05**: Database migrations apply cleanly to create full schema
 
 ### Provider Integration
 
@@ -152,7 +152,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Pending |
 | FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Complete |
 | PROV-01 | Phase 2 | Pending |
 | PROV-02 | Phase 2 | Pending |
 | PROV-03 | Phase 2 | Pending |

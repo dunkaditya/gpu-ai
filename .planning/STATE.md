@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 1 of 7 (Foundation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-24 -- Completed 01-01 (Config & Dev Infrastructure)
+Last activity: 2026-02-24 -- Completed 01-02 (Database Schema & Migration Runner)
 
-Progress: [█░░░░░░░░░] 5%
+Progress: [██░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 1min
-- Total execution time: 0.02 hours
+- Total plans completed: 2
+- Average duration: 1.5min
+- Total execution time: 0.05 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 1 | 1min | 1min |
+| 01-foundation | 2 | 3min | 1.5min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (1min)
+- Last 5 plans: 01-01 (1min), 01-02 (2min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -48,6 +48,10 @@ Recent decisions affecting current work:
 - [Roadmap]: Dashboard last (Phase 7) -- API must be stable before building frontend
 - [01-01]: Phase 1 Config struct scoped to 4 fields only (Port, DatabaseURL, RedisURL, InternalAPIToken)
 - [01-01]: Go version upgraded from 1.22.0 to 1.24.0 (required by pgx/v5 dependency)
+- [01-02]: Edit initial migration directly (no production data exists, greenfield)
+- [01-02]: TIMESTAMPTZ for all time columns to avoid timezone bugs
+- [01-02]: wg_private_key_enc suffix to clarify encryption at rest
+- [01-02]: Per-migration transactions with rollback on error
 
 ### Pending Todos
 
@@ -62,5 +66,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 01-01-PLAN.md (Config & Dev Infrastructure)
+Stopped at: Completed 01-02-PLAN.md (Database Schema & Migration Runner)
 Resume file: None
