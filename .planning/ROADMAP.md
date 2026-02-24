@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Compilable binary with config, database, Redis, migrations, and health endpoint
 - [x] **Phase 2: Provider Abstraction + RunPod Adapter** - Provider interface, registry, and RunPod GraphQL adapter (completed 2026-02-24)
-- [ ] **Phase 3: Privacy Layer** - WireGuard key management, peer management, IPAM, init template, and privacy filtering
+- [x] **Phase 3: Privacy Layer** - WireGuard key management, peer management, IPAM, init template, and privacy filtering (completed 2026-02-24)
 - [ ] **Phase 4: Auth + Instance Lifecycle** - Clerk JWT auth, instance CRUD with state machine, and core API endpoints
 - [ ] **Phase 5: SSH Keys + Billing** - SSH key management, per-second billing ledger, and Stripe metering
 - [ ] **Phase 6: Availability + Health Monitoring** - Background GPU polling, Redis cache, best-price selection, and instance health checks
@@ -155,7 +155,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Complete | 2026-02-24 |
 | 2. Provider Abstraction + RunPod Adapter | 0/3 | Complete    | 2026-02-24 |
-| 3. Privacy Layer | 0/3 | Not started | - |
+| 3. Privacy Layer | 0/3 | Complete    | 2026-02-24 |
 | 4. Auth + Instance Lifecycle | 0/3 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
 | 6. Availability + Health Monitoring | 0/3 | Not started | - |
