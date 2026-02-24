@@ -32,12 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Environment variables load with validation errors on missing required values and sensible defaults for optional ones
   4. Database migrations apply cleanly from scratch and create the full schema (organizations, users, instances, ssh_keys, usage_records tables)
   5. Internal endpoints (health, callbacks) are restricted to localhost -- external requests are rejected
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Config loading, Docker Compose, Go dependencies
+- [ ] 01-02-PLAN.md — Database migration SQL fix and Python migration runner
+- [ ] 01-03-PLAN.md — Database pool, Redis client, API server, health endpoint, main.go wiring
 
 ### Phase 2: Provider Abstraction + RunPod Adapter
 **Goal**: A clean provider interface that any GPU cloud can implement, with a working RunPod adapter that can list GPUs, provision pods, check status, and terminate
@@ -147,7 +147,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 0/3 | Planned | - |
 | 2. Provider Abstraction + RunPod Adapter | 0/3 | Not started | - |
 | 3. Privacy Layer | 0/3 | Not started | - |
 | 4. Auth + Instance Lifecycle | 0/3 | Not started | - |
