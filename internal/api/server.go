@@ -9,15 +9,19 @@ import (
 
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
+	"github.com/gpuai/gpuctl/internal/provision"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/time/rate"
 )
 
-// Server holds HTTP routes and Phase 1 dependencies.
+// Server holds HTTP routes and all injected dependencies.
 type Server struct {
-	mux    *http.ServeMux
-	db     *db.Pool
-	redis  *redis.Client
-	config *config.Config
+	mux          *http.ServeMux
+	db           *db.Pool
+	redis        *redis.Client
+	config       *config.Config
+	engine       *provision.Engine
+	statusBroker *StatusBroker
 }
 
 // ServerDeps contains the dependencies injected into the Server.
@@ -25,19 +29,59 @@ type ServerDeps struct {
 	DB     *db.Pool
 	Redis  *redis.Client
 	Config *config.Config
+	Engine *provision.Engine
 }
 
 // NewServer creates a Server, registers routes, and returns it.
 func NewServer(deps ServerDeps) *Server {
 	s := &Server{
-		mux:    http.NewServeMux(),
-		db:     deps.DB,
-		redis:  deps.Redis,
-		config: deps.Config,
+		mux:          http.NewServeMux(),
+		db:           deps.DB,
+		redis:        deps.Redis,
+		config:       deps.Config,
+		engine:       deps.Engine,
+		statusBroker: NewStatusBroker(),
 	}
 
 	// Health endpoint behind localhost restriction + internal token auth
 	s.mux.Handle("GET /health", LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken, http.HandlerFunc(s.handleHealth))))
+
+	// Auth + rate limiting middleware chain.
+	// 10 req/s sustained with burst of 20 per org.
+	clerkAuth := ClerkAuthMiddleware(deps.Config.ClerkSecretKey)
+	requireOrg := RequireOrg
+	rateLimiter := NewOrgRateLimiter(rate.Every(100*time.Millisecond), 20)
+
+	// Middleware chain helper: Clerk auth -> org required -> rate limiter.
+	authChain := func(h http.Handler) http.Handler {
+		return clerkAuth(requireOrg(rateLimiter.Middleware(h)))
+	}
+
+	// Start rate limiter cleanup goroutine.
+	rateLimiter.StartCleanup(context.Background(), 5*time.Minute)
+
+	// Instance CRUD routes with auth chain.
+	idempotency := IdempotencyMiddleware(deps.DB)
+	s.mux.Handle("POST /api/v1/instances",
+		authChain(idempotency(http.HandlerFunc(s.handleCreateInstance))))
+	s.mux.Handle("GET /api/v1/instances",
+		authChain(http.HandlerFunc(s.handleListInstances)))
+	s.mux.Handle("GET /api/v1/instances/{id}",
+		authChain(http.HandlerFunc(s.handleGetInstance)))
+	s.mux.Handle("DELETE /api/v1/instances/{id}",
+		authChain(http.HandlerFunc(s.handleDeleteInstance)))
+
+	// SSE status streaming.
+	s.mux.Handle("GET /api/v1/instances/{id}/events",
+		authChain(http.HandlerFunc(s.handleInstanceSSE)))
+
+	// Internal callback (localhost + internal token, NOT Clerk auth).
+	s.mux.Handle("POST /internal/instances/{id}/ready",
+		LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken,
+			http.HandlerFunc(s.handleInstanceReady))))
+	s.mux.Handle("POST /internal/instances/{id}/health",
+		LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken,
+			http.HandlerFunc(s.handleInstanceHealth))))
 
 	return s
 }

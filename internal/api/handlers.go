@@ -1,64 +1,392 @@
 package api
 
-// TODO: Implement public API handlers:
-//
-// --- Instances ---
-//
-// func (s *Server) HandleListInstances(w http.ResponseWriter, r *http.Request)
-//   - Extract org_id from auth claims
-//   - Optional ?status= query filter
-//   - Query db.ListInstances(ctx, orgID, status)
-//   - Return JSON array of instance responses (strip upstream fields)
-//
-// func (s *Server) HandleCreateInstance(w http.ResponseWriter, r *http.Request)
-//   - Decode CreateInstanceRequest from JSON body
-//   - Validate request fields
-//   - Check billing status via billing.CheckBillingStatus()
-//   - Call provision.Engine.Provision()
-//   - Return InstanceResponse with hostname, ssh_command, etc.
-//
-// func (s *Server) HandleGetInstance(w http.ResponseWriter, r *http.Request)
-//   - Extract {id} from path
-//   - Verify org ownership
-//   - Return instance details (strip upstream fields)
-//
-// func (s *Server) HandleDeleteInstance(w http.ResponseWriter, r *http.Request)
-//   - Extract {id} from path
-//   - Verify org ownership
-//   - Call provision.Engine.Terminate()
-//   - Return success
-//
-// func (s *Server) HandleInstanceStatus(w http.ResponseWriter, r *http.Request)
-//   - Extract {id} from path
-//   - Return current status from DB (+ optional live check)
-//
-// --- GPU Availability ---
-//
-// func (s *Server) HandleListAvailable(w http.ResponseWriter, r *http.Request)
-//   - Parse query params: type, tier, region, sort_by
-//   - Read Redis availability cache
-//   - Filter and sort offerings
-//   - Strip provider field (customer must not see upstream source)
-//   - Return JSON array
-//
-// --- SSH Keys ---
-//
-// func (s *Server) HandleListSSHKeys(w http.ResponseWriter, r *http.Request)
-// func (s *Server) HandleCreateSSHKey(w http.ResponseWriter, r *http.Request)
-// func (s *Server) HandleDeleteSSHKey(w http.ResponseWriter, r *http.Request)
-//
-// --- Billing ---
-//
-// func (s *Server) HandleGetUsage(w http.ResponseWriter, r *http.Request)
-// func (s *Server) HandleGetInvoices(w http.ResponseWriter, r *http.Request)
-// func (s *Server) HandleStripeWebhook(w http.ResponseWriter, r *http.Request)
-//
-// --- Internal (cloud-init callback) ---
-//
-// func (s *Server) HandleInstanceReady(w http.ResponseWriter, r *http.Request)
-//   - Called by cloud-init when instance boots successfully
-//   - Update instance status to "running", set billing_start
-//
-// func (s *Server) HandleInstanceHealth(w http.ResponseWriter, r *http.Request)
-//   - Called by instance health pings
-//   - Update last_seen timestamp
+import (
+	"encoding/json"
+	"errors"
+	"log/slog"
+	"net/http"
+	"time"
+
+	"github.com/gpuai/gpuctl/internal/auth"
+	"github.com/gpuai/gpuctl/internal/db"
+	"github.com/gpuai/gpuctl/internal/provider"
+	"github.com/gpuai/gpuctl/internal/provision"
+)
+
+// CreateInstanceRequest is the JSON body for POST /api/v1/instances.
+type CreateInstanceRequest struct {
+	GPUType         string   `json:"gpu_type"`                    // e.g. "a100_80gb"
+	GPUCount        int      `json:"gpu_count"`                   // 1-8
+	Region          string   `json:"region,omitempty"`            // optional
+	Tier            string   `json:"tier"`                        // "spot" or "on_demand"
+	SSHKeyIDs       []string `json:"ssh_key_ids"`                 // required, must not be empty
+	Name            *string  `json:"name,omitempty"`              // optional display label
+	MaxPricePerHour *float64 `json:"max_price_per_hour,omitempty"` // optional cap
+}
+
+// Validate checks that the CreateInstanceRequest fields are valid.
+func (req *CreateInstanceRequest) Validate() error {
+	if req.GPUType == "" {
+		return errors.New("gpu_type is required")
+	}
+	if req.GPUCount < 1 || req.GPUCount > 8 {
+		return errors.New("gpu_count must be between 1 and 8")
+	}
+	if req.Tier != "spot" && req.Tier != "on_demand" {
+		return errors.New("tier must be 'spot' or 'on_demand'")
+	}
+	if len(req.SSHKeyIDs) == 0 {
+		return errors.New("ssh_key_ids must not be empty")
+	}
+	return nil
+}
+
+// InstanceResponse is the customer-facing JSON representation of an instance.
+// It structurally excludes all upstream provider details (defense by omission).
+type InstanceResponse struct {
+	ID           string          `json:"id"`
+	Name         *string         `json:"name,omitempty"`
+	Status       string          `json:"status"`        // external state: starting, running, stopping, terminated, error
+	GPUType      string          `json:"gpu_type"`
+	GPUCount     int             `json:"gpu_count"`
+	Tier         string          `json:"tier"`
+	Region       string          `json:"region"`
+	PricePerHour float64         `json:"price_per_hour"`
+	Connection   *ConnectionInfo `json:"connection"`
+	ErrorReason  *string         `json:"error_reason,omitempty"`
+	CreatedAt    string          `json:"created_at"`               // RFC 3339
+	ReadyAt      *string         `json:"ready_at,omitempty"`       // RFC 3339
+	TerminatedAt *string         `json:"terminated_at,omitempty"` // RFC 3339
+}
+
+// ConnectionInfo contains SSH connection details for a running instance.
+type ConnectionInfo struct {
+	Hostname   string `json:"hostname"`
+	Port       int    `json:"port"`
+	SSHCommand string `json:"ssh_command"`
+}
+
+// instanceToResponse maps an internal db.Instance to a customer-facing InstanceResponse.
+// Uses provision.ExternalState to collapse internal states to external.
+// Excludes all upstream provider fields by structural omission.
+func instanceToResponse(inst *db.Instance) InstanceResponse {
+	resp := InstanceResponse{
+		ID:           inst.InstanceID,
+		Name:         inst.Name,
+		Status:       provision.ExternalState(inst.Status),
+		GPUType:      inst.GPUType,
+		GPUCount:     inst.GPUCount,
+		Tier:         inst.Tier,
+		Region:       inst.Region,
+		PricePerHour: inst.PricePerHour,
+		ErrorReason:  inst.ErrorReason,
+		CreatedAt:    inst.CreatedAt.Format(time.RFC3339),
+	}
+
+	// Build connection info from hostname. Default SSH port 22.
+	sshPort := 22
+	resp.Connection = &ConnectionInfo{
+		Hostname:   inst.Hostname,
+		Port:       sshPort,
+		SSHCommand: "ssh root@" + inst.Hostname,
+	}
+
+	// Format optional timestamps.
+	if inst.ReadyAt != nil {
+		s := inst.ReadyAt.Format(time.RFC3339)
+		resp.ReadyAt = &s
+	}
+	if inst.TerminatedAt != nil {
+		s := inst.TerminatedAt.Format(time.RFC3339)
+		resp.TerminatedAt = &s
+	}
+
+	return resp
+}
+
+// handleCreateInstance handles POST /api/v1/instances.
+// Creates a new GPU instance via the provisioning engine.
+func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// 1. Extract Clerk claims.
+	claims, ok := auth.ClaimsFromContext(ctx)
+	if !ok {
+		writeProblem(w, http.StatusUnauthorized, "unauthenticated", "Valid authentication required")
+		return
+	}
+
+	// 2. Auto-provision org + user from Clerk IDs.
+	orgID, err := s.db.EnsureOrgAndUser(ctx, claims.OrgID, claims.UserID, "")
+	if err != nil {
+		slog.Error("failed to ensure org and user",
+			slog.String("clerk_org_id", claims.OrgID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+
+	// 3. Decode and validate request body.
+	var req CreateInstanceRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeProblem(w, http.StatusBadRequest, "invalid-request", "Invalid JSON request body")
+		return
+	}
+	if err := req.Validate(); err != nil {
+		writeProblem(w, http.StatusBadRequest, "validation-error", err.Error())
+		return
+	}
+
+	// 4. Build engine-level provision request.
+	provReq := provision.ProvisionRequest{
+		OrgID:           orgID,
+		UserID:          claims.UserID,
+		GPUType:         provider.GPUType(req.GPUType),
+		GPUCount:        req.GPUCount,
+		Tier:            provider.InstanceTier(req.Tier),
+		Region:          req.Region,
+		Name:            req.Name,
+		SSHKeyIDs:       req.SSHKeyIDs,
+		MaxPricePerHour: req.MaxPricePerHour,
+	}
+
+	// 5. Call provisioning engine.
+	provResp, err := s.engine.Provision(ctx, provReq)
+	if err != nil {
+		// Check for specific known errors.
+		if errors.Is(err, provision.ErrPriceExceeded) {
+			writeProblem(w, http.StatusConflict, "price-exceeded",
+				"Current price exceeds your maximum price per hour")
+			return
+		}
+		if errors.Is(err, provision.ErrNoProvider) {
+			writeProblem(w, http.StatusConflict, "no-availability",
+				"No GPU availability matching your request")
+			return
+		}
+		if errors.Is(err, provision.ErrSSHKeysNotFound) {
+			writeProblem(w, http.StatusBadRequest, "ssh-keys-not-found",
+				"None of the provided SSH key IDs were found")
+			return
+		}
+		// Generic error: log internally, return generic message to customer (API-09).
+		slog.Error("provisioning failed",
+			slog.String("org_id", orgID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "provisioning-error",
+			"Failed to provision instance. Please try again.")
+		return
+	}
+
+	// 6. Fetch the created instance for full response.
+	inst, err := s.db.GetInstance(ctx, provResp.InstanceID)
+	if err != nil {
+		slog.Error("failed to fetch newly created instance",
+			slog.String("instance_id", provResp.InstanceID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "internal-error",
+			"Instance created but failed to retrieve details")
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, instanceToResponse(inst))
+}
+
+// handleListInstances handles GET /api/v1/instances.
+// Returns paginated list of instances for the authenticated organization.
+func (s *Server) handleListInstances(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// 1. Extract org ID from claims.
+	claims, ok := auth.ClaimsFromContext(ctx)
+	if !ok {
+		writeProblem(w, http.StatusUnauthorized, "unauthenticated", "Valid authentication required")
+		return
+	}
+
+	// Look up internal org ID from Clerk org ID.
+	orgID, err := s.db.GetOrgIDByClerkOrgID(ctx, claims.OrgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			// Org not provisioned yet -- return empty list.
+			writeJSON(w, http.StatusOK, PageResult[InstanceResponse]{
+				Data:    []InstanceResponse{},
+				HasMore: false,
+			})
+			return
+		}
+		slog.Error("failed to look up org", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+
+	// 2. Parse pagination params.
+	params := ParsePageParams(r)
+
+	// 3. Decode cursor if present.
+	var cursorTime *time.Time
+	var cursorID string
+	if params.Cursor != "" {
+		ct, cid, err := DecodeCursor(params.Cursor)
+		if err != nil {
+			writeProblem(w, http.StatusBadRequest, "invalid-cursor", "Invalid pagination cursor")
+			return
+		}
+		cursorTime = &ct
+		cursorID = cid
+	}
+
+	// 4. Query instances (limit+1 for has_more detection).
+	instances, err := s.db.ListInstances(ctx, orgID, cursorTime, cursorID, params.Limit)
+	if err != nil {
+		slog.Error("failed to list instances", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to list instances")
+		return
+	}
+
+	// 5. Determine has_more by checking if we got limit+1 results.
+	hasMore := len(instances) > params.Limit
+	if hasMore {
+		instances = instances[:params.Limit]
+	}
+
+	// 6. Map to response type.
+	data := make([]InstanceResponse, 0, len(instances))
+	for i := range instances {
+		data = append(data, instanceToResponse(&instances[i]))
+	}
+
+	// 7. Encode cursor from last item.
+	var cursor string
+	if hasMore && len(instances) > 0 {
+		last := instances[len(instances)-1]
+		cursor = EncodeCursor(last.CreatedAt, last.InstanceID)
+	}
+
+	writeJSON(w, http.StatusOK, PageResult[InstanceResponse]{
+		Data:    data,
+		Cursor:  cursor,
+		HasMore: hasMore,
+	})
+}
+
+// handleGetInstance handles GET /api/v1/instances/{id}.
+// Returns instance details scoped to the authenticated organization.
+func (s *Server) handleGetInstance(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// 1. Extract instance ID from path.
+	instanceID := r.PathValue("id")
+	if instanceID == "" {
+		writeProblem(w, http.StatusBadRequest, "missing-id", "Instance ID is required")
+		return
+	}
+
+	// 2. Extract org ID from claims.
+	claims, ok := auth.ClaimsFromContext(ctx)
+	if !ok {
+		writeProblem(w, http.StatusUnauthorized, "unauthenticated", "Valid authentication required")
+		return
+	}
+
+	orgID, err := s.db.GetOrgIDByClerkOrgID(ctx, claims.OrgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
+			return
+		}
+		slog.Error("failed to look up org", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+
+	// 3. Fetch instance scoped to org.
+	inst, err := s.db.GetInstanceForOrg(ctx, instanceID, orgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
+			return
+		}
+		slog.Error("failed to get instance", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to retrieve instance")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, instanceToResponse(inst))
+}
+
+// handleDeleteInstance handles DELETE /api/v1/instances/{id}.
+// Terminates an instance idempotently (returns 200 if already terminated).
+func (s *Server) handleDeleteInstance(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// 1. Extract instance ID and org ID.
+	instanceID := r.PathValue("id")
+	if instanceID == "" {
+		writeProblem(w, http.StatusBadRequest, "missing-id", "Instance ID is required")
+		return
+	}
+
+	claims, ok := auth.ClaimsFromContext(ctx)
+	if !ok {
+		writeProblem(w, http.StatusUnauthorized, "unauthenticated", "Valid authentication required")
+		return
+	}
+
+	orgID, err := s.db.GetOrgIDByClerkOrgID(ctx, claims.OrgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
+			return
+		}
+		slog.Error("failed to look up org", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+
+	// 2. Verify ownership.
+	inst, err := s.db.GetInstanceForOrg(ctx, instanceID, orgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
+			return
+		}
+		slog.Error("failed to get instance", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+
+	// 3. If already terminated, return 200 with current state (idempotent per INST-06).
+	if inst.Status == provision.StateTerminated {
+		writeJSON(w, http.StatusOK, instanceToResponse(inst))
+		return
+	}
+
+	// 4. Terminate via engine.
+	if err := s.engine.Terminate(ctx, instanceID); err != nil {
+		slog.Error("termination failed",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "termination-error",
+			"Failed to terminate instance. Please try again.")
+		return
+	}
+
+	// 5. Re-fetch instance from DB for updated state.
+	inst, err = s.db.GetInstanceForOrg(ctx, instanceID, orgID)
+	if err != nil {
+		slog.Error("failed to re-fetch instance after termination",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "internal-error",
+			"Instance terminated but failed to retrieve updated details")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, instanceToResponse(inst))
+}

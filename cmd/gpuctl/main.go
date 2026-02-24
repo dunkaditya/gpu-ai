@@ -12,6 +12,9 @@ import (
 	"github.com/gpuai/gpuctl/internal/api"
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
+	"github.com/gpuai/gpuctl/internal/provider"
+	"github.com/gpuai/gpuctl/internal/provider/runpod"
+	"github.com/gpuai/gpuctl/internal/provision"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -66,18 +69,37 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Set up provider registry and register providers.
+	providerRegistry := provider.NewRegistry()
+	if cfg.RunPodAPIKey != "" {
+		runpodAdapter := runpod.NewAdapter(cfg.RunPodAPIKey)
+		providerRegistry.Register(runpodAdapter)
+		slog.Info("registered provider", "name", "runpod")
+	}
+
+	// Create provisioning engine.
+	engine := provision.NewEngine(provision.EngineDeps{
+		Registry: providerRegistry,
+		DB:       dbPool,
+		Config:   cfg,
+		Logger:   logger,
+	})
+
 	// Create API server
 	srv := api.NewServer(api.ServerDeps{
 		DB:     dbPool,
 		Redis:  redisClient,
 		Config: cfg,
+		Engine: engine,
 	})
 
 	httpServer := &http.Server{
-		Addr:         ":" + cfg.Port,
-		Handler:      srv.Handler(),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		Addr:        ":" + cfg.Port,
+		Handler:     srv.Handler(),
+		ReadTimeout: 10 * time.Second,
+		// WriteTimeout disabled (0) for SSE long-lived connections.
+		// Per-handler timeouts should be added for production non-SSE routes.
+		WriteTimeout: 0,
 		IdleTimeout:  60 * time.Second,
 	}
 
