@@ -65,6 +65,18 @@ func IdempotencyMiddleware(dbPool *db.Pool) func(http.Handler) http.Handler {
 				return
 			}
 
+			// Resolve Clerk org ID to internal UUID for DB operations.
+			internalOrgID, err := dbPool.GetOrgIDByClerkOrgID(ctx, claims.OrgID)
+			if err != nil {
+				slog.Error("idempotency: failed to resolve org ID",
+					slog.String("clerk_org_id", claims.OrgID),
+					slog.String("error", err.Error()),
+				)
+				writeProblem(w, http.StatusInternalServerError, "internal-error",
+					"Failed to process request")
+				return
+			}
+
 			// Read and hash request body, then reset for handler.
 			bodyBytes, err := io.ReadAll(r.Body)
 			if err != nil {
@@ -78,7 +90,7 @@ func IdempotencyMiddleware(dbPool *db.Pool) func(http.Handler) http.Handler {
 			requestHash := hex.EncodeToString(hash[:])
 
 			// Check for existing idempotency key.
-			existing, err := dbPool.GetIdempotencyKey(ctx, claims.OrgID, key)
+			existing, err := dbPool.GetIdempotencyKey(ctx, internalOrgID, key)
 			if err != nil && !errors.Is(err, db.ErrNotFound) {
 				slog.Error("idempotency key lookup failed",
 					slog.String("error", err.Error()),
@@ -110,12 +122,12 @@ func IdempotencyMiddleware(dbPool *db.Pool) func(http.Handler) http.Handler {
 			}
 
 			// Key not found: create it.
-			err = dbPool.CreateIdempotencyKey(ctx, claims.OrgID, key, requestHash)
+			err = dbPool.CreateIdempotencyKey(ctx, internalOrgID, key, requestHash)
 			if err != nil {
 				if errors.Is(err, db.ErrIdempotencyKeyExists) {
 					// Race condition: another request created the key first.
 					// Re-check the key state.
-					existing, err = dbPool.GetIdempotencyKey(ctx, claims.OrgID, key)
+					existing, err = dbPool.GetIdempotencyKey(ctx, internalOrgID, key)
 					if err != nil {
 						slog.Error("idempotency key re-lookup failed",
 							slog.String("error", err.Error()),
@@ -152,7 +164,7 @@ func IdempotencyMiddleware(dbPool *db.Pool) func(http.Handler) http.Handler {
 			next.ServeHTTP(capture, r)
 
 			// Store the response for future replays.
-			if err := dbPool.CompleteIdempotencyKey(ctx, claims.OrgID, key,
+			if err := dbPool.CompleteIdempotencyKey(ctx, internalOrgID, key,
 				capture.statusCode, capture.body.Bytes()); err != nil {
 				slog.Error("failed to complete idempotency key",
 					slog.String("key", key),
