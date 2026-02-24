@@ -8,7 +8,6 @@ import (
 )
 
 // Config holds all configuration values for gpuctl.
-// Phase 1 scope: database, redis, port, and internal API token.
 type Config struct {
 	// Port is the HTTP listen port. Default "9090".
 	Port string
@@ -21,6 +20,10 @@ type Config struct {
 
 	// InternalAPIToken is the shared secret used by cloud-init callbacks. Required.
 	InternalAPIToken string
+
+	// RunPodAPIKey is the RunPod API key for GPU provisioning. Optional.
+	// The RunPod adapter is only created if this key is present.
+	RunPodAPIKey string
 }
 
 // Load reads configuration from environment variables, validates required
@@ -56,6 +59,7 @@ func Load() (*Config, error) {
 		DatabaseURL:      databaseURL,
 		RedisURL:         redisURL,
 		InternalAPIToken: internalAPIToken,
+		RunPodAPIKey:     os.Getenv("RUNPOD_API_KEY"),
 	}, nil
 }
 
