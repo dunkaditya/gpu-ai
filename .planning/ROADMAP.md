@@ -136,10 +136,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Multiple distinct Clerk users in the same organization can use the API without constraint violations
   2. `Idempotency-Key` header works correctly even for a new organization's first POST request
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 04.3-01: TBD
+- [ ] 04.3-01-PLAN.md — Schema migration (drop email UNIQUE, nullable email), EnsureOrg extraction, idempotency middleware org-race fix, handler user_id FK fix
 
 ### Phase 5: SSH Keys + Billing
 **Goal**: Users can manage SSH keys that are injected into new instances, per-second billing tracks usage accurately in a PostgreSQL ledger with batched reporting to Stripe, and per-org spending limits prevent bill shock
