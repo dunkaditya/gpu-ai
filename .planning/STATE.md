@@ -8,7 +8,7 @@ progress:
   total_phases: 8
   completed_phases: 8
   total_plans: 28
-  completed_plans: 26
+  completed_plans: 27
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 6 (Availability & Health Monitoring)
-Plan: 3 of 4 in current phase
-Status: In Progress
-Last activity: 2026-02-25 -- Completed 06-02 & 06-03 (Availability API + Health monitor)
+Plan: 4 of 4 in current phase
+Status: Phase Complete
+Last activity: 2026-02-25 -- Completed 06-04 (SSE events + main.go wiring)
 
-Progress: [█████████░] 93%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: 2.0min
 - Total execution time: 0.80 hours
 
@@ -48,10 +48,10 @@ Progress: [█████████░] 93%
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
 | 05-ssh-keys-billing | 5 | 13min | 2.6min |
-| 06-availability-health-monitoring | 3 | 7min | 2.3min |
+| 06-availability-health-monitoring | 4 | 9min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04 (3min), 05-05 (2min), 06-01 (2min), 06-02 (3min), 06-03 (2min)
+- Last 5 plans: 05-05 (2min), 06-01 (2min), 06-02 (3min), 06-03 (2min), 06-04 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -61,6 +61,7 @@ Progress: [█████████░] 93%
 | Phase 06 P01 | 2min | 2 tasks | 6 files |
 | Phase 06 P02 | 3min | 2 tasks | 3 files |
 | Phase 06 P03 | 2min | 2 tasks | 4 files |
+| Phase 06 P04 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -180,6 +181,10 @@ Recent decisions affecting current work:
 - [06-03]: Optimistic locking prevents duplicate event logging on concurrent status transitions
 - [06-03]: Non-fatal event logging: failure to log event does not block primary operation
 - [06-03]: Bounded concurrency (max 10) via semaphore channel for parallel provider checks
+- [06-04]: Combined SSE and REST catch-up in single GET /api/v1/events endpoint (since= param switches mode)
+- [06-04]: OrgEventBroker buffer size 20 for higher org-level event volume
+- [06-04]: Health monitor created after API server to use srv.PublishOrgEvent callback directly
+- [06-04]: Goroutine startup order: poller before server, monitor after server (dependency-driven)
 
 ### Pending Todos
 
@@ -194,5 +199,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 06-02 & 06-03 (Wave 2 complete)
+Stopped at: Completed 06-04 (Phase 6 complete -- all 4 plans executed)
 Resume file: None
