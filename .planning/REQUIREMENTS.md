@@ -72,7 +72,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **BILL-01**: Billing starts at instance provision request time
 - [x] **BILL-02**: Billing stops at instance termination time
 - [x] **BILL-03**: Per-second usage tracked in PostgreSQL billing ledger (source of truth)
-- [ ] **BILL-04**: Usage batched and reported to Stripe Billing Meters every 60 seconds as integer GPU-seconds
+- [x] **BILL-04**: Usage batched and reported to Stripe Billing Meters every 60 seconds as integer GPU-seconds
 - [ ] **BILL-05**: User can view their usage history and costs
 - [x] **BILL-06**: Billing records include GPU type, count, duration, and cost
 - [x] **BILL-07**: Configurable per-org spending limit with automatic instance termination when exceeded
@@ -203,7 +203,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BILL-01 | Phase 5 | Complete |
 | BILL-02 | Phase 5 | Complete |
 | BILL-03 | Phase 5 | Complete |
-| BILL-04 | Phase 5 | Pending |
+| BILL-04 | Phase 5 | Complete |
 | BILL-05 | Phase 5 | Pending |
 | BILL-06 | Phase 5 | Complete |
 | BILL-07 | Phase 5 | Complete |

@@ -8,7 +8,7 @@ progress:
   total_phases: 8
   completed_phases: 7
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 5 (SSH Keys & Billing)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In Progress
-Last activity: 2026-02-25 -- Completed 05-03 (Billing session lifecycle)
+Last activity: 2026-02-25 -- Completed 05-04 (Billing ticker & spending limits)
 
-Progress: [█████████░] 92%
+Progress: [█████████░] 96%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 23
 - Average duration: 2.0min
 - Total execution time: 0.72 hours
 
@@ -47,14 +47,15 @@ Progress: [█████████░] 92%
 | 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
-| 05-ssh-keys-billing | 2 | 4min | 2.0min |
+| 05-ssh-keys-billing | 4 | 11min | 2.75min |
 
 **Recent Trend:**
-- Last 5 plans: 04.2-01 (2min), 04.2-02 (3min), 04.3-01 (3min), 05-01 (1min), 05-02 (3min)
+- Last 5 plans: 04.3-01 (3min), 05-01 (1min), 05-02 (3min), 05-03 (4min), 05-04 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 05 P03 | 4min | 2 tasks | 4 files |
+| Phase 05 P04 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,10 @@ Recent decisions affecting current work:
 - [Phase 05]: CloseBillingSession idempotent -- returns nil if no open session (safe for failed provisions)
 - [Phase 05]: GetOrgMonthSpendCents uses cents (int64) to avoid float precision issues in spending limit checks
 - [Phase 05]: BillingService no-op when Stripe not configured -- matches WireGuard optional service pattern
+- [Phase 05]: Limits enforced BEFORE Stripe reporting in every tick -- prevents API latency from delaying protection
+- [Phase 05]: StateStopped added to state machine -- stopped preserves storage but suspends billing
+- [Phase 05]: 72h auto-terminate after limit reached -- stopped instances terminated after grace period
+- [Phase 05]: Live spend check in checkSpendingLimit at provision time -- catches limit even if ticker hasn't run yet
 
 ### Pending Todos
 
@@ -169,5 +174,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 05-03-PLAN.md (Billing session lifecycle with engine wiring and Stripe service)
+Stopped at: Completed 05-04-PLAN.md (Billing ticker & spending limits)
 Resume file: None
