@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gpuai/gpuctl/internal/availability"
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
 	"github.com/gpuai/gpuctl/internal/provision"
@@ -22,14 +23,16 @@ type Server struct {
 	config       *config.Config
 	engine       *provision.Engine
 	statusBroker *StatusBroker
+	availCache   *availability.Cache
 }
 
 // ServerDeps contains the dependencies injected into the Server.
 type ServerDeps struct {
-	DB     *db.Pool
-	Redis  *redis.Client
-	Config *config.Config
-	Engine *provision.Engine
+	DB         *db.Pool
+	Redis      *redis.Client
+	Config     *config.Config
+	Engine     *provision.Engine
+	AvailCache *availability.Cache
 }
 
 // NewServer creates a Server, registers routes, and returns it.
@@ -41,6 +44,7 @@ func NewServer(deps ServerDeps) *Server {
 		config:       deps.Config,
 		engine:       deps.Engine,
 		statusBroker: NewStatusBroker(),
+		availCache:   deps.AvailCache,
 	}
 
 	// Health endpoint behind localhost restriction + internal token auth
@@ -88,6 +92,10 @@ func NewServer(deps ServerDeps) *Server {
 		authChain(http.HandlerFunc(s.handleGetSpendingLimit)))
 	s.mux.Handle("DELETE /api/v1/billing/spending-limit",
 		authChain(http.HandlerFunc(s.handleDeleteSpendingLimit)))
+
+	// GPU availability endpoint.
+	s.mux.Handle("GET /api/v1/gpu/available",
+		authChain(http.HandlerFunc(s.handleListGPUAvailability)))
 
 	// SSE status streaming.
 	s.mux.Handle("GET /api/v1/instances/{id}/events",
