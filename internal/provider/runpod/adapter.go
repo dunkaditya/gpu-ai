@@ -248,15 +248,15 @@ func (a *Adapter) Provision(ctx context.Context, req provider.ProvisionRequest) 
 
 	switch req.Tier {
 	case provider.TierOnDemand:
-		return a.provisionOnDemand(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars)
+		return a.provisionOnDemand(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars, req.StartupScript)
 	case provider.TierSpot:
-		return a.provisionSpot(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars)
+		return a.provisionSpot(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars, req.StartupScript)
 	default:
 		return nil, fmt.Errorf("unsupported tier: %s", req.Tier)
 	}
 }
 
-func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCount int, imageName, name string, env []envVar) (*provider.ProvisionResult, error) {
+func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCount int, imageName, name string, env []envVar, startupScript string) (*provider.ProvisionResult, error) {
 	input := map[string]any{
 		"cloudType":         "SECURE",
 		"gpuCount":          gpuCount,
@@ -268,6 +268,9 @@ func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCo
 		"startSsh":          true,
 		"ports":             "22/tcp",
 		"env":               env,
+	}
+	if startupScript != "" {
+		input["dockerArgs"] = startupScript
 	}
 
 	var resp createPodResponse
@@ -304,7 +307,7 @@ func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCo
 	}, nil
 }
 
-func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount int, imageName, name string, env []envVar) (*provider.ProvisionResult, error) {
+func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount int, imageName, name string, env []envVar, startupScript string) (*provider.ProvisionResult, error) {
 	input := map[string]any{
 		"cloudType":         "COMMUNITY",
 		"gpuCount":          gpuCount,
@@ -317,6 +320,9 @@ func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount 
 		"ports":             "22/tcp",
 		"bidPerGpu":         float64(0),
 		"env":               env,
+	}
+	if startupScript != "" {
+		input["dockerArgs"] = startupScript
 	}
 
 	var resp createSpotPodResponse
