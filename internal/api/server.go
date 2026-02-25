@@ -75,13 +75,11 @@ func NewServer(deps ServerDeps) *Server {
 	s.mux.Handle("GET /api/v1/instances/{id}/events",
 		authChain(http.HandlerFunc(s.handleInstanceSSE)))
 
-	// Internal callback (localhost + internal token, NOT Clerk auth).
+	// Internal callbacks (per-instance token auth, reachable from GPU instances).
 	s.mux.Handle("POST /internal/instances/{id}/ready",
-		LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken,
-			http.HandlerFunc(s.handleInstanceReady))))
+		InstanceTokenAuth(deps.DB, http.HandlerFunc(s.handleInstanceReady)))
 	s.mux.Handle("POST /internal/instances/{id}/health",
-		LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken,
-			http.HandlerFunc(s.handleInstanceHealth))))
+		InstanceTokenAuth(deps.DB, http.HandlerFunc(s.handleInstanceHealth)))
 
 	return s
 }

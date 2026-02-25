@@ -23,7 +23,8 @@ func (s *Server) handleInstanceReady(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Verify internal token matches the instance's stored token.
+	// 2. Look up instance (needed for status check in transition).
+	// Token already verified by InstanceTokenAuth middleware.
 	inst, err := s.db.GetInstance(ctx, instanceID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
@@ -36,16 +37,6 @@ func (s *Server) handleInstanceReady(w http.ResponseWriter, r *http.Request) {
 		)
 		writeProblem(w, http.StatusInternalServerError, "internal-error",
 			"Failed to process callback")
-		return
-	}
-
-	// The internal auth middleware already checked the Authorization header
-	// against the global internal token. We also verify the instance-specific
-	// token from the request body or query parameter if provided.
-	instanceToken := r.URL.Query().Get("token")
-	if instanceToken != "" && inst.InternalToken != nil && instanceToken != *inst.InternalToken {
-		writeProblem(w, http.StatusForbidden, "forbidden",
-			"Instance token mismatch")
 		return
 	}
 
@@ -95,7 +86,8 @@ func (s *Server) handleInstanceHealth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. Verify instance exists.
-	inst, err := s.db.GetInstance(r.Context(), instanceID)
+	// Token already verified by InstanceTokenAuth middleware.
+	_, err := s.db.GetInstance(r.Context(), instanceID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
@@ -110,19 +102,11 @@ func (s *Server) handleInstanceHealth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. Verify instance-specific token if provided.
-	instanceToken := r.URL.Query().Get("token")
-	if instanceToken != "" && inst.InternalToken != nil && instanceToken != *inst.InternalToken {
-		writeProblem(w, http.StatusForbidden, "forbidden",
-			"Instance token mismatch")
-		return
-	}
-
-	// 4. Log the health ping (full last_seen update deferred to Phase 6).
+	// 3. Log the health ping (full last_seen update deferred to Phase 6).
 	slog.Debug("health ping received",
 		slog.String("instance_id", instanceID),
 	)
 
-	// 5. Return 200 OK.
+	// 4. Return 200 OK.
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
