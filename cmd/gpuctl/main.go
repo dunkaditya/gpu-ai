@@ -15,7 +15,9 @@ import (
 	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/provider/runpod"
 	"github.com/gpuai/gpuctl/internal/provision"
+	"github.com/gpuai/gpuctl/internal/wireguard"
 	"github.com/redis/go-redis/v9"
+	"golang.zx2c4.com/wireguard/wgctrl"
 )
 
 func main() {
@@ -77,12 +79,39 @@ func main() {
 		slog.Info("registered provider", "name", "runpod")
 	}
 
+	// Initialize WireGuard Manager and IPAM if WG config is present.
+	var wgMgr *wireguard.Manager
+	var ipam *wireguard.IPAM
+
+	if cfg.WGEncryptionKeyBytes != nil {
+		wgClient, err := wgctrl.New()
+		if err != nil {
+			slog.Error("failed to create WireGuard client", "error", err)
+			os.Exit(1)
+		}
+		defer wgClient.Close()
+
+		wgMgr = wireguard.NewManager(wgClient, nil, cfg.WGInterfaceName, logger)
+		slog.Info("wireguard manager initialized", "interface", cfg.WGInterfaceName)
+
+		ipam, err = wireguard.NewIPAM("10.0.0.0/16", logger)
+		if err != nil {
+			slog.Error("failed to initialize IPAM", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("wireguard IPAM initialized", "subnet", "10.0.0.0/16")
+	} else {
+		slog.Info("wireguard not configured, privacy layer disabled")
+	}
+
 	// Create provisioning engine.
 	engine := provision.NewEngine(provision.EngineDeps{
-		Registry: providerRegistry,
-		DB:       dbPool,
-		Config:   cfg,
-		Logger:   logger,
+		Registry:  providerRegistry,
+		DB:        dbPool,
+		Config:    cfg,
+		Logger:    logger,
+		WGManager: wgMgr,
+		IPAM:      ipam,
 	})
 
 	// Create API server
