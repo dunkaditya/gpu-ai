@@ -4,6 +4,7 @@ package config
 import (
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -70,21 +71,6 @@ func Load() (*Config, error) {
 		missing = append(missing, "INTERNAL_API_TOKEN")
 	}
 
-	wgEncryptionKey := os.Getenv("WG_ENCRYPTION_KEY")
-	if wgEncryptionKey == "" {
-		missing = append(missing, "WG_ENCRYPTION_KEY")
-	}
-
-	wgProxyEndpoint := os.Getenv("WG_PROXY_ENDPOINT")
-	if wgProxyEndpoint == "" {
-		missing = append(missing, "WG_PROXY_ENDPOINT")
-	}
-
-	wgProxyPublicKey := os.Getenv("WG_PROXY_PUBLIC_KEY")
-	if wgProxyPublicKey == "" {
-		missing = append(missing, "WG_PROXY_PUBLIC_KEY")
-	}
-
 	if len(missing) > 0 {
 		return nil, fmt.Errorf("missing required environment variables: %s", strings.Join(missing, ", "))
 	}
@@ -93,13 +79,43 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("INTERNAL_API_TOKEN must be changed from default value 'change-me'")
 	}
 
-	// Validate WG_ENCRYPTION_KEY: must be exactly 64 hex characters (32 bytes).
-	if len(wgEncryptionKey) != 64 {
-		return nil, fmt.Errorf("WG_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes), got %d", len(wgEncryptionKey))
+	// WireGuard config is optional. All three WG vars must be present together or all absent.
+	wgEncryptionKey := os.Getenv("WG_ENCRYPTION_KEY")
+	wgProxyEndpoint := os.Getenv("WG_PROXY_ENDPOINT")
+	wgProxyPublicKey := os.Getenv("WG_PROXY_PUBLIC_KEY")
+
+	wgVars := map[string]string{
+		"WG_ENCRYPTION_KEY":   wgEncryptionKey,
+		"WG_PROXY_ENDPOINT":   wgProxyEndpoint,
+		"WG_PROXY_PUBLIC_KEY": wgProxyPublicKey,
 	}
-	wgEncryptionKeyBytes, err := hex.DecodeString(wgEncryptionKey)
-	if err != nil {
-		return nil, fmt.Errorf("WG_ENCRYPTION_KEY is not valid hex: %w", err)
+	var wgPresent, wgMissing []string
+	for name, val := range wgVars {
+		if val != "" {
+			wgPresent = append(wgPresent, name)
+		} else {
+			wgMissing = append(wgMissing, name)
+		}
+	}
+
+	if len(wgPresent) > 0 && len(wgMissing) > 0 {
+		return nil, fmt.Errorf("incomplete WireGuard configuration: have %s but missing %s (all three WG vars must be set together or all absent)",
+			strings.Join(wgPresent, ", "), strings.Join(wgMissing, ", "))
+	}
+
+	// Validate and decode WG_ENCRYPTION_KEY only when present.
+	var wgEncryptionKeyBytes []byte
+	if wgEncryptionKey != "" {
+		if len(wgEncryptionKey) != 64 {
+			return nil, fmt.Errorf("WG_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes), got %d", len(wgEncryptionKey))
+		}
+		var err error
+		wgEncryptionKeyBytes, err = hex.DecodeString(wgEncryptionKey)
+		if err != nil {
+			return nil, fmt.Errorf("WG_ENCRYPTION_KEY is not valid hex: %w", err)
+		}
+	} else {
+		slog.Info("WireGuard config not set, privacy layer disabled")
 	}
 
 	return &Config{
