@@ -147,17 +147,19 @@ Plans:
 **Requirements**: SSHK-01, SSHK-02, SSHK-03, SSHK-04, BILL-01, BILL-02, BILL-03, BILL-04, BILL-05, BILL-06, BILL-07, API-06, API-07
 **Success Criteria** (what must be TRUE):
   1. User can add, list, and delete SSH public keys via API, and keys are injected into new instances at provision time
-  2. Billing starts at instance provision request time and stops at termination time -- no unbilled gaps
+  2. Billing starts at booting state (provider confirms pod allocated) and stops at DELETE request time -- no unbilled gaps
   3. Per-second usage is tracked in the PostgreSQL billing ledger with GPU type, count, duration, and cost
   4. Usage is batched and reported to Stripe Billing Meters every 60 seconds as integer GPU-seconds
   5. User can retrieve their billing usage history and costs via GET /api/v1/billing/usage
-  6. Per-org spending limit can be configured, and instances are automatically terminated when the limit is exceeded
-**Plans**: TBD
+  6. Per-org spending limit can be configured; instances are stopped at 100% and terminated after 72h
+**Plans**: 5 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — Schema migration v5 (ssh_keys org_id, billing_sessions, spending_limits, stopped state)
+- [ ] 05-02-PLAN.md — SSH key CRUD handlers, DB methods, validation, smart provisioning default
+- [ ] 05-03-PLAN.md — Billing session lifecycle wiring in engine, billing DB methods, Stripe service struct
+- [ ] 05-04-PLAN.md — Billing ticker (60s), spending limit enforcement (stop/terminate), main.go wiring
+- [ ] 05-05-PLAN.md — Usage API endpoint and spending limit management endpoints
 
 ### Phase 6: Availability + Health Monitoring
 **Goal**: Background systems continuously poll providers for GPU availability (cached in Redis), select the best-price provider for provisioning, monitor running instances for health and spot interruptions, and notify orgs via webhook on instance failures
