@@ -50,7 +50,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INST-04**: User can terminate an instance and billing stops
 - [ ] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
 - [x] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
-- [ ] **INST-07**: Instance ready callback transitions status from booting to running
+- [x] **INST-07**: Instance ready callback transitions status from booting to running
 - [x] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
 
 ### Authentication
@@ -190,7 +190,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INST-04 | Phase 4 | Complete |
 | INST-05 | Phase 4.2 | Pending |
 | INST-06 | Phase 4 | Complete |
-| INST-07 | Phase 4.2 | Pending |
+| INST-07 | Phase 4.2 | Complete |
 | INST-08 | Phase 4 | Complete |
 | AUTH-01 | Phase 4 | Complete |
 | AUTH-02 | Phase 4 | Complete |

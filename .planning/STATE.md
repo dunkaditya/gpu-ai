@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 4.1: WireGuard Integration Wiring
+**Current focus:** Phase 4.2: Instance Lifecycle Fix
 
 ## Current Position
 
-Phase: 4.1 (WireGuard Integration Wiring)
-Plan: 2 of 2 in current phase
-Status: Phase Complete
-Last activity: 2026-02-25 -- Completed 04.1-02 (AddPeer in provisioning flow + RunPod dockerArgs delivery)
+Phase: 4.2 (Instance Lifecycle Fix)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-02-25 -- Completed 04.2-01 (Callback auth fix: InstanceTokenAuth + GpuctlPublicURL)
 
-Progress: [█████████░] 76%
+Progress: [█████████░] 78%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 1.9min
 - Total execution time: 0.5 hours
 
@@ -32,9 +32,10 @@ Progress: [█████████░] 76%
 | 03-privacy-layer | 3 | 6min | 2.0min |
 | 04-auth-instance-lifecycle | 4 | 12min | 3.0min |
 | 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
+| 04.2-instance-lifecycle-fix | 1 | 2min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (4min), 04-03 (4min), 04-04 (2min), 04.1-01 (2min), 04.1-02 (2min)
+- Last 5 plans: 04-03 (4min), 04-04 (2min), 04.1-01 (2min), 04.1-02 (2min), 04.2-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -116,6 +117,9 @@ Recent decisions affecting current work:
 - [04.1-02]: AddPeer placed after IPAM allocation but before provider.Provision -- peer must exist on proxy before instance boots
 - [04.1-02]: RemovePeer rollback uses wgPubKey (outer scope) not kp.PublicKey (inner scope) -- correct Go variable scoping
 - [04.1-02]: dockerArgs only set when startupScript non-empty -- backward compatibility for tests without WG
+- [04.2-01]: InstanceTokenAuth validates per-instance tokens via DB lookup, replacing LocalhostOnly + InternalAuthMiddleware on callback routes
+- [04.2-01]: GpuctlPublicURL is optional config -- empty falls back to branded hostname for dev
+- [04.2-01]: Redundant per-handler token checks removed -- middleware handles all auth
 
 ### Pending Todos
 
@@ -130,5 +134,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 04.1-02-PLAN.md (AddPeer in provisioning flow + RunPod dockerArgs delivery)
+Stopped at: Completed 04.2-01-PLAN.md (Callback auth fix: InstanceTokenAuth + GpuctlPublicURL)
 Resume file: None
