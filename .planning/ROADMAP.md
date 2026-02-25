@@ -171,15 +171,14 @@ Plans:
   3. Provisioning engine automatically selects the best-price provider when creating an instance
   4. Health monitor detects spot instance interruptions and automatically stops billing
   5. Instance ready callback transitions instance status from booting to running
-  6. Spot interruptions and instance failures trigger webhook notification to org's configured callback URL
-**Plans**: 5 plans
+  6. ~~Spot interruptions and instance failures trigger webhook notification to org's configured callback URL~~ (DEFERRED — webhook delivery moved to future phase; SSE event delivery implemented instead)
+**Plans**: 4 plans
 
 Plans:
 - [x] 06-01-PLAN.md — Schema migration v6 (instance_events), provider type updates, Redis cache, availability poller
 - [x] 06-02-PLAN.md — GPU availability API endpoint with filtering, best-price provider selection with fallback
 - [x] 06-03-PLAN.md — Health monitor (spot interruption, failure detection), event logging, billing stop
 - [x] 06-04-PLAN.md — Per-org SSE broker, REST event catch-up endpoint, config update, main.go wiring
-- [ ] 06-05-PLAN.md — Gap closure: Webhook delivery for spot interruption and failure events (HLTH-04)
 
 ### Phase 7: Dashboard
 **Goal**: A complete Next.js customer dashboard where users can sign up, browse GPU availability, provision and manage instances, manage SSH keys, and view billing -- all backed by the stable API
@@ -213,5 +212,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 4.2 -> 4.3 -> 5 -> 6
 | 4.2 Instance Lifecycle State Machine Fix | 0/1 | Not started | - |
 | 4.3 Auth & Idempotency Edge Cases | 0/1 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
-| 6. Availability + Health Monitoring | 4/5 | In Progress | - |
+| 6. Availability + Health Monitoring | 4/4 | In Progress | - |
 | 7. Dashboard | 0/3 | Not started | - |
