@@ -102,10 +102,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Health Monitoring
 
-- [ ] **HLTH-01**: Background goroutine monitors instance health every 60 seconds
-- [ ] **HLTH-02**: Spot instance interruption detected and billing stopped automatically
-- [ ] **HLTH-03**: Instance ready callback received from booted instances
-- [ ] **HLTH-04**: Spot interruption and instance failure events trigger webhook notification to org's configured callback URL
+- [x] **HLTH-01**: Background goroutine monitors instance health every 60 seconds
+- [x] **HLTH-02**: Spot instance interruption detected and billing stopped automatically
+- [x] **HLTH-03**: Instance ready callback received from booted instances
+- [x] **HLTH-04**: Spot interruption and instance failure events trigger webhook notification to org's configured callback URL
 
 ### Dashboard
 
@@ -224,10 +224,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-10 | Phase 4 | Complete |
 | API-11 | Phase 4.3 | Complete |
 | API-12 | Phase 4 | Complete |
-| HLTH-01 | Phase 6 | Pending |
-| HLTH-02 | Phase 6 | Pending |
-| HLTH-03 | Phase 6 | Pending |
-| HLTH-04 | Phase 6 | Pending |
+| HLTH-01 | Phase 6 | Complete |
+| HLTH-02 | Phase 6 | Complete |
+| HLTH-03 | Phase 6 | Complete |
+| HLTH-04 | Phase 6 | Complete |
 | DASH-01 | Phase 7 | Pending |
 | DASH-02 | Phase 7 | Pending |
 | DASH-03 | Phase 7 | Pending |

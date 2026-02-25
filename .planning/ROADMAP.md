@@ -177,7 +177,7 @@ Plans:
 Plans:
 - [ ] 06-01-PLAN.md — Schema migration v6 (instance_events), provider type updates, Redis cache, availability poller
 - [ ] 06-02-PLAN.md — GPU availability API endpoint with filtering, best-price provider selection with fallback
-- [ ] 06-03-PLAN.md — Health monitor (spot interruption, failure detection), event logging, billing stop
+- [x] 06-03-PLAN.md — Health monitor (spot interruption, failure detection), event logging, billing stop
 - [ ] 06-04-PLAN.md — Per-org SSE broker, REST event catch-up endpoint, config update, main.go wiring
 
 ### Phase 7: Dashboard
@@ -212,5 +212,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 4.2 -> 4.3 -> 5 -> 6
 | 4.2 Instance Lifecycle State Machine Fix | 0/1 | Not started | - |
 | 4.3 Auth & Idempotency Edge Cases | 0/1 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
-| 6. Availability + Health Monitoring | 0/3 | Not started | - |
+| 6. Availability + Health Monitoring | 2/4 | In progress | - |
 | 7. Dashboard | 0/3 | Not started | - |
