@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PROV-02**: Provider registry manages multiple adapters with lookup by name
 - [x] **PROV-03**: RunPod adapter lists available GPU types with pricing via GraphQL API
 - [x] **PROV-04**: RunPod adapter provisions a pod with custom Docker image and startup scripts
-- [ ] **PROV-05**: RunPod adapter queries pod status by upstream ID
+- [x] **PROV-05**: RunPod adapter queries pod status by upstream ID
 - [x] **PROV-06**: RunPod adapter terminates a pod by upstream ID
 
 ### Privacy Layer
@@ -48,7 +48,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INST-02**: User can list their active instances with status and connection info
 - [x] **INST-03**: User can get details of a specific instance by ID
 - [x] **INST-04**: User can terminate an instance and billing stops
-- [ ] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
+- [x] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
 - [x] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
 - [x] **INST-07**: Instance ready callback transitions status from booting to running
 - [x] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
@@ -174,7 +174,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROV-02 | Phase 2 | Complete |
 | PROV-03 | Phase 2 | Complete |
 | PROV-04 | Phase 2 | Complete |
-| PROV-05 | Phase 4.2 | Pending |
+| PROV-05 | Phase 4.2 | Complete |
 | PROV-06 | Phase 2 | Complete |
 | PRIV-01 | Phase 4.1 | Complete |
 | PRIV-02 | Phase 4.1 | Complete |
@@ -188,7 +188,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INST-02 | Phase 4 | Complete |
 | INST-03 | Phase 4 | Complete |
 | INST-04 | Phase 4 | Complete |
-| INST-05 | Phase 4.2 | Pending |
+| INST-05 | Phase 4.2 | Complete |
 | INST-06 | Phase 4 | Complete |
 | INST-07 | Phase 4.2 | Complete |
 | INST-08 | Phase 4 | Complete |
