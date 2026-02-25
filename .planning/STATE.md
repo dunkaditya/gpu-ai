@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 4.1 (WireGuard Integration Wiring)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-25 -- Completed 04.1-01 (Optional WG config + Manager/IPAM init wiring)
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-25 -- Completed 04.1-02 (AddPeer in provisioning flow + RunPod dockerArgs delivery)
 
-Progress: [████████░░] 72%
+Progress: [█████████░] 76%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 1.9min
-- Total execution time: 0.4 hours
+- Total execution time: 0.5 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [████████░░] 72%
 | 02-provider-abstraction | 3 | 7min | 2.3min |
 | 03-privacy-layer | 3 | 6min | 2.0min |
 | 04-auth-instance-lifecycle | 4 | 12min | 3.0min |
-| 04.1-wireguard-integration-wiring | 1 | 2min | 2.0min |
+| 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (2min), 04-02 (4min), 04-03 (4min), 04-04 (2min), 04.1-01 (2min)
+- Last 5 plans: 04-02 (4min), 04-03 (4min), 04-04 (2min), 04.1-01 (2min), 04.1-02 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -113,6 +113,9 @@ Recent decisions affecting current work:
 - [04.1-01]: All-or-nothing WG config: all three WG vars present together or all absent -- prevents misconfiguration
 - [04.1-01]: WG init gated on WGEncryptionKeyBytes != nil (decoded bytes, not string) -- matches research Pattern 1
 - [04.1-01]: IPAM hardcoded to 10.0.0.0/16 subnet -- matches existing IPAM tests and engine code
+- [04.1-02]: AddPeer placed after IPAM allocation but before provider.Provision -- peer must exist on proxy before instance boots
+- [04.1-02]: RemovePeer rollback uses wgPubKey (outer scope) not kp.PublicKey (inner scope) -- correct Go variable scoping
+- [04.1-02]: dockerArgs only set when startupScript non-empty -- backward compatibility for tests without WG
 
 ### Pending Todos
 
@@ -127,5 +130,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 04.1-01-PLAN.md (Optional WG config + Manager/IPAM init wiring)
+Stopped at: Completed 04.1-02-PLAN.md (AddPeer in provisioning flow + RunPod dockerArgs delivery)
 Resume file: None
