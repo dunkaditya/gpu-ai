@@ -107,10 +107,11 @@ Plans:
   2. `AddPeer` is called during engine.Provision after key generation and IPAM allocation
   3. RunPod adapter reads and passes `ProvisionRequest.StartupScript` to the pod
   4. Full WG flow executes at runtime: keys generated -> IPAM allocated -> peer added -> cloud-init rendered and delivered
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04.1-01: TBD
+- [ ] 04.1-01-PLAN.md — Make WG config optional, initialize WG Manager + IPAM in main.go
+- [ ] 04.1-02-PLAN.md — Wire AddPeer into provisioning flow, deliver StartupScript via RunPod dockerArgs
 
 ### Phase 4.2: Instance Lifecycle State Machine Fix (INSERTED — Gap Closure)
 **Goal**: Fix the instance state machine so instances actually progress from provisioning to booting to running: extend status polling to trigger the booting transition and make the ready callback endpoint reachable from GPU instances
