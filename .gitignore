@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Go
+gpuctl/gpuctl
+*.exe
+*.exe~
+*.dll
+*.dylib
+*.test
+*.out
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Node (frontend)
+node_modules/
+.next/
+out/
+
+# Infrastructure
+infra/wireguard/*.conf
+infra/wireguard/*.key
+
+# Misc
+*.log
+tmp/

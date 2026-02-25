@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -63,6 +64,25 @@ func (s *Server) handleInstanceReady(w http.ResponseWriter, r *http.Request) {
 			InternalStatus: provision.StateRunning,
 			Timestamp:      time.Now().UTC().Format(time.RFC3339),
 		})
+
+		// Log ready event to instance_events table.
+		metadata, _ := json.Marshal(map[string]string{
+			"gpu_type": inst.GPUType,
+			"region":   inst.Region,
+		})
+		readyEvent := &db.InstanceEvent{
+			InstanceID: instanceID,
+			OrgID:      inst.OrgID,
+			EventType:  "ready",
+			Metadata:   metadata,
+		}
+		if err := s.db.CreateInstanceEvent(ctx, readyEvent); err != nil {
+			slog.Error("failed to log ready event",
+				slog.String("instance_id", instanceID),
+				slog.String("error", err.Error()),
+			)
+			// Non-fatal: instance is running, event logging failure doesn't block.
+		}
 	} else {
 		// Already transitioned or in wrong state -- idempotent, log warning.
 		slog.Warn("instance ready callback ignored (already transitioned or not booting)",

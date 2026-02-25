@@ -81,7 +81,7 @@ Each task was committed atomically:
 1. **Task 1: Implement database pool and Redis client with retry** - `7f0b265` (feat)
 2. **Task 2: Implement API server with health endpoint, internal auth, and wire main.go** - `a33f53e` (feat)
 
-**Plan metadata:** (pending final commit)
+**Plan metadata:** `69e97a8` (docs: complete plan)
 
 ## Files Created/Modified
 - `internal/db/pool.go` - pgxpool wrapper with Pool, NewPool, Close, Ping, PgxPool, ConnectWithRetry
