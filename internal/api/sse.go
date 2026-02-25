@@ -209,3 +209,68 @@ func writeSSEEvent(w http.ResponseWriter, eventType string, data any) error {
 	_, err = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", eventType, string(jsonBytes))
 	return err
 }
+
+// OrgEventPayload is the SSE payload for per-org instance events.
+type OrgEventPayload struct {
+	EventID    string          `json:"event_id"`
+	EventType  string          `json:"event_type"`
+	InstanceID string          `json:"instance_id"`
+	GPUModel   string          `json:"gpu_model,omitempty"`
+	Region     string          `json:"region,omitempty"`
+	Metadata   json.RawMessage `json:"metadata,omitempty"`
+	CreatedAt  string          `json:"created_at"`
+}
+
+// OrgEventBroker manages SSE subscribers for per-org instance events.
+// One connection per org streams all instance events for that org.
+type OrgEventBroker struct {
+	mu          sync.RWMutex
+	subscribers map[string][]chan OrgEventPayload // org_id -> channels
+}
+
+// NewOrgEventBroker creates a new OrgEventBroker.
+func NewOrgEventBroker() *OrgEventBroker {
+	return &OrgEventBroker{
+		subscribers: make(map[string][]chan OrgEventPayload),
+	}
+}
+
+// Subscribe creates a new buffered channel for receiving events for the given org.
+func (b *OrgEventBroker) Subscribe(orgID string) chan OrgEventPayload {
+	ch := make(chan OrgEventPayload, 20)
+	b.mu.Lock()
+	b.subscribers[orgID] = append(b.subscribers[orgID], ch)
+	b.mu.Unlock()
+	return ch
+}
+
+// Unsubscribe removes a channel from the broker and closes it.
+func (b *OrgEventBroker) Unsubscribe(orgID string, ch chan OrgEventPayload) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	subs := b.subscribers[orgID]
+	for i, sub := range subs {
+		if sub == ch {
+			b.subscribers[orgID] = append(subs[:i], subs[i+1:]...)
+			close(ch)
+			break
+		}
+	}
+	if len(b.subscribers[orgID]) == 0 {
+		delete(b.subscribers, orgID)
+	}
+}
+
+// Publish sends an event to all subscribers for the given org.
+// Non-blocking: slow subscribers miss events rather than block.
+func (b *OrgEventBroker) Publish(orgID string, event OrgEventPayload) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	for _, ch := range b.subscribers[orgID] {
+		select {
+		case ch <- event:
+		default:
+			// Subscriber is slow, skip.
+		}
+	}
+}

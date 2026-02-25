@@ -17,13 +17,14 @@ import (
 
 // Server holds HTTP routes and all injected dependencies.
 type Server struct {
-	mux          *http.ServeMux
-	db           *db.Pool
-	redis        *redis.Client
-	config       *config.Config
-	engine       *provision.Engine
-	statusBroker *StatusBroker
-	availCache   *availability.Cache
+	mux            *http.ServeMux
+	db             *db.Pool
+	redis          *redis.Client
+	config         *config.Config
+	engine         *provision.Engine
+	statusBroker   *StatusBroker
+	orgEventBroker *OrgEventBroker
+	availCache     *availability.Cache
 }
 
 // ServerDeps contains the dependencies injected into the Server.
@@ -38,13 +39,14 @@ type ServerDeps struct {
 // NewServer creates a Server, registers routes, and returns it.
 func NewServer(deps ServerDeps) *Server {
 	s := &Server{
-		mux:          http.NewServeMux(),
-		db:           deps.DB,
-		redis:        deps.Redis,
-		config:       deps.Config,
-		engine:       deps.Engine,
-		statusBroker: NewStatusBroker(),
-		availCache:   deps.AvailCache,
+		mux:            http.NewServeMux(),
+		db:             deps.DB,
+		redis:          deps.Redis,
+		config:         deps.Config,
+		engine:         deps.Engine,
+		statusBroker:   NewStatusBroker(),
+		orgEventBroker: NewOrgEventBroker(),
+		availCache:     deps.AvailCache,
 	}
 
 	// Health endpoint behind localhost restriction + internal token auth
@@ -101,6 +103,10 @@ func NewServer(deps ServerDeps) *Server {
 	s.mux.Handle("GET /api/v1/instances/{id}/events",
 		authChain(http.HandlerFunc(s.handleInstanceSSE)))
 
+	// Per-org events: SSE streaming + REST catch-up.
+	s.mux.Handle("GET /api/v1/events",
+		authChain(http.HandlerFunc(s.handleEvents)))
+
 	// Internal callbacks (per-instance token auth, reachable from GPU instances).
 	s.mux.Handle("POST /internal/instances/{id}/ready",
 		InstanceTokenAuth(deps.DB, http.HandlerFunc(s.handleInstanceReady)))
@@ -113,6 +119,19 @@ func NewServer(deps ServerDeps) *Server {
 // Handler returns the root HTTP handler for the server.
 func (s *Server) Handler() http.Handler {
 	return s.mux
+}
+
+// PublishOrgEvent publishes an instance event to per-org SSE subscribers.
+// Called by the health monitor via OnEvent callback.
+func (s *Server) PublishOrgEvent(event db.InstanceEvent) {
+	payload := OrgEventPayload{
+		EventID:    event.EventID,
+		EventType:  event.EventType,
+		InstanceID: event.InstanceID,
+		Metadata:   event.Metadata,
+		CreatedAt:  event.CreatedAt.Format(time.RFC3339),
+	}
+	s.orgEventBroker.Publish(event.OrgID, payload)
 }
 
 // PublishStatusChange publishes an instance status change event to SSE subscribers.
