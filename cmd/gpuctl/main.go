@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gpuai/gpuctl/internal/api"
+	"github.com/gpuai/gpuctl/internal/billing"
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
 	"github.com/gpuai/gpuctl/internal/provider"
@@ -124,6 +125,19 @@ func main() {
 
 	// Wire SSE status events from provisioning engine to API server.
 	engine.SetOnStatusChange(srv.PublishStatusChange)
+
+	// Create billing service (Stripe metering).
+	billingSvc := billing.NewBillingService(cfg.StripeAPIKey, cfg.StripeMeterEventName, logger)
+
+	// Create and start billing ticker (60s interval for limit enforcement + Stripe reporting).
+	billingTicker := billing.NewBillingTicker(billing.TickerDeps{
+		DB:     dbPool,
+		Engine: engine,
+		Stripe: billingSvc,
+		Logger: logger,
+	})
+	go billingTicker.Start(ctx)
+	slog.Info("billing ticker started")
 
 	httpServer := &http.Server{
 		Addr:        ":" + cfg.Port,

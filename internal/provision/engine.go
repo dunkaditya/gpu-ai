@@ -96,6 +96,9 @@ var ErrPriceExceeded = errors.New("current price exceeds maximum price per hour"
 // ErrSSHKeysNotFound is returned when none of the requested SSH keys exist.
 var ErrSSHKeysNotFound = errors.New("ssh keys not found")
 
+// ErrSpendingLimitReached is returned when an org has reached their spending limit.
+var ErrSpendingLimitReached = errors.New("spending limit reached: new instance creation blocked")
+
 // Provision creates a new GPU instance.
 //
 // Steps:
@@ -156,7 +159,12 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		sshPubKeys = append(sshPubKeys, k.PublicKey)
 	}
 
-	// 3. Select provider from registry.
+	// 3. Check spending limit: block new instance creation if org is at limit.
+	if err := e.checkSpendingLimit(ctx, req.OrgID); err != nil {
+		return nil, err
+	}
+
+	// 4. Select provider from registry.
 	prov, offering, err := e.selectProvider(ctx, req)
 	if err != nil {
 		return nil, err
@@ -481,6 +489,31 @@ func (e *Engine) TerminateStoppedInstancesForOrg(ctx context.Context, orgID stri
 			)
 			// Continue terminating other instances.
 		}
+	}
+	return nil
+}
+
+// checkSpendingLimit verifies an org is below their spending limit before creating
+// a new instance. Returns nil if no limit is set or spend is under limit.
+// Returns ErrSpendingLimitReached if the org is at or over their limit.
+func (e *Engine) checkSpendingLimit(ctx context.Context, orgID string) error {
+	limit, err := e.db.GetSpendingLimit(ctx, orgID)
+	if errors.Is(err, db.ErrNotFound) {
+		return nil // No limit set, allow.
+	}
+	if err != nil {
+		return fmt.Errorf("check spending limit: %w", err)
+	}
+	if limit.LimitReachedAt != nil {
+		return ErrSpendingLimitReached
+	}
+	// Also check live spend in case ticker hasn't run yet.
+	spendCents, err := e.db.GetOrgMonthSpendCents(ctx, orgID, limit.BillingCycleStart)
+	if err != nil {
+		return fmt.Errorf("check spending limit: %w", err)
+	}
+	if spendCents >= limit.MonthlyLimitCents {
+		return ErrSpendingLimitReached
 	}
 	return nil
 }

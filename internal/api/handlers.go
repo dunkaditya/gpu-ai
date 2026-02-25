@@ -171,6 +171,11 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 				"None of the provided SSH key IDs were found")
 			return
 		}
+		if errors.Is(err, provision.ErrSpendingLimitReached) {
+			writeProblem(w, http.StatusPaymentRequired, "spending_limit_reached",
+				"Instance creation blocked: organization spending limit reached. Remove limit or contact support.")
+			return
+		}
 		// Generic error: log internally, return generic message to customer (API-09).
 		slog.Error("provisioning failed",
 			slog.String("org_id", orgID),
