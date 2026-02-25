@@ -172,12 +172,13 @@ Plans:
   4. Health monitor detects spot instance interruptions and automatically stops billing
   5. Instance ready callback transitions instance status from booting to running
   6. Spot interruptions and instance failures trigger webhook notification to org's configured callback URL
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md — Schema migration v6 (instance_events), provider type updates, Redis cache, availability poller
+- [ ] 06-02-PLAN.md — GPU availability API endpoint with filtering, best-price provider selection with fallback
+- [ ] 06-03-PLAN.md — Health monitor (spot interruption, failure detection), event logging, billing stop
+- [ ] 06-04-PLAN.md — Per-org SSE broker, REST event catch-up endpoint, config update, main.go wiring
 
 ### Phase 7: Dashboard
 **Goal**: A complete Next.js customer dashboard where users can sign up, browse GPU availability, provision and manage instances, manage SSH keys, and view billing -- all backed by the stable API

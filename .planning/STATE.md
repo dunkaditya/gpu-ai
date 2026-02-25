@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-02-25T18:15:27.977Z"
+status: in-progress
+last_updated: "2026-02-25T20:16:32Z"
 progress:
   total_phases: 8
   completed_phases: 8
-  total_plans: 24
-  completed_plans: 24
+  total_plans: 28
+  completed_plans: 25
 ---
 
 # Project State
@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 5: SSH Keys & Billing
+**Current focus:** Phase 6: Availability & Health Monitoring
 
 ## Current Position
 
-Phase: 5 (SSH Keys & Billing)
-Plan: 5 of 5 in current phase
-Status: Complete
-Last activity: 2026-02-25 -- Completed 05-05 (Billing API endpoints)
+Phase: 6 (Availability & Health Monitoring)
+Plan: 1 of 4 in current phase
+Status: In Progress
+Last activity: 2026-02-25 -- Completed 06-01 (Availability foundation)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 89%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: 2.0min
 - Total execution time: 0.75 hours
 
@@ -48,15 +48,17 @@ Progress: [██████████] 100%
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
 | 05-ssh-keys-billing | 5 | 13min | 2.6min |
+| 06-availability-health-monitoring | 1 | 2min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (1min), 05-02 (3min), 05-03 (4min), 05-04 (3min), 05-05 (2min)
+- Last 5 plans: 05-02 (3min), 05-03 (4min), 05-04 (3min), 05-05 (2min), 06-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 05 P03 | 4min | 2 tasks | 4 files |
 | Phase 05 P04 | 3min | 2 tasks | 8 files |
 | Phase 05 P05 | 2min | 2 tasks | 2 files |
+| Phase 06 P01 | 2min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -164,6 +166,11 @@ Recent decisions affecting current work:
 - [05-05]: EnsureOrgAndUser for write endpoints, GetOrgIDByClerkOrgID for read-only -- consistent with SSH key handler patterns
 - [05-05]: Period and start/end params mutually exclusive with 400 error on conflict
 - [05-05]: Hourly aggregation walks sessions across hour boundaries for precise bucket distribution
+- [06-01]: Redis single-key JSON array (gpu:offerings:all) instead of per-offering SCAN pattern -- atomic reads, no partial data
+- [06-01]: 35s TTL on cache entries with 30s poll interval -- brief overlap prevents stale reads
+- [06-01]: Markup pricing applied during cache write so customers never see wholesale prices
+- [06-01]: AvailableOffering uses defense-by-omission: Provider field structurally absent
+- [06-01]: org_id index includes created_at DESC for efficient REST catch-up endpoint queries
 
 ### Pending Todos
 
@@ -178,5 +185,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 05-05-PLAN.md (Billing API endpoints)
+Stopped at: Completed 06-01-PLAN.md (Availability foundation)
 Resume file: None

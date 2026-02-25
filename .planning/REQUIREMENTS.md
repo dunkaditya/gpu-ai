@@ -79,8 +79,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Availability
 
-- [ ] **AVAIL-01**: Background poller queries all providers every 30 seconds
-- [ ] **AVAIL-02**: GPU offerings cached in Redis with 35-second TTL
+- [x] **AVAIL-01**: Background poller queries all providers every 30 seconds
+- [x] **AVAIL-02**: GPU offerings cached in Redis with 35-second TTL
 - [ ] **AVAIL-03**: User can view available GPU types with pricing by region and tier
 - [ ] **AVAIL-04**: Availability response aggregates across providers without revealing provider identity
 - [ ] **AVAIL-05**: Provisioning engine selects best-price provider automatically
@@ -207,8 +207,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BILL-05 | Phase 5 | Complete |
 | BILL-06 | Phase 5 | Complete |
 | BILL-07 | Phase 5 | Complete |
-| AVAIL-01 | Phase 6 | Pending |
-| AVAIL-02 | Phase 6 | Pending |
+| AVAIL-01 | Phase 6 | Complete |
+| AVAIL-02 | Phase 6 | Complete |
 | AVAIL-03 | Phase 6 | Pending |
 | AVAIL-04 | Phase 6 | Pending |
 | AVAIL-05 | Phase 6 | Pending |
