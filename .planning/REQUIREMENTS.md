@@ -62,20 +62,20 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### SSH Key Management
 
-- [ ] **SSHK-01**: User can add an SSH public key with a name
-- [ ] **SSHK-02**: User can list their SSH keys
-- [ ] **SSHK-03**: User can delete an SSH key
-- [ ] **SSHK-04**: SSH keys are injected into new instances at provision time
+- [x] **SSHK-01**: User can add an SSH public key with a name
+- [x] **SSHK-02**: User can list their SSH keys
+- [x] **SSHK-03**: User can delete an SSH key
+- [x] **SSHK-04**: SSH keys are injected into new instances at provision time
 
 ### Billing
 
-- [ ] **BILL-01**: Billing starts at instance provision request time
-- [ ] **BILL-02**: Billing stops at instance termination time
-- [ ] **BILL-03**: Per-second usage tracked in PostgreSQL billing ledger (source of truth)
+- [x] **BILL-01**: Billing starts at instance provision request time
+- [x] **BILL-02**: Billing stops at instance termination time
+- [x] **BILL-03**: Per-second usage tracked in PostgreSQL billing ledger (source of truth)
 - [ ] **BILL-04**: Usage batched and reported to Stripe Billing Meters every 60 seconds as integer GPU-seconds
 - [ ] **BILL-05**: User can view their usage history and costs
-- [ ] **BILL-06**: Billing records include GPU type, count, duration, and cost
-- [ ] **BILL-07**: Configurable per-org spending limit with automatic instance termination when exceeded
+- [x] **BILL-06**: Billing records include GPU type, count, duration, and cost
+- [x] **BILL-07**: Configurable per-org spending limit with automatic instance termination when exceeded
 
 ### Availability
 
@@ -196,17 +196,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 4 | Complete |
 | AUTH-03 | Phase 4.3 | Complete |
 | AUTH-04 | Phase 1 | Complete |
-| SSHK-01 | Phase 5 | Pending |
-| SSHK-02 | Phase 5 | Pending |
-| SSHK-03 | Phase 5 | Pending |
-| SSHK-04 | Phase 5 | Pending |
-| BILL-01 | Phase 5 | Pending |
-| BILL-02 | Phase 5 | Pending |
-| BILL-03 | Phase 5 | Pending |
+| SSHK-01 | Phase 5 | Complete |
+| SSHK-02 | Phase 5 | Complete |
+| SSHK-03 | Phase 5 | Complete |
+| SSHK-04 | Phase 5 | Complete |
+| BILL-01 | Phase 5 | Complete |
+| BILL-02 | Phase 5 | Complete |
+| BILL-03 | Phase 5 | Complete |
 | BILL-04 | Phase 5 | Pending |
 | BILL-05 | Phase 5 | Pending |
-| BILL-06 | Phase 5 | Pending |
-| BILL-07 | Phase 5 | Pending |
+| BILL-06 | Phase 5 | Complete |
+| BILL-07 | Phase 5 | Complete |
 | AVAIL-01 | Phase 6 | Pending |
 | AVAIL-02 | Phase 6 | Pending |
 | AVAIL-03 | Phase 6 | Pending |

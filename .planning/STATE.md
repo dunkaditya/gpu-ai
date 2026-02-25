@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 4.3: Auth & Idempotency Edge Cases
+**Current focus:** Phase 5: SSH Keys & Billing
 
 ## Current Position
 
-Phase: 4.3 (Auth & Idempotency Edge Cases)
-Plan: 1 of 1 in current phase
-Status: Phase Complete
-Last activity: 2026-02-25 -- Completed 04.3-01 (Auth & idempotency edge case fixes)
+Phase: 5 (SSH Keys & Billing)
+Plan: 1 of 5 in current phase
+Status: In Progress
+Last activity: 2026-02-25 -- Completed 05-01 (Database migration v5)
 
-Progress: [█████████░] 85%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: 1.9min
-- Total execution time: 0.65 hours
+- Total execution time: 0.67 hours
 
 **By Phase:**
 
@@ -34,9 +34,10 @@ Progress: [█████████░] 85%
 | 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
+| 05-ssh-keys-billing | 1 | 1min | 1.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04.1-01 (2min), 04.1-02 (2min), 04.2-01 (2min), 04.2-02 (3min), 04.3-01 (3min)
+- Last 5 plans: 04.1-02 (2min), 04.2-01 (2min), 04.2-02 (3min), 04.3-01 (3min), 05-01 (1min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -128,6 +129,10 @@ Recent decisions affecting current work:
 - [04.3-01]: EnsureOrg extracted as standalone function -- reusable in both middleware and EnsureOrgAndUser
 - [04.3-01]: NULLIF converts empty email to NULL in upsert queries -- cleaner than storing empty strings
 - [04.3-01]: RETURNING user_id on user upsert -- gets internal UUID in single query round-trip
+- [05-01]: ON DELETE RESTRICT for billing_sessions FKs to instances and organizations -- prevents accidental cascade deletion of billing records
+- [05-01]: ON DELETE CASCADE for ssh_keys and spending_limits org FKs -- keys and limits should be cleaned up with the org
+- [05-01]: stripe_reported_seconds column for delta-based Stripe usage metering -- avoids double-reporting
+- [05-01]: Partial index on billing_sessions (WHERE ended_at IS NULL) for active session lookups
 
 ### Pending Todos
 
@@ -142,5 +147,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 04.3-01-PLAN.md (Auth & idempotency edge case fixes)
+Stopped at: Completed 05-01-PLAN.md (Database migration v5 for SSH keys & billing)
 Resume file: None
