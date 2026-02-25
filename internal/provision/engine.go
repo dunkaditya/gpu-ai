@@ -179,6 +179,25 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 			wgAddress = &addr
 		}
 
+		// Add WireGuard peer to proxy BEFORE provider call.
+		// The peer must be registered so the instance can establish the tunnel on boot.
+		if wgAddress != nil {
+			addrStr, _, _ := strings.Cut(*wgAddress, "/")
+			tunnelIP := net.ParseIP(addrStr)
+			if tunnelIP == nil {
+				return nil, fmt.Errorf("provision: invalid tunnel IP: %s", *wgAddress)
+			}
+			externalPort := wireguard.PortFromTunnelIP(tunnelIP)
+			if err := e.wgMgr.AddPeer(ctx, kp.PublicKey, tunnelIP, externalPort); err != nil {
+				return nil, fmt.Errorf("provision: add wireguard peer: %w", err)
+			}
+			e.logger.Info("added WireGuard peer for instance",
+				slog.String("instance_id", instanceID),
+				slog.String("tunnel_ip", tunnelIP.String()),
+				slog.Int("external_port", externalPort),
+			)
+		}
+
 		// Build callback URL.
 		callbackURL := fmt.Sprintf("https://%s/internal/instances/%s/ready", hostname, instanceID)
 
@@ -219,6 +238,19 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 
 	provResult, err := prov.Provision(ctx, provReq)
 	if err != nil {
+		// Best-effort cleanup: remove WG peer if we added one.
+		if e.wgMgr != nil && wgPubKey != nil && wgAddress != nil {
+			addrStr, _, _ := strings.Cut(*wgAddress, "/")
+			if tunnelIP := net.ParseIP(addrStr); tunnelIP != nil {
+				externalPort := wireguard.PortFromTunnelIP(tunnelIP)
+				if rmErr := e.wgMgr.RemovePeer(ctx, *wgPubKey, tunnelIP, externalPort); rmErr != nil {
+					e.logger.Error("failed to clean up WireGuard peer after provision failure",
+						slog.String("instance_id", instanceID),
+						slog.String("error", rmErr.Error()),
+					)
+				}
+			}
+		}
 		return nil, fmt.Errorf("provision: provider %s: %w", prov.Name(), err)
 	}
 
