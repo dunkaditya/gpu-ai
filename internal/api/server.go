@@ -79,6 +79,16 @@ func NewServer(deps ServerDeps) *Server {
 	s.mux.Handle("DELETE /api/v1/ssh-keys/{id}",
 		authChain(http.HandlerFunc(s.handleDeleteSSHKey)))
 
+	// Billing endpoints.
+	s.mux.Handle("GET /api/v1/billing/usage",
+		authChain(http.HandlerFunc(s.handleGetUsage)))
+	s.mux.Handle("PUT /api/v1/billing/spending-limit",
+		authChain(http.HandlerFunc(s.handleSetSpendingLimit)))
+	s.mux.Handle("GET /api/v1/billing/spending-limit",
+		authChain(http.HandlerFunc(s.handleGetSpendingLimit)))
+	s.mux.Handle("DELETE /api/v1/billing/spending-limit",
+		authChain(http.HandlerFunc(s.handleDeleteSpendingLimit)))
+
 	// SSE status streaming.
 	s.mux.Handle("GET /api/v1/instances/{id}/events",
 		authChain(http.HandlerFunc(s.handleInstanceSSE)))
