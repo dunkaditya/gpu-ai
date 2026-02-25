@@ -438,6 +438,53 @@ func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 	return nil
 }
 
+// StopInstancesForOrg transitions all running instances for an org to stopped state.
+// "Stopped" preserves local storage but suspends billing. Does NOT call provider.Terminate.
+// Used by the billing ticker when an org reaches their spending limit.
+func (e *Engine) StopInstancesForOrg(ctx context.Context, orgID string) error {
+	instances, err := e.db.ListRunningInstancesByOrg(ctx, orgID)
+	if err != nil {
+		return fmt.Errorf("list running instances for org %s: %w", orgID, err)
+	}
+
+	for _, inst := range instances {
+		updated, err := e.db.UpdateInstanceStatus(ctx, inst.InstanceID, StateRunning, StateStopped)
+		if err != nil {
+			e.logger.Error("failed to stop instance for spending limit",
+				slog.String("instance_id", inst.InstanceID),
+				slog.String("org_id", orgID),
+				slog.String("error", err.Error()),
+			)
+			continue
+		}
+		if updated && e.onStatusChange != nil {
+			e.onStatusChange(inst.InstanceID, StateStopped)
+		}
+	}
+	return nil
+}
+
+// TerminateStoppedInstancesForOrg terminates all stopped instances for an org.
+// Used by the billing ticker 72 hours after a spending limit is reached.
+func (e *Engine) TerminateStoppedInstancesForOrg(ctx context.Context, orgID string) error {
+	instances, err := e.db.ListStoppedInstancesByOrg(ctx, orgID)
+	if err != nil {
+		return fmt.Errorf("list stopped instances for org %s: %w", orgID, err)
+	}
+
+	for _, inst := range instances {
+		if err := e.Terminate(ctx, inst.InstanceID); err != nil {
+			e.logger.Error("failed to terminate stopped instance for spending limit",
+				slog.String("instance_id", inst.InstanceID),
+				slog.String("org_id", orgID),
+				slog.String("error", err.Error()),
+			)
+			// Continue terminating other instances.
+		}
+	}
+	return nil
+}
+
 // selectProvider finds the best available provider for the request.
 // For Phase 4, it uses the first provider that has availability. Best-price
 // selection across providers is deferred to Phase 6.

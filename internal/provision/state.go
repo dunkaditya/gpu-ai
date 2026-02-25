@@ -7,6 +7,7 @@ const (
 	StateProvisioning = "provisioning"
 	StateBooting      = "booting"
 	StateRunning      = "running"
+	StateStopped      = "stopped"
 	StateStopping     = "stopping"
 	StateTerminated   = "terminated"
 	StateError        = "error"
@@ -18,7 +19,8 @@ var validTransitions = map[string][]string{
 	StateCreating:     {StateProvisioning, StateError, StateStopping},
 	StateProvisioning: {StateBooting, StateError, StateStopping},
 	StateBooting:      {StateRunning, StateError, StateStopping},
-	StateRunning:      {StateStopping, StateError},
+	StateRunning:      {StateStopped, StateStopping, StateError},
+	StateStopped:      {StateRunning, StateStopping, StateTerminated},
 	StateStopping:     {StateTerminated, StateError},
 	StateTerminated:   {},
 	StateError:        {StateStopping},
@@ -47,6 +49,8 @@ func ExternalState(internal string) string {
 		return "starting"
 	case StateRunning:
 		return "running"
+	case StateStopped:
+		return "stopped"
 	case StateStopping:
 		return "stopping"
 	case StateTerminated:

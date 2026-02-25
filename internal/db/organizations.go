@@ -103,6 +103,27 @@ func (p *Pool) EnsureOrgAndUser(ctx context.Context, clerkOrgID, clerkUserID, em
 	return orgUUID, userUUID, nil
 }
 
+// GetOrgStripeCustomerID retrieves the Stripe customer ID for an organization.
+// Returns an empty string (not an error) if the org exists but has no Stripe customer ID.
+// Returns ErrNotFound if the org does not exist.
+func (p *Pool) GetOrgStripeCustomerID(ctx context.Context, orgID string) (string, error) {
+	var customerID *string
+	err := p.pool.QueryRow(ctx,
+		`SELECT stripe_customer_id FROM organizations WHERE organization_id = $1`,
+		orgID,
+	).Scan(&customerID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", ErrNotFound
+	}
+	if err != nil {
+		return "", err
+	}
+	if customerID == nil {
+		return "", nil
+	}
+	return *customerID, nil
+}
+
 // GetOrgIDByClerkOrgID retrieves the internal organization UUID by Clerk org ID.
 // Returns ErrNotFound if no matching organization exists.
 func (p *Pool) GetOrgIDByClerkOrgID(ctx context.Context, clerkOrgID string) (string, error) {

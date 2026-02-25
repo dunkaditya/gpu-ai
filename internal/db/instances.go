@@ -169,6 +169,66 @@ func (p *Pool) ListInstances(ctx context.Context, orgID string, cursor *time.Tim
 	return instances, rows.Err()
 }
 
+// ListRunningInstancesByOrg returns all instances with status 'running' for an org.
+// Used by the billing ticker to stop instances when a spending limit is reached.
+func (p *Pool) ListRunningInstancesByOrg(ctx context.Context, orgID string) ([]Instance, error) {
+	rows, err := p.pool.Query(ctx,
+		`SELECT `+instanceColumns+` FROM instances WHERE org_id = $1 AND status = 'running'`,
+		orgID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var instances []Instance
+	for rows.Next() {
+		var inst Instance
+		if err := rows.Scan(
+			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
+			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
+			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
+			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
+			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
+		); err != nil {
+			return nil, err
+		}
+		instances = append(instances, inst)
+	}
+	return instances, rows.Err()
+}
+
+// ListStoppedInstancesByOrg returns all instances with status 'stopped' for an org.
+// Used by the billing ticker to terminate instances 72h after spending limit was reached.
+func (p *Pool) ListStoppedInstancesByOrg(ctx context.Context, orgID string) ([]Instance, error) {
+	rows, err := p.pool.Query(ctx,
+		`SELECT `+instanceColumns+` FROM instances WHERE org_id = $1 AND status = 'stopped'`,
+		orgID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var instances []Instance
+	for rows.Next() {
+		var inst Instance
+		if err := rows.Scan(
+			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
+			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
+			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
+			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
+			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
+		); err != nil {
+			return nil, err
+		}
+		instances = append(instances, inst)
+	}
+	return instances, rows.Err()
+}
+
 // UpdateInstanceStatus atomically updates an instance's status using optimistic locking.
 // It only updates the row if the current status matches fromStatus, preventing race conditions.
 // Returns true if the row was updated, false if the status was concurrently changed.
