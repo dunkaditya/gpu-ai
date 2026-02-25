@@ -19,7 +19,7 @@ type CreateInstanceRequest struct {
 	GPUCount        int      `json:"gpu_count"`                   // 1-8
 	Region          string   `json:"region,omitempty"`            // optional
 	Tier            string   `json:"tier"`                        // "spot" or "on_demand"
-	SSHKeyIDs       []string `json:"ssh_key_ids"`                 // required, must not be empty
+	SSHKeyIDs       []string `json:"ssh_key_ids,omitempty"`        // optional; auto-includes user's keys if empty
 	Name            *string  `json:"name,omitempty"`              // optional display label
 	MaxPricePerHour *float64 `json:"max_price_per_hour,omitempty"` // optional cap
 }
@@ -35,9 +35,8 @@ func (req *CreateInstanceRequest) Validate() error {
 	if req.Tier != "spot" && req.Tier != "on_demand" {
 		return errors.New("tier must be 'spot' or 'on_demand'")
 	}
-	if len(req.SSHKeyIDs) == 0 {
-		return errors.New("ssh_key_ids must not be empty")
-	}
+	// SSHKeyIDs is now optional -- the provisioning engine handles the fallback
+	// by auto-including the user's keys when none are specified.
 	return nil
 }
 

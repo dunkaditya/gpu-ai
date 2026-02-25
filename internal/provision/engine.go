@@ -130,13 +130,24 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		slog.String("tier", string(req.Tier)),
 	)
 
-	// 2. Look up SSH keys from DB by IDs.
-	sshKeys, err := e.db.GetSSHKeysByIDs(ctx, req.SSHKeyIDs)
-	if err != nil {
-		return nil, fmt.Errorf("provision: look up ssh keys: %w", err)
+	// 2. Look up SSH keys from DB.
+	// Smart default: if no explicit key IDs provided, auto-include all of the user's keys.
+	var sshKeys []db.SSHKey
+	if len(req.SSHKeyIDs) > 0 {
+		// Explicit key IDs provided -- look them up.
+		sshKeys, err = e.db.GetSSHKeysByIDs(ctx, req.SSHKeyIDs)
+		if err != nil {
+			return nil, fmt.Errorf("provision: look up ssh keys: %w", err)
+		}
+	} else {
+		// No key IDs provided -- auto-include all of user's keys.
+		sshKeys, err = e.db.GetSSHKeysByUserID(ctx, req.UserID)
+		if err != nil {
+			return nil, fmt.Errorf("provision: look up user ssh keys: %w", err)
+		}
 	}
 	if len(sshKeys) == 0 {
-		return nil, ErrSSHKeysNotFound
+		return nil, ErrSSHKeysNotFound // "at least one SSH key required"
 	}
 
 	// Collect public keys.
@@ -381,6 +392,15 @@ func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 		return fmt.Errorf("terminate: update DB: %w", err)
 	}
 
+	// Billing stops at DELETE request time.
+	if err := e.db.CloseBillingSession(ctx, instanceID, time.Now().UTC()); err != nil {
+		e.logger.Error("failed to close billing session on termination",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		// Non-fatal: instance is terminated, log and continue.
+	}
+
 	// 6. Clean up WireGuard peer if configured.
 	if e.wgMgr != nil && inst.WGPublicKey != nil && inst.WGAddress != nil {
 		// WGAddress may contain a CIDR suffix (e.g., "10.0.0.2/16") from the INET column.
@@ -522,6 +542,7 @@ func (e *Engine) progressStatus(instanceID string) {
 			)
 			_ = e.db.SetInstanceError(ctx, instanceID,
 				"provisioning timeout: instance did not start within 10 minutes")
+			e.createZeroBillingSession(ctx, instanceID)
 			return
 		case <-ticker.C:
 			// Check if instance has been concurrently terminated.
@@ -575,6 +596,24 @@ func (e *Engine) progressStatus(instanceID string) {
 					if e.onStatusChange != nil {
 						e.onStatusChange(instanceID, StateBooting)
 					}
+
+					// Billing starts at booting: provider has confirmed pod is allocated.
+					session := &db.BillingSession{
+						InstanceID:   instanceID,
+						OrgID:        inst.OrgID,
+						GPUType:      inst.GPUType,
+						GPUCount:     inst.GPUCount,
+						PricePerHour: inst.PricePerHour,
+						StartedAt:    time.Now().UTC(),
+					}
+					if err := e.db.CreateBillingSession(ctx, session); err != nil {
+						e.logger.Error("failed to create billing session at booting",
+							slog.String("instance_id", instanceID),
+							slog.String("error", err.Error()),
+						)
+						// Non-fatal: instance still transitions to booting. Billing gap is acceptable
+						// vs preventing instance from reaching running state.
+					}
 				}
 				return // Polling complete; ready callback handles booting->running.
 
@@ -585,10 +624,50 @@ func (e *Engine) progressStatus(instanceID string) {
 				)
 				_ = e.db.SetInstanceError(ctx, instanceID,
 					fmt.Sprintf("upstream instance failed: %s", status.Status))
+				e.createZeroBillingSession(ctx, instanceID)
 				return
 			}
 			// For "creating" or any other status, continue polling.
 		}
+	}
+}
+
+// createZeroBillingSession creates a $0 audit billing session for a failed provision.
+// Called when an instance never reached booting state (timeout or upstream failure).
+// The session is created and immediately closed with the same timestamp, resulting in
+// zero duration and zero cost.
+func (e *Engine) createZeroBillingSession(ctx context.Context, instanceID string) {
+	inst, err := e.db.GetInstance(ctx, instanceID)
+	if err != nil {
+		e.logger.Error("failed to get instance for zero billing session",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		return
+	}
+
+	now := time.Now().UTC()
+	session := &db.BillingSession{
+		InstanceID:   instanceID,
+		OrgID:        inst.OrgID,
+		GPUType:      inst.GPUType,
+		GPUCount:     inst.GPUCount,
+		PricePerHour: inst.PricePerHour,
+		StartedAt:    now,
+	}
+	if err := e.db.CreateBillingSession(ctx, session); err != nil {
+		e.logger.Error("failed to create zero billing session",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		return
+	}
+
+	if err := e.db.CloseBillingSession(ctx, instanceID, now); err != nil {
+		e.logger.Error("failed to close zero billing session",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
 	}
 }
 

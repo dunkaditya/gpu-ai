@@ -71,6 +71,14 @@ func NewServer(deps ServerDeps) *Server {
 	s.mux.Handle("DELETE /api/v1/instances/{id}",
 		authChain(http.HandlerFunc(s.handleDeleteInstance)))
 
+	// SSH key CRUD routes with auth chain.
+	s.mux.Handle("POST /api/v1/ssh-keys",
+		authChain(http.HandlerFunc(s.handleCreateSSHKey)))
+	s.mux.Handle("GET /api/v1/ssh-keys",
+		authChain(http.HandlerFunc(s.handleListSSHKeys)))
+	s.mux.Handle("DELETE /api/v1/ssh-keys/{id}",
+		authChain(http.HandlerFunc(s.handleDeleteSSHKey)))
+
 	// SSE status streaming.
 	s.mux.Handle("GET /api/v1/instances/{id}/events",
 		authChain(http.HandlerFunc(s.handleInstanceSSE)))
