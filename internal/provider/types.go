@@ -36,6 +36,9 @@ type GPUOffering struct {
 	GPUType            GPUType      `json:"gpu_type"`
 	GPUCount           int          `json:"gpu_count"`
 	VRAMPerGPUGB       int          `json:"vram_per_gpu_gb"`
+	CPUCores           int          `json:"cpu_cores"`
+	RAMGB              int          `json:"ram_gb"`
+	StorageGB          int          `json:"storage_gb"`
 	PricePerHour       float64      `json:"price_per_hour"`
 	Tier               InstanceTier `json:"tier"`
 	Region             string       `json:"region"`
