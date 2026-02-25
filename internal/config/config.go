@@ -55,6 +55,14 @@ type Config struct {
 	// from GPU instances. Optional -- if empty, callback URLs fall back to
 	// branded hostname (dev only).
 	GpuctlPublicURL string
+
+	// StripeAPIKey is the Stripe secret key for billing metering. Optional.
+	// Billing metering is disabled if not set.
+	StripeAPIKey string
+
+	// StripeMeterEventName is the Stripe Billing Meter event name (e.g., "gpu_seconds").
+	// Must match the meter configured in Stripe Dashboard.
+	StripeMeterEventName string
 }
 
 // Load reads configuration from environment variables, validates required
@@ -124,6 +132,10 @@ func Load() (*Config, error) {
 		slog.Info("WireGuard config not set, privacy layer disabled")
 	}
 
+	if os.Getenv("STRIPE_API_KEY") == "" {
+		slog.Info("Stripe not configured, billing metering disabled")
+	}
+
 	return &Config{
 		Port:                 getEnvDefault("GPUCTL_PORT", "9090"),
 		DatabaseURL:          databaseURL,
@@ -137,6 +149,8 @@ func Load() (*Config, error) {
 		WGInterfaceName:      getEnvDefault("WG_INTERFACE_NAME", "wg0"),
 		ClerkSecretKey:       os.Getenv("CLERK_SECRET_KEY"),
 		GpuctlPublicURL:     os.Getenv("GPUCTL_PUBLIC_URL"),
+		StripeAPIKey:         os.Getenv("STRIPE_API_KEY"),
+		StripeMeterEventName: os.Getenv("STRIPE_METER_EVENT_NAME"),
 	}, nil
 }
 
