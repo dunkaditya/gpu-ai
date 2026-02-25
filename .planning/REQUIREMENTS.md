@@ -57,7 +57,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **AUTH-01**: All customer API endpoints require valid Clerk JWT
 - [x] **AUTH-02**: JWT verification extracts user_id and org_id into request context
-- [ ] **AUTH-03**: Users can only access instances belonging to their organization
+- [x] **AUTH-03**: Users can only access instances belonging to their organization
 - [x] **AUTH-04**: Internal endpoints restricted to localhost only
 
 ### SSH Key Management
@@ -97,7 +97,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **API-08**: GET /health returns service health status
 - [x] **API-09**: Error responses never leak upstream provider details
 - [x] **API-10**: All list endpoints support cursor-based pagination with configurable page size
-- [ ] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
+- [x] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
 - [x] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
 
 ### Health Monitoring
@@ -194,7 +194,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INST-08 | Phase 4 | Complete |
 | AUTH-01 | Phase 4 | Complete |
 | AUTH-02 | Phase 4 | Complete |
-| AUTH-03 | Phase 4.3 | Pending |
+| AUTH-03 | Phase 4.3 | Complete |
 | AUTH-04 | Phase 1 | Complete |
 | SSHK-01 | Phase 5 | Pending |
 | SSHK-02 | Phase 5 | Pending |
@@ -222,7 +222,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Complete |
 | API-10 | Phase 4 | Complete |
-| API-11 | Phase 4.3 | Pending |
+| API-11 | Phase 4.3 | Complete |
 | API-12 | Phase 4 | Complete |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |

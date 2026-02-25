@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 4.2: Instance Lifecycle Fix
+**Current focus:** Phase 4.3: Auth & Idempotency Edge Cases
 
 ## Current Position
 
-Phase: 4.2 (Instance Lifecycle Fix)
-Plan: 2 of 2 in current phase
+Phase: 4.3 (Auth & Idempotency Edge Cases)
+Plan: 1 of 1 in current phase
 Status: Phase Complete
-Last activity: 2026-02-25 -- Completed 04.2-02 (Provider polling loop, callback URL fix, SSE wiring)
+Last activity: 2026-02-25 -- Completed 04.3-01 (Auth & idempotency edge case fixes)
 
-Progress: [█████████░] 82%
+Progress: [█████████░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 1.9min
-- Total execution time: 0.6 hours
+- Total execution time: 0.65 hours
 
 **By Phase:**
 
@@ -33,9 +33,10 @@ Progress: [█████████░] 82%
 | 04-auth-instance-lifecycle | 4 | 12min | 3.0min |
 | 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
+| 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04-04 (2min), 04.1-01 (2min), 04.1-02 (2min), 04.2-01 (2min), 04.2-02 (3min)
+- Last 5 plans: 04.1-01 (2min), 04.1-02 (2min), 04.2-01 (2min), 04.2-02 (3min), 04.3-01 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -123,6 +124,10 @@ Recent decisions affecting current work:
 - [04.2-02]: buildCallbackURL extracted as package-level function for testability
 - [04.2-02]: SetOnStatusChange setter avoids Engine<->Server circular dependency in main.go
 - [04.2-02]: 5-second polling interval with 10-minute timeout balances responsiveness with resource usage
+- [04.3-01]: Pattern 2 (Eager Creation) for idempotency middleware -- avoids pass-through gap where retries could create duplicates
+- [04.3-01]: EnsureOrg extracted as standalone function -- reusable in both middleware and EnsureOrgAndUser
+- [04.3-01]: NULLIF converts empty email to NULL in upsert queries -- cleaner than storing empty strings
+- [04.3-01]: RETURNING user_id on user upsert -- gets internal UUID in single query round-trip
 
 ### Pending Todos
 
@@ -137,5 +142,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 04.2-02-PLAN.md (Provider polling loop, callback URL fix, SSE wiring)
+Stopped at: Completed 04.3-01-PLAN.md (Auth & idempotency edge case fixes)
 Resume file: None
