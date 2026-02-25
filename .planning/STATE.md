@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 5 (SSH Keys & Billing)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In Progress
-Last activity: 2026-02-25 -- Completed 05-01 (Database migration v5)
+Last activity: 2026-02-25 -- Completed 05-02 (SSH key CRUD API)
 
-Progress: [█████████░] 87%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 1.9min
-- Total execution time: 0.67 hours
+- Total plans completed: 21
+- Average duration: 2.0min
+- Total execution time: 0.72 hours
 
 **By Phase:**
 
@@ -34,10 +34,10 @@ Progress: [█████████░] 87%
 | 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
-| 05-ssh-keys-billing | 1 | 1min | 1.0min |
+| 05-ssh-keys-billing | 2 | 4min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 04.1-02 (2min), 04.2-01 (2min), 04.2-02 (3min), 04.3-01 (3min), 05-01 (1min)
+- Last 5 plans: 04.2-01 (2min), 04.2-02 (3min), 04.3-01 (3min), 05-01 (1min), 05-02 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -133,6 +133,10 @@ Recent decisions affecting current work:
 - [05-01]: ON DELETE CASCADE for ssh_keys and spending_limits org FKs -- keys and limits should be cleaned up with the org
 - [05-01]: stripe_reported_seconds column for delta-based Stripe usage metering -- avoids double-reporting
 - [05-01]: Partial index on billing_sessions (WHERE ended_at IS NULL) for active session lookups
+- [05-02]: SSH key validation uses golang.org/x/crypto/ssh ParseAuthorizedKey -- not regex -- for correctness
+- [05-02]: Key type allowlist (ssh-rsa, ssh-ed25519, ecdsa-sha2-nistp*) -- safer than blocklist against unknown future types
+- [05-02]: SSHKeyIDs made optional in CreateInstanceRequest -- engine layer handles fallback to user's keys via GetSSHKeysByUserID
+- [05-02]: ErrDuplicateKey sentinel mapped from SQLSTATE 23505 -- same pattern as isDuplicateKeyError in idempotency.go
 
 ### Pending Todos
 
@@ -147,5 +151,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 05-01-PLAN.md (Database migration v5 for SSH keys & billing)
+Stopped at: Completed 05-02-PLAN.md (SSH key CRUD API with validation and provisioning smart default)
 Resume file: None
