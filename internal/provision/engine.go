@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"sort"
 	"strings"
 	"time"
 
@@ -17,6 +18,12 @@ import (
 	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/wireguard"
 )
+
+// providerCandidate pairs a provider with a matching offering for price-sorted selection.
+type providerCandidate struct {
+	prov     provider.Provider
+	offering provider.GPUOffering
+}
 
 // ProvisionRequest contains the parameters for provisioning a new instance.
 // This is the engine-level request, distinct from provider.ProvisionRequest.
@@ -164,14 +171,14 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		return nil, err
 	}
 
-	// 4. Select provider from registry.
-	prov, offering, err := e.selectProvider(ctx, req)
+	// 4. Select provider candidates (sorted by price ascending).
+	candidates, err := e.selectProviderCandidates(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	// 4. Check price cap.
-	if req.MaxPricePerHour != nil && offering.PricePerHour > *req.MaxPricePerHour {
+	// Check price cap against cheapest candidate.
+	if req.MaxPricePerHour != nil && candidates[0].offering.PricePerHour > *req.MaxPricePerHour {
 		return nil, ErrPriceExceeded
 	}
 
@@ -179,6 +186,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 	callbackURL := buildCallbackURL(e.config.GpuctlPublicURL, hostname, instanceID)
 
 	// 6. Optionally generate WireGuard keys and cloud-init.
+	// WG setup happens once before the provider retry loop.
 	var wgPubKey, wgPrivKeyEnc, wgAddress *string
 	var startupScript string
 
@@ -253,25 +261,57 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		}
 	}
 
-	// 7. Build provider-level request and call provider.
+	// 7. Build provider-level request and try provisioning with fallback retry.
+	// Only the provider.Provision call is retried with different providers (max 3 attempts).
+	// WG setup (key gen, IPAM, AddPeer) happened once above.
 	provReq := provider.ProvisionRequest{
-		InstanceID:       instanceID,
-		GPUType:          req.GPUType,
-		GPUCount:         req.GPUCount,
-		Tier:             req.Tier,
-		Region:           req.Region,
-		SSHPublicKeys:    sshPubKeys,
-		InternalToken:    internalToken,
-		CallbackURL:      callbackURL,
-		StartupScript:    startupScript,
+		InstanceID:    instanceID,
+		GPUType:       req.GPUType,
+		GPUCount:      req.GPUCount,
+		Tier:          req.Tier,
+		Region:        req.Region,
+		SSHPublicKeys: sshPubKeys,
+		InternalToken: internalToken,
+		CallbackURL:   callbackURL,
+		StartupScript: startupScript,
 	}
 	if wgAddress != nil {
 		provReq.WireGuardAddress = *wgAddress
 	}
 
-	provResult, err := prov.Provision(ctx, provReq)
-	if err != nil {
-		// Best-effort cleanup: remove WG peer if we added one.
+	const maxProvisionAttempts = 3
+	var prov provider.Provider
+	var offering *provider.GPUOffering
+	var provResult *provider.ProvisionResult
+	var lastErr error
+
+	for attempt := 0; attempt < maxProvisionAttempts && attempt < len(candidates); attempt++ {
+		c := candidates[attempt]
+		prov = c.prov
+		offering = &c.offering
+
+		e.logger.Info("attempting provision with provider",
+			slog.String("instance_id", instanceID),
+			slog.String("provider", prov.Name()),
+			slog.Float64("price_per_hour", offering.PricePerHour),
+			slog.Int("attempt", attempt+1),
+		)
+
+		provResult, lastErr = prov.Provision(ctx, provReq)
+		if lastErr == nil {
+			break // Success
+		}
+
+		e.logger.Warn("provider provision failed, trying next candidate",
+			slog.String("instance_id", instanceID),
+			slog.String("provider", prov.Name()),
+			slog.String("error", lastErr.Error()),
+			slog.Int("attempt", attempt+1),
+		)
+	}
+
+	if lastErr != nil {
+		// All attempts failed. Best-effort cleanup: remove WG peer if we added one.
 		if e.wgMgr != nil && wgPubKey != nil && wgAddress != nil {
 			addrStr, _, _ := strings.Cut(*wgAddress, "/")
 			if tunnelIP := net.ParseIP(addrStr); tunnelIP != nil {
@@ -284,7 +324,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 				}
 			}
 		}
-		return nil, fmt.Errorf("provision: provider %s: %w", prov.Name(), err)
+		return nil, fmt.Errorf("provision: all providers failed (last: %s): %w", prov.Name(), lastErr)
 	}
 
 	// 8. Build and persist instance record.
@@ -518,14 +558,27 @@ func (e *Engine) checkSpendingLimit(ctx context.Context, orgID string) error {
 	return nil
 }
 
-// selectProvider finds the best available provider for the request.
-// For Phase 4, it uses the first provider that has availability. Best-price
-// selection across providers is deferred to Phase 6.
+// selectProvider finds the best-price provider for the request.
+// Collects all matching offerings across providers, sorts by price ascending,
+// and returns the cheapest match. Tiebreaker: registry iteration order provides
+// the implicit tiebreak via sort.SliceStable (earlier-registered provider preferred).
 func (e *Engine) selectProvider(ctx context.Context, req ProvisionRequest) (provider.Provider, *provider.GPUOffering, error) {
+	candidates, err := e.selectProviderCandidates(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+	return candidates[0].prov, &candidates[0].offering, nil
+}
+
+// selectProviderCandidates returns all matching providers sorted by price ascending.
+// Used by selectProvider (returns first) and by Provision (iterates for fallback retry).
+func (e *Engine) selectProviderCandidates(ctx context.Context, req ProvisionRequest) ([]providerCandidate, error) {
 	providers := e.registry.All()
 	if len(providers) == 0 {
-		return nil, nil, ErrNoProvider
+		return nil, ErrNoProvider
 	}
+
+	var candidates []providerCandidate
 
 	for _, prov := range providers {
 		offerings, err := prov.ListAvailable(ctx)
@@ -537,8 +590,7 @@ func (e *Engine) selectProvider(ctx context.Context, req ProvisionRequest) (prov
 			continue
 		}
 
-		for i := range offerings {
-			o := &offerings[i]
+		for _, o := range offerings {
 			if o.GPUType != req.GPUType {
 				continue
 			}
@@ -554,11 +606,24 @@ func (e *Engine) selectProvider(ctx context.Context, req ProvisionRequest) (prov
 			if o.AvailableCount <= 0 {
 				continue
 			}
-			return prov, o, nil
+			candidates = append(candidates, providerCandidate{prov: prov, offering: o})
 		}
 	}
 
-	return nil, nil, ErrNoProvider
+	if len(candidates) == 0 {
+		return nil, ErrNoProvider
+	}
+
+	// Sort by price ascending. On equal price, registry iteration order provides
+	// the implicit tiebreak (earlier-registered provider = higher priority).
+	// Per CONTEXT.md: "higher-margin provider wins (existing priority list handles
+	// this -- no new mechanism)". sort.SliceStable preserves registry insertion
+	// order as the tiebreaker.
+	sort.SliceStable(candidates, func(i, j int) bool {
+		return candidates[i].offering.PricePerHour < candidates[j].offering.PricePerHour
+	})
+
+	return candidates, nil
 }
 
 // progressStatus runs in a goroutine to drive the full provisioning lifecycle:
