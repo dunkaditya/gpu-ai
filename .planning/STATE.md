@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 4 of 7 (Auth & Instance Lifecycle)
-Plan: 3 of 3 in current phase
+Plan: 4 of 4 in current phase
 Status: Phase Complete
-Last activity: 2026-02-24 -- Completed 04-03 (API Handlers, Idempotency, SSE Streaming)
+Last activity: 2026-02-24 -- Completed 04-04 (Gap Closure: Idempotency org_id fix, WireGuard cleanup)
 
-Progress: [███████░░░] 65%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 1.9min
 - Total execution time: 0.4 hours
 
@@ -30,10 +30,10 @@ Progress: [███████░░░] 65%
 | 01-foundation | 4 | 6min | 1.5min |
 | 02-provider-abstraction | 3 | 7min | 2.3min |
 | 03-privacy-layer | 3 | 6min | 2.0min |
-| 04-auth-instance-lifecycle | 3 | 10min | 3.3min |
+| 04-auth-instance-lifecycle | 4 | 12min | 3.0min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (2min), 03-03 (2min), 04-01 (2min), 04-02 (4min), 04-03 (4min)
+- Last 5 plans: 03-03 (2min), 04-01 (2min), 04-02 (4min), 04-03 (4min), 04-04 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -106,6 +106,9 @@ Recent decisions affecting current work:
 - [04-03]: Idempotency middleware uses SHA-256 body hash to detect key reuse with different bodies
 - [04-03]: Internal ready callback is idempotent: returns 200 even if already transitioned
 - [04-03]: Rate limiter: 10 req/s sustained with burst of 20 per org
+- [04-04]: Resolve Clerk org ID at middleware layer, not DB layer -- keeps DB functions UUID-only
+- [04-04]: WG cleanup is best-effort: errors logged but termination succeeds regardless
+- [04-04]: Strip CIDR suffix from INET column values before net.ParseIP to handle PostgreSQL format
 
 ### Pending Todos
 
@@ -120,5 +123,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 04-03-PLAN.md (API Handlers, Idempotency, SSE Streaming)
+Stopped at: Completed 04-04-PLAN.md (Gap Closure: Idempotency org_id fix, WireGuard cleanup)
 Resume file: None
