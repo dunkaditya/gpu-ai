@@ -10,9 +10,11 @@ import (
 	"time"
 
 	"github.com/gpuai/gpuctl/internal/api"
+	"github.com/gpuai/gpuctl/internal/availability"
 	"github.com/gpuai/gpuctl/internal/billing"
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
+	"github.com/gpuai/gpuctl/internal/health"
 	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/provider/runpod"
 	"github.com/gpuai/gpuctl/internal/provision"
@@ -115,12 +117,25 @@ func main() {
 		IPAM:      ipam,
 	})
 
+	// Create availability cache and poller.
+	availCache := availability.NewCache(redisClient, 35*time.Second)
+	availPoller := availability.NewPoller(
+		providerRegistry,
+		availCache,
+		30*time.Second,
+		cfg.PricingMarkupPct,
+		logger,
+	)
+	go availPoller.Start(ctx)
+	slog.Info("availability poller started", "interval", "30s", "markup_pct", cfg.PricingMarkupPct)
+
 	// Create API server
 	srv := api.NewServer(api.ServerDeps{
-		DB:     dbPool,
-		Redis:  redisClient,
-		Config: cfg,
-		Engine: engine,
+		DB:         dbPool,
+		Redis:      redisClient,
+		Config:     cfg,
+		Engine:     engine,
+		AvailCache: availCache,
 	})
 
 	// Wire SSE status events from provisioning engine to API server.
@@ -138,6 +153,17 @@ func main() {
 	})
 	go billingTicker.Start(ctx)
 	slog.Info("billing ticker started")
+
+	// Create and start health monitor.
+	healthMonitor := health.NewMonitor(health.MonitorDeps{
+		DB:       dbPool,
+		Registry: providerRegistry,
+		Logger:   logger,
+		Interval: 60 * time.Second,
+		OnEvent:  srv.PublishOrgEvent,
+	})
+	go healthMonitor.Start(ctx)
+	slog.Info("health monitor started", "interval", "60s")
 
 	httpServer := &http.Server{
 		Addr:        ":" + cfg.Port,

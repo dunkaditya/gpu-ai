@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -63,6 +64,10 @@ type Config struct {
 	// StripeMeterEventName is the Stripe Billing Meter event name (e.g., "gpu_seconds").
 	// Must match the meter configured in Stripe Dashboard.
 	StripeMeterEventName string
+
+	// PricingMarkupPct is the percentage markup applied to provider prices for retail pricing.
+	// Default: 15.0 (15% markup). Set via PRICING_MARKUP_PCT env var.
+	PricingMarkupPct float64
 }
 
 // Load reads configuration from environment variables, validates required
@@ -136,6 +141,13 @@ func Load() (*Config, error) {
 		slog.Info("Stripe not configured, billing metering disabled")
 	}
 
+	// Parse pricing markup percentage (default 15.0%).
+	pricingMarkupPctStr := getEnvDefault("PRICING_MARKUP_PCT", "15.0")
+	pricingMarkupPct, err := strconv.ParseFloat(pricingMarkupPctStr, 64)
+	if err != nil {
+		return nil, fmt.Errorf("PRICING_MARKUP_PCT must be a valid number: %w", err)
+	}
+
 	return &Config{
 		Port:                 getEnvDefault("GPUCTL_PORT", "9090"),
 		DatabaseURL:          databaseURL,
@@ -151,6 +163,7 @@ func Load() (*Config, error) {
 		GpuctlPublicURL:     os.Getenv("GPUCTL_PUBLIC_URL"),
 		StripeAPIKey:         os.Getenv("STRIPE_API_KEY"),
 		StripeMeterEventName: os.Getenv("STRIPE_METER_EVENT_NAME"),
+		PricingMarkupPct:     pricingMarkupPct,
 	}, nil
 }
 
