@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-02-25T17:56:24.701Z"
+progress:
+  total_phases: 8
+  completed_phases: 7
+  total_plans: 24
+  completed_plans: 22
+---
+
 # Project State
 
 ## Project Reference
@@ -10,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 5 (SSH Keys & Billing)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In Progress
-Last activity: 2026-02-25 -- Completed 05-02 (SSH key CRUD API)
+Last activity: 2026-02-25 -- Completed 05-03 (Billing session lifecycle)
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
@@ -41,6 +54,7 @@ Progress: [█████████░] 89%
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 05 P03 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -137,6 +151,10 @@ Recent decisions affecting current work:
 - [05-02]: Key type allowlist (ssh-rsa, ssh-ed25519, ecdsa-sha2-nistp*) -- safer than blocklist against unknown future types
 - [05-02]: SSHKeyIDs made optional in CreateInstanceRequest -- engine layer handles fallback to user's keys via GetSSHKeysByUserID
 - [05-02]: ErrDuplicateKey sentinel mapped from SQLSTATE 23505 -- same pattern as isDuplicateKeyError in idempotency.go
+- [Phase 05]: Billing session creation non-fatal -- instance transitions to booting even if billing INSERT fails
+- [Phase 05]: CloseBillingSession idempotent -- returns nil if no open session (safe for failed provisions)
+- [Phase 05]: GetOrgMonthSpendCents uses cents (int64) to avoid float precision issues in spending limit checks
+- [Phase 05]: BillingService no-op when Stripe not configured -- matches WireGuard optional service pattern
 
 ### Pending Todos
 
@@ -151,5 +169,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 05-02-PLAN.md (SSH key CRUD API with validation and provisioning smart default)
+Stopped at: Completed 05-03-PLAN.md (Billing session lifecycle with engine wiring and Stripe service)
 Resume file: None
