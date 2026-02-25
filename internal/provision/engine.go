@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -407,6 +408,26 @@ func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 			slog.String("error", err.Error()),
 		)
 		// Non-fatal: instance is terminated, log and continue.
+	}
+
+	// Log terminated event to instance_events table.
+	metadata, _ := json.Marshal(map[string]string{
+		"gpu_type": inst.GPUType,
+		"region":   inst.Region,
+		"tier":     inst.Tier,
+	})
+	terminatedEvent := &db.InstanceEvent{
+		InstanceID: instanceID,
+		OrgID:      inst.OrgID,
+		EventType:  "terminated",
+		Metadata:   metadata,
+	}
+	if err := e.db.CreateInstanceEvent(ctx, terminatedEvent); err != nil {
+		e.logger.Error("failed to log terminated event",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		// Non-fatal: instance is terminated, event logging failure doesn't block.
 	}
 
 	// 6. Clean up WireGuard peer if configured.
