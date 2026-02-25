@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-25T17:56:24.701Z"
+last_updated: "2026-02-25T18:09:33.001Z"
 progress:
   total_phases: 8
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 24
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 5 (SSH Keys & Billing)
-Plan: 4 of 5 in current phase
-Status: In Progress
-Last activity: 2026-02-25 -- Completed 05-04 (Billing ticker & spending limits)
+Plan: 5 of 5 in current phase
+Status: Complete
+Last activity: 2026-02-25 -- Completed 05-05 (Billing API endpoints)
 
-Progress: [█████████░] 96%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: 2.0min
-- Total execution time: 0.72 hours
+- Total execution time: 0.75 hours
 
 **By Phase:**
 
@@ -47,15 +47,16 @@ Progress: [█████████░] 96%
 | 04.1-wireguard-integration-wiring | 2 | 4min | 2.0min |
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
-| 05-ssh-keys-billing | 4 | 11min | 2.75min |
+| 05-ssh-keys-billing | 5 | 13min | 2.6min |
 
 **Recent Trend:**
-- Last 5 plans: 04.3-01 (3min), 05-01 (1min), 05-02 (3min), 05-03 (4min), 05-04 (3min)
+- Last 5 plans: 05-01 (1min), 05-02 (3min), 05-03 (4min), 05-04 (3min), 05-05 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 05 P03 | 4min | 2 tasks | 4 files |
 | Phase 05 P04 | 3min | 2 tasks | 8 files |
+| Phase 05 P05 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -160,6 +161,9 @@ Recent decisions affecting current work:
 - [Phase 05]: StateStopped added to state machine -- stopped preserves storage but suspends billing
 - [Phase 05]: 72h auto-terminate after limit reached -- stopped instances terminated after grace period
 - [Phase 05]: Live spend check in checkSpendingLimit at provision time -- catches limit even if ticker hasn't run yet
+- [05-05]: EnsureOrgAndUser for write endpoints, GetOrgIDByClerkOrgID for read-only -- consistent with SSH key handler patterns
+- [05-05]: Period and start/end params mutually exclusive with 400 error on conflict
+- [05-05]: Hourly aggregation walks sessions across hour boundaries for precise bucket distribution
 
 ### Pending Todos
 
@@ -174,5 +178,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 05-04-PLAN.md (Billing ticker & spending limits)
+Stopped at: Completed 05-05-PLAN.md (Billing API endpoints)
 Resume file: None

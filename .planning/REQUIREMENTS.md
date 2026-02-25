@@ -73,7 +73,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **BILL-02**: Billing stops at instance termination time
 - [x] **BILL-03**: Per-second usage tracked in PostgreSQL billing ledger (source of truth)
 - [x] **BILL-04**: Usage batched and reported to Stripe Billing Meters every 60 seconds as integer GPU-seconds
-- [ ] **BILL-05**: User can view their usage history and costs
+- [x] **BILL-05**: User can view their usage history and costs
 - [x] **BILL-06**: Billing records include GPU type, count, duration, and cost
 - [x] **BILL-07**: Configurable per-org spending limit with automatic instance termination when exceeded
 
@@ -93,7 +93,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **API-04**: DELETE /api/v1/instances/{id} terminates an instance
 - [ ] **API-05**: GET /api/v1/gpu/available returns GPU availability with optional filters
 - [x] **API-06**: GET/POST/DELETE /api/v1/ssh-keys manages SSH keys
-- [ ] **API-07**: GET /api/v1/billing/usage returns billing history
+- [x] **API-07**: GET /api/v1/billing/usage returns billing history
 - [x] **API-08**: GET /health returns service health status
 - [x] **API-09**: Error responses never leak upstream provider details
 - [x] **API-10**: All list endpoints support cursor-based pagination with configurable page size
@@ -204,7 +204,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BILL-02 | Phase 5 | Complete |
 | BILL-03 | Phase 5 | Complete |
 | BILL-04 | Phase 5 | Complete |
-| BILL-05 | Phase 5 | Pending |
+| BILL-05 | Phase 5 | Complete |
 | BILL-06 | Phase 5 | Complete |
 | BILL-07 | Phase 5 | Complete |
 | AVAIL-01 | Phase 6 | Pending |
@@ -218,7 +218,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-04 | Phase 4 | Complete |
 | API-05 | Phase 6 | Pending |
 | API-06 | Phase 5 | Complete |
-| API-07 | Phase 5 | Pending |
+| API-07 | Phase 5 | Complete |
 | API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Complete |
 | API-10 | Phase 4 | Complete |
