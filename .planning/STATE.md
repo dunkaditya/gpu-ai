@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-last_updated: "2026-02-25T20:16:32Z"
+last_updated: "2026-02-25T20:22:45Z"
 progress:
   total_phases: 8
   completed_phases: 8
   total_plans: 28
-  completed_plans: 25
+  completed_plans: 26
 ---
 
 # Project State
@@ -23,18 +23,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 6 (Availability & Health Monitoring)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-25 -- Completed 06-01 (Availability foundation)
+Last activity: 2026-02-25 -- Completed 06-02 (Availability API & best-price selection)
 
-Progress: [████████░░] 89%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: 2.0min
-- Total execution time: 0.75 hours
+- Total execution time: 0.80 hours
 
 **By Phase:**
 
@@ -48,10 +48,10 @@ Progress: [████████░░] 89%
 | 04.2-instance-lifecycle-fix | 2 | 5min | 2.5min |
 | 04.3-auth-idempotency-edge-cases | 1 | 3min | 3.0min |
 | 05-ssh-keys-billing | 5 | 13min | 2.6min |
-| 06-availability-health-monitoring | 1 | 2min | 2.0min |
+| 06-availability-health-monitoring | 2 | 5min | 2.5min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (3min), 05-03 (4min), 05-04 (3min), 05-05 (2min), 06-01 (2min)
+- Last 5 plans: 05-03 (4min), 05-04 (3min), 05-05 (2min), 06-01 (2min), 06-02 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -59,6 +59,7 @@ Progress: [████████░░] 89%
 | Phase 05 P04 | 3min | 2 tasks | 8 files |
 | Phase 05 P05 | 2min | 2 tasks | 2 files |
 | Phase 06 P01 | 2min | 2 tasks | 6 files |
+| Phase 06 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -171,6 +172,10 @@ Recent decisions affecting current work:
 - [06-01]: Markup pricing applied during cache write so customers never see wholesale prices
 - [06-01]: AvailableOffering uses defense-by-omission: Provider field structurally absent
 - [06-01]: org_id index includes created_at DESC for efficient REST catch-up endpoint queries
+- [06-02]: sort.SliceStable for price sorting preserves registry iteration order as tiebreaker -- no explicit priority list needed
+- [06-02]: Provider retry limited to provider.Provision call only -- WG setup happens once before retry loop
+- [06-02]: Max 3 provision attempts across different providers to limit latency
+- [06-02]: Price cap checked against cheapest candidate only (first in sorted list)
 
 ### Pending Todos
 
@@ -185,5 +190,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 06-01-PLAN.md (Availability foundation)
+Stopped at: Completed 06-02-PLAN.md (Availability API & best-price selection)
 Resume file: None

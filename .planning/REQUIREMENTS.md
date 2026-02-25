@@ -81,9 +81,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **AVAIL-01**: Background poller queries all providers every 30 seconds
 - [x] **AVAIL-02**: GPU offerings cached in Redis with 35-second TTL
-- [ ] **AVAIL-03**: User can view available GPU types with pricing by region and tier
-- [ ] **AVAIL-04**: Availability response aggregates across providers without revealing provider identity
-- [ ] **AVAIL-05**: Provisioning engine selects best-price provider automatically
+- [x] **AVAIL-03**: User can view available GPU types with pricing by region and tier
+- [x] **AVAIL-04**: Availability response aggregates across providers without revealing provider identity
+- [x] **AVAIL-05**: Provisioning engine selects best-price provider automatically
 
 ### API
 
@@ -91,7 +91,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **API-02**: GET /api/v1/instances lists user's instances
 - [x] **API-03**: GET /api/v1/instances/{id} returns instance details
 - [x] **API-04**: DELETE /api/v1/instances/{id} terminates an instance
-- [ ] **API-05**: GET /api/v1/gpu/available returns GPU availability with optional filters
+- [x] **API-05**: GET /api/v1/gpu/available returns GPU availability with optional filters
 - [x] **API-06**: GET/POST/DELETE /api/v1/ssh-keys manages SSH keys
 - [x] **API-07**: GET /api/v1/billing/usage returns billing history
 - [x] **API-08**: GET /health returns service health status
@@ -209,14 +209,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BILL-07 | Phase 5 | Complete |
 | AVAIL-01 | Phase 6 | Complete |
 | AVAIL-02 | Phase 6 | Complete |
-| AVAIL-03 | Phase 6 | Pending |
-| AVAIL-04 | Phase 6 | Pending |
-| AVAIL-05 | Phase 6 | Pending |
+| AVAIL-03 | Phase 6 | Complete |
+| AVAIL-04 | Phase 6 | Complete |
+| AVAIL-05 | Phase 6 | Complete |
 | API-01 | Phase 4 | Complete |
 | API-02 | Phase 4 | Complete |
 | API-03 | Phase 4 | Complete |
 | API-04 | Phase 4 | Complete |
-| API-05 | Phase 6 | Pending |
+| API-05 | Phase 6 | Complete |
 | API-06 | Phase 5 | Complete |
 | API-07 | Phase 5 | Complete |
 | API-08 | Phase 1 | Complete |
