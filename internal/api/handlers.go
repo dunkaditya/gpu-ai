@@ -117,7 +117,7 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. Auto-provision org + user from Clerk IDs.
-	orgID, err := s.db.EnsureOrgAndUser(ctx, claims.OrgID, claims.UserID, "")
+	orgID, _, err := s.db.EnsureOrgAndUser(ctx, claims.OrgID, claims.UserID, "")
 	if err != nil {
 		slog.Error("failed to ensure org and user",
 			slog.String("clerk_org_id", claims.OrgID),

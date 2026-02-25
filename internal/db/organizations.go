@@ -22,7 +22,7 @@ type User struct {
 	UserID      string
 	OrgID       string
 	ClerkUserID *string
-	Email       string
+	Email       *string // nullable: Clerk owns identity, email is informational
 	Name        string
 	Role        string
 	CreatedAt   time.Time
@@ -46,10 +46,10 @@ func (p *Pool) GetOrganization(ctx context.Context, orgID string) (*Organization
 	return &org, nil
 }
 
-// EnsureOrgAndUser upserts an organization (by Clerk org ID) and a user (by Clerk user ID).
-// On first call, it creates the org and user. On subsequent calls, it updates the user's email.
-// Returns the internal organization UUID.
-func (p *Pool) EnsureOrgAndUser(ctx context.Context, clerkOrgID, clerkUserID, email string) (string, error) {
+// EnsureOrg upserts an organization by Clerk org ID and returns the internal UUID.
+// Thread-safe: uses INSERT ... ON CONFLICT DO NOTHING so concurrent callers
+// are handled atomically by PostgreSQL.
+func (p *Pool) EnsureOrg(ctx context.Context, clerkOrgID string) (string, error) {
 	// Upsert organization: create if not exists, otherwise no-op.
 	_, err := p.pool.Exec(ctx,
 		`INSERT INTO organizations (organization_id, name, clerk_org_id)
@@ -71,18 +71,36 @@ func (p *Pool) EnsureOrgAndUser(ctx context.Context, clerkOrgID, clerkUserID, em
 		return "", err
 	}
 
-	// Upsert user: create if not exists, otherwise update email.
-	_, err = p.pool.Exec(ctx,
-		`INSERT INTO users (user_id, org_id, clerk_user_id, email, name, role)
-		 VALUES (gen_random_uuid(), $1, $2, $3, '', 'member')
-		 ON CONFLICT (clerk_user_id) DO UPDATE SET email = EXCLUDED.email`,
-		orgUUID, clerkUserID, email,
-	)
+	return orgUUID, nil
+}
+
+// EnsureOrgAndUser upserts an organization (by Clerk org ID) and a user (by Clerk user ID).
+// On first call, it creates the org and user. On subsequent calls, it updates the user's email.
+// Returns both the internal organization UUID and the internal user UUID.
+// The user UUID should be used for instances.user_id FK (not the Clerk user ID string).
+func (p *Pool) EnsureOrgAndUser(ctx context.Context, clerkOrgID, clerkUserID, email string) (orgID string, userID string, err error) {
+	// Reuse EnsureOrg for the organization upsert.
+	orgUUID, err := p.EnsureOrg(ctx, clerkOrgID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return orgUUID, nil
+	// Upsert user: create if not exists, otherwise update email.
+	// NULLIF converts empty email to NULL (Clerk JWTs may not include email).
+	// RETURNING user_id gives us the internal UUID for FK usage.
+	var userUUID string
+	err = p.pool.QueryRow(ctx,
+		`INSERT INTO users (user_id, org_id, clerk_user_id, email, name, role)
+		 VALUES (gen_random_uuid(), $1, $2, NULLIF($3, ''), '', 'member')
+		 ON CONFLICT (clerk_user_id) DO UPDATE SET email = NULLIF(EXCLUDED.email, '')
+		 RETURNING user_id`,
+		orgUUID, clerkUserID, email,
+	).Scan(&userUUID)
+	if err != nil {
+		return "", "", err
+	}
+
+	return orgUUID, userUUID, nil
 }
 
 // GetOrgIDByClerkOrgID retrieves the internal organization UUID by Clerk org ID.
