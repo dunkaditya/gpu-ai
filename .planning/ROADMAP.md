@@ -122,10 +122,11 @@ Plans:
   1. `progressStatus` goroutine polls provider `GetStatus` and transitions instance from provisioning to booting when provider reports pod is running
   2. `/internal/instances/{id}/ready` callback is reachable from GPU instances (token-based auth via internal_token instead of LocalhostOnly)
   3. Full lifecycle works: creating -> provisioning -> booting -> (cloud-init callback) -> running
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04.2-01: TBD
+- [ ] 04.2-01-PLAN.md — InstanceTokenAuth middleware, callback route fix, GPUCTL_PUBLIC_URL config
+- [ ] 04.2-02-PLAN.md — progressStatus polling loop, callback URL fix, SSE status events, tests
 
 ### Phase 4.3: Auth & Idempotency Edge Cases (INSERTED — Gap Closure)
 **Goal**: Fix two structural bugs: the email UNIQUE constraint that blocks multi-user organizations, and the idempotency middleware race condition with org creation
