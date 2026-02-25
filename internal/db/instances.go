@@ -229,6 +229,37 @@ func (p *Pool) ListStoppedInstancesByOrg(ctx context.Context, orgID string) ([]I
 	return instances, rows.Err()
 }
 
+// ListActiveInstances returns all instances with status 'running' or 'booting'.
+// Used by the health monitor to check all active instances across all organizations.
+func (p *Pool) ListActiveInstances(ctx context.Context) ([]Instance, error) {
+	rows, err := p.pool.Query(ctx,
+		`SELECT `+instanceColumns+` FROM instances WHERE status IN ('running', 'booting')`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var instances []Instance
+	for rows.Next() {
+		var inst Instance
+		// Scan fields must match instanceColumns order exactly.
+		// Copy the scan list from ListRunningInstancesByOrg to stay in sync.
+		if err := rows.Scan(
+			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
+			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
+			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
+			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
+			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
+		); err != nil {
+			return nil, err
+		}
+		instances = append(instances, inst)
+	}
+	return instances, rows.Err()
+}
+
 // UpdateInstanceStatus atomically updates an instance's status using optimistic locking.
 // It only updates the row if the current status matches fromStatus, preventing race conditions.
 // Returns true if the row was updated, false if the status was concurrently changed.
