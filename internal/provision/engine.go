@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
@@ -49,29 +50,41 @@ type EngineDeps struct {
 	// Optional: set to nil if WG proxy not configured.
 	WGManager *wireguard.Manager
 	IPAM      *wireguard.IPAM
+	// OnStatusChange is called when progressStatus changes an instance's state.
+	// Used to publish SSE events. Nil means no notification.
+	OnStatusChange func(instanceID, status string)
 }
 
 // Engine orchestrates instance provisioning and termination.
 // It coordinates provider adapters, WireGuard, cloud-init, and DB persistence.
 type Engine struct {
-	registry *provider.Registry
-	db       *db.Pool
-	config   *config.Config
-	logger   *slog.Logger
-	wgMgr    *wireguard.Manager
-	ipam     *wireguard.IPAM
+	registry       *provider.Registry
+	db             *db.Pool
+	config         *config.Config
+	logger         *slog.Logger
+	wgMgr          *wireguard.Manager
+	ipam           *wireguard.IPAM
+	onStatusChange func(instanceID, status string)
 }
 
 // NewEngine creates a new provisioning engine with the given dependencies.
 func NewEngine(deps EngineDeps) *Engine {
 	return &Engine{
-		registry: deps.Registry,
-		db:       deps.DB,
-		config:   deps.Config,
-		logger:   deps.Logger,
-		wgMgr:    deps.WGManager,
-		ipam:     deps.IPAM,
+		registry:       deps.Registry,
+		db:             deps.DB,
+		config:         deps.Config,
+		logger:         deps.Logger,
+		wgMgr:          deps.WGManager,
+		ipam:           deps.IPAM,
+		onStatusChange: deps.OnStatusChange,
 	}
+}
+
+// SetOnStatusChange sets the callback invoked when progressStatus changes
+// an instance's state. Allows post-construction wiring when Engine is created
+// before the API server (which owns the SSE broker).
+func (e *Engine) SetOnStatusChange(fn func(instanceID, status string)) {
+	e.onStatusChange = fn
 }
 
 // ErrNoProvider is returned when no suitable provider is found for the request.
@@ -89,10 +102,11 @@ var ErrSSHKeysNotFound = errors.New("ssh keys not found")
 //  1. Generate instance ID and internal token
 //  2. Resolve SSH keys from DB
 //  3. Select provider and verify pricing
-//  4. Optionally generate WireGuard keys and render cloud-init
-//  5. Call provider to create upstream instance
-//  6. Persist instance record to DB
-//  7. Kick off async status progression
+//  4. Build callback URL (uses GPUCTL_PUBLIC_URL if configured)
+//  5. Optionally generate WireGuard keys and render cloud-init
+//  6. Call provider to create upstream instance
+//  7. Persist instance record to DB
+//  8. Kick off async status progression (creating -> provisioning -> booting)
 func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*ProvisionResponse, error) {
 	// 1. Generate instance ID: "gpu-" + 4 random hex bytes.
 	instanceID, err := generateInstanceID()
@@ -142,7 +156,10 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		return nil, ErrPriceExceeded
 	}
 
-	// 5. Optionally generate WireGuard keys and cloud-init.
+	// 5. Build callback URL using public URL if configured, falling back to branded hostname.
+	callbackURL := buildCallbackURL(e.config.GpuctlPublicURL, hostname, instanceID)
+
+	// 6. Optionally generate WireGuard keys and cloud-init.
 	var wgPubKey, wgPrivKeyEnc, wgAddress *string
 	var startupScript string
 
@@ -198,9 +215,6 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 			)
 		}
 
-		// Build callback URL.
-		callbackURL := fmt.Sprintf("https://%s/internal/instances/%s/ready", hostname, instanceID)
-
 		// Render cloud-init bootstrap script.
 		bootstrapData := wireguard.BootstrapData{
 			InstanceID:         instanceID,
@@ -220,7 +234,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		}
 	}
 
-	// 6. Build provider-level request and call provider.
+	// 7. Build provider-level request and call provider.
 	provReq := provider.ProvisionRequest{
 		InstanceID:       instanceID,
 		GPUType:          req.GPUType,
@@ -229,7 +243,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		Region:           req.Region,
 		SSHPublicKeys:    sshPubKeys,
 		InternalToken:    internalToken,
-		CallbackURL:      fmt.Sprintf("https://%s/internal/instances/%s/ready", hostname, instanceID),
+		CallbackURL:      callbackURL,
 		StartupScript:    startupScript,
 	}
 	if wgAddress != nil {
@@ -254,7 +268,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		return nil, fmt.Errorf("provision: provider %s: %w", prov.Name(), err)
 	}
 
-	// 7. Build and persist instance record.
+	// 8. Build and persist instance record.
 	upstreamIP := &provResult.UpstreamIP
 	if provResult.UpstreamIP == "" {
 		upstreamIP = nil
@@ -285,7 +299,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		return nil, fmt.Errorf("provision: persist instance: %w", err)
 	}
 
-	// 8. Kick off async status progression: creating -> provisioning.
+	// 9. Kick off async status progression: creating -> provisioning -> (poll) -> booting.
 	go e.progressStatus(instanceID)
 
 	e.logger.Info("instance provisioned",
@@ -447,14 +461,17 @@ func (e *Engine) selectProvider(ctx context.Context, req ProvisionRequest) (prov
 	return nil, nil, ErrNoProvider
 }
 
-// progressStatus runs in a goroutine to transition instance from creating to provisioning.
-// The ready callback from the instance will handle further transitions.
+// progressStatus runs in a goroutine to drive the full provisioning lifecycle:
+// creating -> provisioning -> (poll provider) -> booting.
+// The ready callback from cloud-init handles the final booting -> running transition.
+// Has a 10-minute timeout to prevent goroutine leaks.
 func (e *Engine) progressStatus(instanceID string) {
 	ctx := context.Background()
 
+	// Step 1: Transition creating -> provisioning (immediate, as before).
 	updated, err := e.db.UpdateInstanceStatus(ctx, instanceID, StateCreating, StateProvisioning)
 	if err != nil {
-		e.logger.Error("failed to progress status to provisioning",
+		e.logger.Error("failed to progress to provisioning",
 			slog.String("instance_id", instanceID),
 			slog.String("error", err.Error()),
 		)
@@ -464,7 +481,124 @@ func (e *Engine) progressStatus(instanceID string) {
 		e.logger.Warn("status already changed from creating",
 			slog.String("instance_id", instanceID),
 		)
+		return
 	}
+
+	// Notify SSE subscribers of provisioning state.
+	if e.onStatusChange != nil {
+		e.onStatusChange(instanceID, StateProvisioning)
+	}
+
+	// Step 2: Look up instance to get upstream_provider and upstream_id.
+	inst, err := e.db.GetInstance(ctx, instanceID)
+	if err != nil {
+		e.logger.Error("failed to get instance for status polling",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		return
+	}
+
+	// Step 3: Look up provider adapter from registry.
+	prov, ok := e.registry.Get(inst.UpstreamProvider)
+	if !ok {
+		e.logger.Error("provider not found for status polling",
+			slog.String("instance_id", instanceID),
+			slog.String("provider", inst.UpstreamProvider),
+		)
+		return
+	}
+
+	// Step 4: Poll provider until running, terminal, or timeout.
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	timeout := time.After(10 * time.Minute)
+
+	for {
+		select {
+		case <-timeout:
+			e.logger.Error("provisioning timeout",
+				slog.String("instance_id", instanceID),
+			)
+			_ = e.db.SetInstanceError(ctx, instanceID,
+				"provisioning timeout: instance did not start within 10 minutes")
+			return
+		case <-ticker.C:
+			// Check if instance has been concurrently terminated.
+			current, err := e.db.GetInstance(ctx, instanceID)
+			if err != nil {
+				e.logger.Warn("failed to check instance status during polling",
+					slog.String("instance_id", instanceID),
+					slog.String("error", err.Error()),
+				)
+				continue
+			}
+			if current.Status != StateProvisioning {
+				e.logger.Info("instance status changed during polling, exiting",
+					slog.String("instance_id", instanceID),
+					slog.String("status", current.Status),
+				)
+				return
+			}
+
+			// Poll upstream provider.
+			status, err := prov.GetStatus(ctx, inst.UpstreamID)
+			if err != nil {
+				e.logger.Warn("status poll failed, will retry",
+					slog.String("instance_id", instanceID),
+					slog.String("error", err.Error()),
+				)
+				continue
+			}
+
+			e.logger.Debug("polled provider status",
+				slog.String("instance_id", instanceID),
+				slog.String("upstream_status", status.Status),
+			)
+
+			switch status.Status {
+			case "running":
+				// Provider reports pod is running -> transition to booting.
+				// Cloud-init is now executing on the instance.
+				updated, err := e.db.UpdateInstanceStatus(ctx, instanceID, StateProvisioning, StateBooting)
+				if err != nil {
+					e.logger.Error("failed to transition to booting",
+						slog.String("instance_id", instanceID),
+						slog.String("error", err.Error()),
+					)
+					return
+				}
+				if updated {
+					e.logger.Info("instance transitioned to booting",
+						slog.String("instance_id", instanceID),
+					)
+					if e.onStatusChange != nil {
+						e.onStatusChange(instanceID, StateBooting)
+					}
+				}
+				return // Polling complete; ready callback handles booting->running.
+
+			case "terminated", "error":
+				e.logger.Error("upstream instance failed to start",
+					slog.String("instance_id", instanceID),
+					slog.String("upstream_status", status.Status),
+				)
+				_ = e.db.SetInstanceError(ctx, instanceID,
+					fmt.Sprintf("upstream instance failed: %s", status.Status))
+				return
+			}
+			// For "creating" or any other status, continue polling.
+		}
+	}
+}
+
+// buildCallbackURL constructs the ready callback URL for an instance.
+// Uses GpuctlPublicURL when configured, falling back to branded hostname.
+func buildCallbackURL(publicURL, hostname, instanceID string) string {
+	if publicURL != "" {
+		return strings.TrimRight(publicURL, "/") + "/internal/instances/" + instanceID + "/ready"
+	}
+	return "https://" + hostname + "/internal/instances/" + instanceID + "/ready"
 }
 
 // generateInstanceID produces a branded instance ID: "gpu-" + 4 random hex bytes.

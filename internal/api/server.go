@@ -89,6 +89,17 @@ func (s *Server) Handler() http.Handler {
 	return s.mux
 }
 
+// PublishStatusChange publishes an instance status change event to SSE subscribers.
+// Called by the provisioning engine via OnStatusChange callback.
+func (s *Server) PublishStatusChange(instanceID, internalStatus string) {
+	s.statusBroker.Publish(instanceID, StatusEvent{
+		InstanceID:     instanceID,
+		Status:         provision.ExternalState(internalStatus),
+		InternalStatus: internalStatus,
+		Timestamp:      time.Now().UTC().Format(time.RFC3339),
+	})
+}
+
 // healthResponse is the JSON body returned by the health endpoint.
 type healthResponse struct {
 	Status string `json:"status"`

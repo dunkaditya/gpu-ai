@@ -122,6 +122,9 @@ func main() {
 		Engine: engine,
 	})
 
+	// Wire SSE status events from provisioning engine to API server.
+	engine.SetOnStatusChange(srv.PublishStatusChange)
+
 	httpServer := &http.Server{
 		Addr:        ":" + cfg.Port,
 		Handler:     srv.Handler(),
