@@ -49,6 +49,12 @@ type Config struct {
 	// ClerkSecretKey is the Clerk API secret key for JWT verification.
 	// Optional -- empty disables Clerk auth for local dev.
 	ClerkSecretKey string
+
+	// GpuctlPublicURL is the public base URL of the gpuctl server
+	// (e.g., "https://api.gpu.ai"). Used to construct callback URLs reachable
+	// from GPU instances. Optional -- if empty, callback URLs fall back to
+	// branded hostname (dev only).
+	GpuctlPublicURL string
 }
 
 // Load reads configuration from environment variables, validates required
@@ -130,6 +136,7 @@ func Load() (*Config, error) {
 		WGProxyPublicKey:     wgProxyPublicKey,
 		WGInterfaceName:      getEnvDefault("WG_INTERFACE_NAME", "wg0"),
 		ClerkSecretKey:       os.Getenv("CLERK_SECRET_KEY"),
+		GpuctlPublicURL:     os.Getenv("GPUCTL_PUBLIC_URL"),
 	}, nil
 }
 

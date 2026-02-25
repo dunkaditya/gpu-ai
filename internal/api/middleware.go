@@ -2,8 +2,12 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net"
 	"net/http"
+	"strings"
+
+	"github.com/gpuai/gpuctl/internal/db"
 )
 
 // LocalhostOnly restricts access to requests originating from loopback addresses
@@ -36,6 +40,50 @@ func InternalAuthMiddleware(token string, next http.Handler) http.Handler {
 			json.NewEncoder(w).Encode(map[string]string{"error": "forbidden"})
 			return
 		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// InstanceTokenAuth validates per-instance Bearer tokens against the database.
+// Each GPU instance authenticates itself using the unique internal_token assigned
+// during provisioning. The token is sent in the Authorization: Bearer header
+// by the cloud-init callback script.
+func InstanceTokenAuth(dbPool *db.Pool, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 1. Extract instance ID from path.
+		instanceID := r.PathValue("id")
+		if instanceID == "" {
+			writeProblem(w, http.StatusBadRequest, "missing-id", "Instance ID is required")
+			return
+		}
+
+		// 2. Extract Bearer token from Authorization header.
+		auth := r.Header.Get("Authorization")
+		if auth == "" || !strings.HasPrefix(auth, "Bearer ") {
+			writeProblem(w, http.StatusUnauthorized, "unauthorized", "Authorization required")
+			return
+		}
+		token := strings.TrimPrefix(auth, "Bearer ")
+
+		// 3. Look up instance in the database.
+		inst, err := dbPool.GetInstance(r.Context(), instanceID)
+		if err != nil {
+			if errors.Is(err, db.ErrNotFound) {
+				http.NotFound(w, r)
+				return
+			}
+			writeProblem(w, http.StatusInternalServerError, "internal-error",
+				"Failed to verify instance token")
+			return
+		}
+
+		// 4. Verify the token matches the instance's stored internal_token.
+		if inst.InternalToken == nil || token != *inst.InternalToken {
+			writeProblem(w, http.StatusForbidden, "forbidden", "Invalid instance token")
+			return
+		}
+
+		// 5. Token valid -- proceed to handler.
 		next.ServeHTTP(w, r)
 	})
 }

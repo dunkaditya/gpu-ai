@@ -136,3 +136,55 @@ func TestInternalAuthMiddleware_InvalidToken(t *testing.T) {
 		t.Errorf("expected 403, got %d", rec.Code)
 	}
 }
+
+// --- InstanceTokenAuth tests ---
+// These test cases exercise the header-parsing and early-rejection paths
+// that do not require a database connection. Cases that reach the DB lookup
+// (valid token, invalid token, instance not found) are covered by
+// integration tests.
+
+func TestInstanceTokenAuth_MissingInstanceID(t *testing.T) {
+	// Pass nil dbPool -- the middleware should reject before hitting the DB.
+	handler := InstanceTokenAuth(nil, okHandler())
+
+	req := httptest.NewRequest(http.MethodPost, "/internal/instances//ready", nil)
+	// PathValue("id") returns "" when there's no {id} match.
+	// Since we're not using a real mux, PathValue will return "".
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("expected 400, got %d", rec.Code)
+	}
+}
+
+func TestInstanceTokenAuth_MissingAuthorizationHeader(t *testing.T) {
+	handler := InstanceTokenAuth(nil, okHandler())
+
+	req := httptest.NewRequest(http.MethodPost, "/internal/instances/{id}/ready", nil)
+	req.SetPathValue("id", "inst-123")
+	// No Authorization header set.
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401, got %d", rec.Code)
+	}
+}
+
+func TestInstanceTokenAuth_InvalidAuthorizationFormat(t *testing.T) {
+	handler := InstanceTokenAuth(nil, okHandler())
+
+	req := httptest.NewRequest(http.MethodPost, "/internal/instances/{id}/ready", nil)
+	req.SetPathValue("id", "inst-123")
+	req.Header.Set("Authorization", "Basic dXNlcjpwYXNz") // Not Bearer
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401, got %d", rec.Code)
+	}
+}
