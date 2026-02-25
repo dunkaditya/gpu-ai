@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 4: Auth & Instance Lifecycle
+**Current focus:** Phase 4.1: WireGuard Integration Wiring
 
 ## Current Position
 
-Phase: 4 of 7 (Auth & Instance Lifecycle)
-Plan: 4 of 4 in current phase
-Status: Phase Complete
-Last activity: 2026-02-24 -- Completed 04-04 (Gap Closure: Idempotency org_id fix, WireGuard cleanup)
+Phase: 4.1 (WireGuard Integration Wiring)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-02-25 -- Completed 04.1-01 (Optional WG config + Manager/IPAM init wiring)
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 72%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: 1.9min
 - Total execution time: 0.4 hours
 
@@ -31,9 +31,10 @@ Progress: [███████░░░] 67%
 | 02-provider-abstraction | 3 | 7min | 2.3min |
 | 03-privacy-layer | 3 | 6min | 2.0min |
 | 04-auth-instance-lifecycle | 4 | 12min | 3.0min |
+| 04.1-wireguard-integration-wiring | 1 | 2min | 2.0min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (2min), 04-01 (2min), 04-02 (4min), 04-03 (4min), 04-04 (2min)
+- Last 5 plans: 04-01 (2min), 04-02 (4min), 04-03 (4min), 04-04 (2min), 04.1-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -109,6 +110,9 @@ Recent decisions affecting current work:
 - [04-04]: Resolve Clerk org ID at middleware layer, not DB layer -- keeps DB functions UUID-only
 - [04-04]: WG cleanup is best-effort: errors logged but termination succeeds regardless
 - [04-04]: Strip CIDR suffix from INET column values before net.ParseIP to handle PostgreSQL format
+- [04.1-01]: All-or-nothing WG config: all three WG vars present together or all absent -- prevents misconfiguration
+- [04.1-01]: WG init gated on WGEncryptionKeyBytes != nil (decoded bytes, not string) -- matches research Pattern 1
+- [04.1-01]: IPAM hardcoded to 10.0.0.0/16 subnet -- matches existing IPAM tests and engine code
 
 ### Pending Todos
 
@@ -122,6 +126,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Completed 04-04-PLAN.md (Gap Closure: Idempotency org_id fix, WireGuard cleanup)
+Last session: 2026-02-25
+Stopped at: Completed 04.1-01-PLAN.md (Optional WG config + Manager/IPAM init wiring)
 Resume file: None
