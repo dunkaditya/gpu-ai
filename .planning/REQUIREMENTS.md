@@ -28,17 +28,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PROV-02**: Provider registry manages multiple adapters with lookup by name
 - [x] **PROV-03**: RunPod adapter lists available GPU types with pricing via GraphQL API
 - [x] **PROV-04**: RunPod adapter provisions a pod with custom Docker image and startup scripts
-- [x] **PROV-05**: RunPod adapter queries pod status by upstream ID
+- [ ] **PROV-05**: RunPod adapter queries pod status by upstream ID
 - [x] **PROV-06**: RunPod adapter terminates a pod by upstream ID
 
 ### Privacy Layer
 
-- [x] **PRIV-01**: WireGuard key pairs generated for each new instance
-- [x] **PRIV-02**: WireGuard peers added to proxy server programmatically via wgctrl-go
-- [x] **PRIV-03**: WireGuard peers removed from proxy server on instance termination
-- [x] **PRIV-04**: IPAM allocates unique WireGuard addresses from subnet pool backed by PostgreSQL
-- [x] **PRIV-05**: Instance init template renders with WireGuard config, SSH keys, hostname, firewall rules
-- [x] **PRIV-06**: Customer SSH connections route through WireGuard proxy with branded hostname
+- [ ] **PRIV-01**: WireGuard key pairs generated for each new instance
+- [ ] **PRIV-02**: WireGuard peers added to proxy server programmatically via wgctrl-go
+- [ ] **PRIV-03**: WireGuard peers removed from proxy server on instance termination
+- [ ] **PRIV-04**: IPAM allocates unique WireGuard addresses from subnet pool backed by PostgreSQL
+- [ ] **PRIV-05**: Instance init template renders with WireGuard config, SSH keys, hostname, firewall rules
+- [ ] **PRIV-06**: Customer SSH connections route through WireGuard proxy with branded hostname
 - [x] **PRIV-07**: Upstream provider identity (name, IP, env vars, metadata endpoint) hidden from customer
 - [x] **PRIV-08**: All customer-facing API responses structurally exclude upstream provider details
 
@@ -48,16 +48,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **INST-02**: User can list their active instances with status and connection info
 - [x] **INST-03**: User can get details of a specific instance by ID
 - [x] **INST-04**: User can terminate an instance and billing stops
-- [x] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
+- [ ] **INST-05**: Instance follows state machine (creating -> provisioning -> booting -> running -> stopping -> terminated)
 - [x] **INST-06**: Instance termination is idempotent (multiple calls produce same result)
-- [x] **INST-07**: Instance ready callback transitions status from booting to running
+- [ ] **INST-07**: Instance ready callback transitions status from booting to running
 - [x] **INST-08**: Instance creation response includes confirmed hourly cost so user knows what they're paying before resources are allocated
 
 ### Authentication
 
 - [x] **AUTH-01**: All customer API endpoints require valid Clerk JWT
 - [x] **AUTH-02**: JWT verification extracts user_id and org_id into request context
-- [x] **AUTH-03**: Users can only access instances belonging to their organization
+- [ ] **AUTH-03**: Users can only access instances belonging to their organization
 - [x] **AUTH-04**: Internal endpoints restricted to localhost only
 
 ### SSH Key Management
@@ -97,7 +97,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **API-08**: GET /health returns service health status
 - [x] **API-09**: Error responses never leak upstream provider details
 - [x] **API-10**: All list endpoints support cursor-based pagination with configurable page size
-- [x] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
+- [ ] **API-11**: POST /api/v1/instances accepts Idempotency-Key header to prevent duplicate instance creation on network retries
 - [x] **API-12**: All customer API endpoints are rate-limited per org (prevent runaway scripts from creating dozens of instances)
 
 ### Health Monitoring
@@ -174,27 +174,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROV-02 | Phase 2 | Complete |
 | PROV-03 | Phase 2 | Complete |
 | PROV-04 | Phase 2 | Complete |
-| PROV-05 | Phase 2 | Complete |
+| PROV-05 | Phase 4.2 | Pending |
 | PROV-06 | Phase 2 | Complete |
-| PRIV-01 | Phase 3 | Complete |
-| PRIV-02 | Phase 3 | Complete |
-| PRIV-03 | Phase 3 | Complete |
-| PRIV-04 | Phase 3 | Complete |
-| PRIV-05 | Phase 3 | Complete |
-| PRIV-06 | Phase 3 | Complete |
+| PRIV-01 | Phase 4.1 | Pending |
+| PRIV-02 | Phase 4.1 | Pending |
+| PRIV-03 | Phase 4.1 | Pending |
+| PRIV-04 | Phase 4.1 | Pending |
+| PRIV-05 | Phase 4.1 | Pending |
+| PRIV-06 | Phase 4.1 | Pending |
 | PRIV-07 | Phase 3 | Complete |
 | PRIV-08 | Phase 3 | Complete |
 | INST-01 | Phase 4 | Complete |
 | INST-02 | Phase 4 | Complete |
 | INST-03 | Phase 4 | Complete |
 | INST-04 | Phase 4 | Complete |
-| INST-05 | Phase 4 | Complete |
+| INST-05 | Phase 4.2 | Pending |
 | INST-06 | Phase 4 | Complete |
-| INST-07 | Phase 4 | Complete |
+| INST-07 | Phase 4.2 | Pending |
 | INST-08 | Phase 4 | Complete |
 | AUTH-01 | Phase 4 | Complete |
 | AUTH-02 | Phase 4 | Complete |
-| AUTH-03 | Phase 4 | Complete |
+| AUTH-03 | Phase 4.3 | Pending |
 | AUTH-04 | Phase 1 | Complete |
 | SSHK-01 | Phase 5 | Pending |
 | SSHK-02 | Phase 5 | Pending |
@@ -222,7 +222,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-08 | Phase 1 | Complete |
 | API-09 | Phase 4 | Complete |
 | API-10 | Phase 4 | Complete |
-| API-11 | Phase 4 | Complete |
+| API-11 | Phase 4.3 | Pending |
 | API-12 | Phase 4 | Complete |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |

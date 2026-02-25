@@ -16,6 +16,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Provider Abstraction + RunPod Adapter** - Provider interface, registry, and RunPod GraphQL adapter (completed 2026-02-24)
 - [x] **Phase 3: Privacy Layer** - WireGuard key management, peer management, IPAM, init template, and privacy filtering (completed 2026-02-24)
 - [x] **Phase 4: Auth + Instance Lifecycle** - Clerk JWT auth, instance CRUD with state machine, and core API endpoints (completed 2026-02-25)
+- [ ] **Phase 4.1: WireGuard Integration Wiring** - INSERTED: Initialize WG components in main.go, wire AddPeer into provisioning, fix RunPod StartupScript delivery
+- [ ] **Phase 4.2: Instance Lifecycle State Machine Fix** - INSERTED: Fix provisioning->booting transition, make ready callback reachable, wire GetStatus polling
+- [ ] **Phase 4.3: Auth & Idempotency Edge Cases** - INSERTED: Fix multi-user org email constraint, fix idempotency middleware org race
 - [ ] **Phase 5: SSH Keys + Billing** - SSH key management, per-second billing ledger, and Stripe metering
 - [ ] **Phase 6: Availability + Health Monitoring** - Background GPU polling, Redis cache, best-price selection, and instance health checks
 - [ ] **Phase 7: Dashboard** - Next.js customer dashboard with auth, GPU availability, instance management, billing, and SSH keys
@@ -94,6 +97,48 @@ Plans:
 - [x] 04-03-PLAN.md — Instance API handlers, idempotency middleware, SSE status streaming, internal callback, route wiring
 - [ ] 04-04-PLAN.md — Gap closure: Fix idempotency org_id type mismatch, implement WireGuard peer cleanup on termination
 
+### Phase 4.1: WireGuard Integration Wiring (INSERTED — Gap Closure)
+**Goal**: Connect the implemented-but-unwired WireGuard components so the privacy layer actually functions at runtime: initialize WG Manager and IPAM in main.go, call AddPeer during provisioning, and make RunPod deliver the StartupScript
+**Depends on**: Phase 3, Phase 4
+**Requirements**: PRIV-01, PRIV-02, PRIV-03, PRIV-04, PRIV-05, PRIV-06
+**Gap Closure**: Closes WireGuard Privacy Layer E2E broken flow from audit
+**Success Criteria** (what must be TRUE):
+  1. `wireguard.NewManager` and `wireguard.NewIPAM` are initialized in main.go and passed to EngineDeps
+  2. `AddPeer` is called during engine.Provision after key generation and IPAM allocation
+  3. RunPod adapter reads and passes `ProvisionRequest.StartupScript` to the pod
+  4. Full WG flow executes at runtime: keys generated -> IPAM allocated -> peer added -> cloud-init rendered and delivered
+**Plans**: TBD
+
+Plans:
+- [ ] 04.1-01: TBD
+
+### Phase 4.2: Instance Lifecycle State Machine Fix (INSERTED — Gap Closure)
+**Goal**: Fix the instance state machine so instances actually progress from provisioning to booting to running: extend status polling to trigger the booting transition and make the ready callback endpoint reachable from GPU instances
+**Depends on**: Phase 2, Phase 4
+**Requirements**: INST-05, INST-07, PROV-05
+**Gap Closure**: Closes Instance Becoming Running broken flow from audit
+**Success Criteria** (what must be TRUE):
+  1. `progressStatus` goroutine polls provider `GetStatus` and transitions instance from provisioning to booting when provider reports pod is running
+  2. `/internal/instances/{id}/ready` callback is reachable from GPU instances (token-based auth via internal_token instead of LocalhostOnly)
+  3. Full lifecycle works: creating -> provisioning -> booting -> (cloud-init callback) -> running
+**Plans**: TBD
+
+Plans:
+- [ ] 04.2-01: TBD
+
+### Phase 4.3: Auth & Idempotency Edge Cases (INSERTED — Gap Closure)
+**Goal**: Fix two structural bugs: the email UNIQUE constraint that blocks multi-user organizations, and the idempotency middleware race condition with org creation
+**Depends on**: Phase 4
+**Requirements**: AUTH-03, API-11
+**Gap Closure**: Closes auth and idempotency edge case bugs from audit
+**Success Criteria** (what must be TRUE):
+  1. Multiple distinct Clerk users in the same organization can use the API without constraint violations
+  2. `Idempotency-Key` header works correctly even for a new organization's first POST request
+**Plans**: TBD
+
+Plans:
+- [ ] 04.3-01: TBD
+
 ### Phase 5: SSH Keys + Billing
 **Goal**: Users can manage SSH keys that are injected into new instances, per-second billing tracks usage accurately in a PostgreSQL ledger with batched reporting to Stripe, and per-org spending limits prevent bill shock
 **Depends on**: Phase 4
@@ -150,7 +195,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 4.2 -> 4.3 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -158,6 +203,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Provider Abstraction + RunPod Adapter | 0/3 | Complete    | 2026-02-24 |
 | 3. Privacy Layer | 0/3 | Complete    | 2026-02-24 |
 | 4. Auth + Instance Lifecycle | 0/4 | Complete    | 2026-02-25 |
+| 4.1 WireGuard Integration Wiring | 0/1 | Not started | - |
+| 4.2 Instance Lifecycle State Machine Fix | 0/1 | Not started | - |
+| 4.3 Auth & Idempotency Edge Cases | 0/1 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
 | 6. Availability + Health Monitoring | 0/3 | Not started | - |
 | 7. Dashboard | 0/3 | Not started | - |
