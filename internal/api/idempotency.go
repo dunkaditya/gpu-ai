@@ -68,13 +68,31 @@ func IdempotencyMiddleware(dbPool *db.Pool) func(http.Handler) http.Handler {
 			// Resolve Clerk org ID to internal UUID for DB operations.
 			internalOrgID, err := dbPool.GetOrgIDByClerkOrgID(ctx, claims.OrgID)
 			if err != nil {
-				slog.Error("idempotency: failed to resolve org ID",
-					slog.String("clerk_org_id", claims.OrgID),
-					slog.String("error", err.Error()),
-				)
-				writeProblem(w, http.StatusInternalServerError, "internal-error",
-					"Failed to process request")
-				return
+				if errors.Is(err, db.ErrNotFound) {
+					// Org not yet provisioned. Eagerly create it so the idempotency key
+					// can be scoped correctly even on the very first request for a new org.
+					// Pattern 2 (Eager Creation) avoids the pass-through gap where retries
+					// could create duplicate instances.
+					internalOrgID, err = dbPool.EnsureOrg(ctx, claims.OrgID)
+					if err != nil {
+						slog.Error("idempotency: failed to ensure org",
+							slog.String("clerk_org_id", claims.OrgID),
+							slog.String("error", err.Error()),
+						)
+						writeProblem(w, http.StatusInternalServerError, "internal-error",
+							"Failed to process request")
+						return
+					}
+					// Fall through to normal idempotency logic.
+				} else {
+					slog.Error("idempotency: failed to resolve org ID",
+						slog.String("clerk_org_id", claims.OrgID),
+						slog.String("error", err.Error()),
+					)
+					writeProblem(w, http.StatusInternalServerError, "internal-error",
+						"Failed to process request")
+					return
+				}
 			}
 
 			// Read and hash request body, then reset for handler.

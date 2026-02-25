@@ -117,7 +117,9 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. Auto-provision org + user from Clerk IDs.
-	orgID, _, err := s.db.EnsureOrgAndUser(ctx, claims.OrgID, claims.UserID, "")
+	// EnsureOrgAndUser returns both the internal org UUID and user UUID.
+	// The user UUID (not the Clerk user ID) must be used for instances.user_id FK.
+	orgID, userID, err := s.db.EnsureOrgAndUser(ctx, claims.OrgID, claims.UserID, "")
 	if err != nil {
 		slog.Error("failed to ensure org and user",
 			slog.String("clerk_org_id", claims.OrgID),
@@ -141,7 +143,7 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 	// 4. Build engine-level provision request.
 	provReq := provision.ProvisionRequest{
 		OrgID:           orgID,
-		UserID:          claims.UserID,
+		UserID:          userID,
 		GPUType:         provider.GPUType(req.GPUType),
 		GPUCount:        req.GPUCount,
 		Tier:            provider.InstanceTier(req.Tier),

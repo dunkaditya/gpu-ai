@@ -22,7 +22,7 @@ import (
 // This is the engine-level request, distinct from provider.ProvisionRequest.
 type ProvisionRequest struct {
 	OrgID           string
-	UserID          string
+	UserID          string // internal user UUID from users.user_id (not Clerk user ID)
 	GPUType         provider.GPUType
 	GPUCount        int
 	Tier            provider.InstanceTier
