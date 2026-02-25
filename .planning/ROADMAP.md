@@ -16,11 +16,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Provider Abstraction + RunPod Adapter** - Provider interface, registry, and RunPod GraphQL adapter (completed 2026-02-24)
 - [x] **Phase 3: Privacy Layer** - WireGuard key management, peer management, IPAM, init template, and privacy filtering (completed 2026-02-24)
 - [x] **Phase 4: Auth + Instance Lifecycle** - Clerk JWT auth, instance CRUD with state machine, and core API endpoints (completed 2026-02-25)
-- [ ] **Phase 4.1: WireGuard Integration Wiring** - INSERTED: Initialize WG components in main.go, wire AddPeer into provisioning, fix RunPod StartupScript delivery
-- [ ] **Phase 4.2: Instance Lifecycle State Machine Fix** - INSERTED: Fix provisioning->booting transition, make ready callback reachable, wire GetStatus polling
-- [ ] **Phase 4.3: Auth & Idempotency Edge Cases** - INSERTED: Fix multi-user org email constraint, fix idempotency middleware org race
-- [ ] **Phase 5: SSH Keys + Billing** - SSH key management, per-second billing ledger, and Stripe metering
-- [ ] **Phase 6: Availability + Health Monitoring** - Background GPU polling, Redis cache, best-price selection, and instance health checks
+- [x] **Phase 4.1: WireGuard Integration Wiring** - INSERTED: Initialize WG components in main.go, wire AddPeer into provisioning, fix RunPod StartupScript delivery (completed 2026-02-25)
+- [x] **Phase 4.2: Instance Lifecycle State Machine Fix** - INSERTED: Fix provisioning->booting transition, make ready callback reachable, wire GetStatus polling (completed 2026-02-25)
+- [x] **Phase 4.3: Auth & Idempotency Edge Cases** - INSERTED: Fix multi-user org email constraint, fix idempotency middleware org race (completed 2026-02-25)
+- [x] **Phase 5: SSH Keys + Billing** - SSH key management, per-second billing ledger, and Stripe metering (completed 2026-02-25)
+- [x] **Phase 6: Availability + Health Monitoring** - Background GPU polling, Redis cache, best-price selection, and instance health checks (completed 2026-02-25)
 - [ ] **Phase 7: Dashboard** - Next.js customer dashboard with auth, GPU availability, instance management, billing, and SSH keys
 
 ## Phase Details
