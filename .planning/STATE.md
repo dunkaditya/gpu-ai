@@ -186,6 +186,10 @@ Recent decisions affecting current work:
 - [06-04]: Health monitor created after API server to use srv.PublishOrgEvent callback directly
 - [06-04]: Goroutine startup order: poller before server, monitor after server (dependency-driven)
 
+### Roadmap Evolution
+
+- Phase 8 added: Rebuild frontend landing page to match Vercel homepage design
+
 ### Pending Todos
 
 None yet.
