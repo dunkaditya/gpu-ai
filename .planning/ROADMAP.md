@@ -214,3 +214,14 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 4.2 -> 4.3 -> 5 -> 6
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
 | 6. Availability + Health Monitoring | 4/4 | In Progress | - |
 | 7. Dashboard | 0/3 | Not started | - |
+
+### Phase 8: Rebuild frontend landing page to match Vercel homepage design
+
+**Goal:** Rebuild the GPU.ai landing page to mirror Vercel's homepage layout, structure, and visual style -- Geist fonts, dark theme, grid background with cross markers, rainbow glow, 7 sections (Navbar, Hero, UseCaseTabs, FeaturePillars, CLIDemo, FinalCTA, Footer) with GPU.ai content adapted for the product
+**Requirements**: DASH-01
+**Depends on:** Phase 7
+**Plans:** 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Fix broken build, install Geist fonts, rewrite design system (globals.css + layout.tsx), create lib/ utilities, delete 12 removed components
+- [ ] 08-02-PLAN.md — Build all 7 landing page sections (Navbar, Hero, UseCaseTabs, FeaturePillars, CLIDemo, FinalCTA, Footer) and compose page.tsx
