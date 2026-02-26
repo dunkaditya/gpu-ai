@@ -109,7 +109,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Dashboard
 
-- [ ] **DASH-01**: Landing page describes the product
+- [x] **DASH-01**: Landing page describes the product
 - [ ] **DASH-02**: User can sign up and log in via Clerk
 - [ ] **DASH-03**: User can view real-time GPU availability with pricing
 - [ ] **DASH-04**: User can provision a GPU instance from the dashboard
@@ -228,7 +228,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HLTH-02 | Phase 6 | Complete |
 | HLTH-03 | Phase 6 | Complete |
 | HLTH-04 | Phase 6 | Complete |
-| DASH-01 | Phase 7 | Pending |
+| DASH-01 | Phase 7 | Complete |
 | DASH-02 | Phase 7 | Pending |
 | DASH-03 | Phase 7 | Pending |
 | DASH-04 | Phase 7 | Pending |
