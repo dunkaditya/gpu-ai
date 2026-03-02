@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import localFont from "next/font/local";
 import "./globals.css";
 
+const vremenaGrotesk = localFont({
+  src: "../../public/fonts/vremena-grotesk.woff2",
+  variable: "--font-vremena-grotesk",
+  display: "swap",
+});
+
+const nectoMono = localFont({
+  src: "../../public/fonts/necto-mono.woff2",
+  variable: "--font-necto-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "GPU.ai — Your Infrastructure for GPU Compute",
+  title: "GPU.ai — GPU Cloud at Unbeatable Prices",
   description:
-    "Aggregate GPU inventory from 12+ providers. Best price, fastest deploy, single API. Up to 30% cheaper than hyperscalers.",
+    "We aggregate GPU inventory from 12+ providers to find you the best price. Up to 30% cheaper than hyperscalers. Deploy in seconds.",
   openGraph: {
-    title: "GPU.ai — Your Infrastructure for GPU Compute",
+    title: "GPU.ai — GPU Cloud at Unbeatable Prices",
     description:
-      "Aggregate GPU inventory from 12+ providers. Best price, fastest deploy, single API.",
+      "Aggregate GPU cloud. Up to 30% cheaper. Deploy in seconds.",
     type: "website",
   },
 };
@@ -23,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}
+        className={`${vremenaGrotesk.variable} ${nectoMono.variable} antialiased`}
       >
         {children}
       </body>

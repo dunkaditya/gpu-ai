@@ -1,55 +1,84 @@
-import { HERO_CONTENT } from "@/lib/constants";
-import { Button, Container } from "@/components/ui";
+import { Container } from "@/components/ui/Container";
+import { Counter } from "@/components/ui/Counter";
+import { ComputeField } from "./ComputeField";
+import { LightFixture } from "./LightFixture";
+import { PricingWidget } from "./PricingWidget";
+import { HERO_STATS } from "@/lib/constants";
 
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-24 overflow-visible">
-      <Container>
-        {/* Content */}
-        <div className="text-center mx-auto max-w-[800px]">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.1]">
-            {HERO_CONTENT.headline}
-          </h1>
-          <p className="mt-6 text-lg md:text-xl text-text-muted max-w-[600px] mx-auto">
-            {HERO_CONTENT.subtitle}
-          </p>
+    <section className="relative pt-[88px]">
+      {/* Black opaque layer + mesh zone — same clip path */}
+      {/* Black bg with hard clip edge */}
+      {/* Black opaque layer — full width, covers both stripe lines in hero area */}
+      <div className="absolute inset-0 z-[41] bg-bg" />
+      {/* Mesh effects with soft fade along the same diagonal */}
+      <div
+        className="absolute -bottom-[10vh] left-0 right-0 top-0 z-[42]"
+        style={{
+          WebkitMaskImage: "linear-gradient(192deg, black 40%, transparent 50%)",
+          maskImage: "linear-gradient(192deg, black 40%, transparent 50%)",
+        }}
+      >
+        <ComputeField />
+        <LightFixture />
+      </div>
 
-          {/* CTA buttons */}
-          <div className="flex items-center justify-center gap-4 mt-10">
-            <Button variant="primary" size="lg" href="#">
-              {HERO_CONTENT.primaryCTA}
-            </Button>
-            <Button variant="secondary" size="lg" href="#">
-              {HERO_CONTENT.secondaryCTA}
-            </Button>
-          </div>
+      <Container className="relative z-[44] flex min-h-[calc(100vh-480px)] flex-col justify-center py-10 pb-10">
+        <div className="flex w-full flex-col items-center gap-16 lg:flex-row lg:gap-20">
+          {/* Left — copy */}
+          <div className="flex-1 text-center lg:text-left">
+            {/* Headline */}
+            <h1
+              className="type-display animate-fade-up font-bold"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <span className="text-white">GPUs shouldn&apos;t</span>
+              <br />
+              <span className="text-white">cost so much.</span>
+            </h1>
 
-          {/* Metrics row */}
-          <div className="flex items-center justify-center gap-8 md:gap-12 mt-16">
-            {HERO_CONTENT.metrics.map((metric) => (
-              <div key={metric.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white">
-                  {metric.value}
+            <p
+              className="type-h2 animate-fade-up mt-3 font-bold"
+              style={{ animationDelay: "0.15s" }}
+            >
+              <span className="gradient-text">Now they don&apos;t.</span>
+            </p>
+
+            <p
+              className="type-body-lg animate-fade-up mt-7 max-w-[600px] font-normal tracking-[-0.08em] text-text"
+              style={{ animationDelay: "0.2s" }}
+            >
+              We built the infrastructure layer that GPU clouds should have built years ago. Source NVIDIA hardware globally, deploy instantly, a fraction of the cost.
+            </p>
+
+            {/* Stats */}
+            <div
+              className="animate-fade-up mt-8 flex flex-wrap justify-center gap-12 lg:justify-start lg:gap-14"
+              style={{ animationDelay: "0.3s" }}
+            >
+              {HERO_STATS.map((stat) => (
+                <div key={stat.label} className="flex flex-col items-center gap-1 lg:items-start">
+                  <span className="type-h3 font-bold text-white">
+                    <Counter
+                      value={stat.value}
+                      prefix={"prefix" in stat ? stat.prefix : undefined}
+                      suffix={stat.suffix}
+                    />
+                  </span>
+                  <span className="type-body font-normal text-text">{stat.label}</span>
                 </div>
-                <div className="mt-1 text-sm text-text-muted">{metric.label}</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Triangle + Rainbow glow */}
-        <div className="relative mt-20 flex justify-center">
-          <div className="absolute inset-0 flex justify-center">
-            <div className="rainbow-glow w-[500px] h-[300px] md:w-[700px] md:h-[400px]" />
-          </div>
-          <svg
-            className="relative z-10 w-[120px] h-[120px] md:w-[180px] md:h-[180px]"
-            viewBox="0 0 1024 1024"
-            fill="white"
-            xmlns="http://www.w3.org/2000/svg"
+          {/* Right — interactive pricing widget */}
+          <div
+            className="animate-fade-up w-full flex-shrink-0 lg:w-[400px]"
+            style={{ animationDelay: "0.3s" }}
           >
-            <path d="M512 128L896 832H128L512 128Z" />
-          </svg>
+            <PricingWidget />
+          </div>
         </div>
       </Container>
     </section>

@@ -1,42 +1,77 @@
-import { FOOTER_COLUMNS } from "@/lib/constants";
-import { Container } from "@/components/ui";
+import { Container } from "@/components/ui/Container";
+import { ChipLogo } from "@/components/ui/ChipLogo";
+import { Icon } from "@/components/ui/Icon";
+import { FOOTER_LINKS } from "@/lib/constants";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/[0.08] py-16">
+    <footer className="border-t border-border bg-bg py-16 md:py-20">
       <Container>
-        {/* Top section: columns */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-          {/* Branding column */}
-          <div>
-            <span className="text-lg font-semibold text-white">GPU.ai</span>
-            <p className="mt-2 text-sm text-text-dim">GPU compute, simplified.</p>
+        <div className="grid gap-10 md:grid-cols-5">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <a href="/" className="mb-4 flex items-center gap-2">
+              <ChipLogo size={22} />
+              <span className="type-ui font-semibold tracking-[-0.3px]">
+                <span className="text-white">gpu</span>
+                <span className="text-purple">.ai</span>
+              </span>
+            </a>
+            <p className="type-ui-sm mt-3 leading-[1.6] text-text-dim">
+              The GPU cloud built to save you money.
+            </p>
           </div>
 
           {/* Link columns */}
-          {FOOTER_COLUMNS.map((column) => (
-            <div key={column.title}>
-              <span className="text-sm font-medium text-white">{column.title}</span>
-              <div className="mt-4 space-y-3">
-                {column.links.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="block text-sm text-text-muted hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </a>
+          {Object.entries(FOOTER_LINKS).map(([category, links]) => (
+            <div key={category}>
+              <h4 className="type-ui-2xs mb-4 font-semibold uppercase tracking-[0.08em] text-text-muted">
+                {category}
+              </h4>
+              <ul className="flex flex-col gap-2.5">
+                {links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="type-ui-sm text-text-dim transition-colors hover:text-text"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           ))}
         </div>
 
-        {/* Bottom section */}
-        <div className="mt-12 flex items-center justify-between border-t border-white/[0.08] pt-8">
-          <span className="text-sm text-text-dim">
-            &copy; 2026 GPU.ai. All rights reserved.
+        {/* Bottom bar */}
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+          <span className="type-ui-sm text-text-dim">
+            &copy; {new Date().getFullYear()} GPU.ai. All rights reserved.
           </span>
+          <div className="flex items-center gap-5">
+            <a href="https://twitter.com" aria-label="Twitter">
+              <Icon
+                name="twitter"
+                size={18}
+                className="text-text-dim transition-colors hover:text-text-muted"
+              />
+            </a>
+            <a href="https://github.com" aria-label="GitHub">
+              <Icon
+                name="github"
+                size={18}
+                className="text-text-dim transition-colors hover:text-text-muted"
+              />
+            </a>
+            <a href="https://discord.gg" aria-label="Discord">
+              <Icon
+                name="discord"
+                size={18}
+                className="text-text-dim transition-colors hover:text-text-muted"
+              />
+            </a>
+          </div>
         </div>
       </Container>
     </footer>

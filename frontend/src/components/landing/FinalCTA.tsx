@@ -1,25 +1,26 @@
-import { Button, Container } from "@/components/ui";
+import { Container } from "@/components/ui/Container";
+import { Button } from "@/components/ui/Button";
 
 export function FinalCTA() {
   return (
-    <section className="py-24">
-      <Container>
-        <div className="text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-white">
-            Start building with GPU.ai
-          </h2>
-          <p className="mt-6 text-text-muted text-lg max-w-[500px] mx-auto">
-            Deploy your first GPU instance in under 60 seconds. No contracts, no
-            commitments, per-second billing.
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-10">
-            <Button variant="primary" size="lg" href="#">
-              Launch GPU Instance
-            </Button>
-            <Button variant="secondary" size="lg" href="#">
-              Talk to our team
-            </Button>
-          </div>
+    <section className="relative border-t border-border overflow-hidden py-24 md:py-32">
+      {/* Radial glow background */}
+      <div className="radial-glow pointer-events-none absolute inset-0" />
+
+      <Container className="relative z-10 text-center">
+        <h2 className="type-h2 font-bold text-white">
+          Start deploying GPUs
+          <br />
+          in under 60 seconds
+        </h2>
+        <p className="type-body-lg mx-auto mt-3 max-w-[440px] text-text-muted">
+          No credit card required. Free tier available.
+        </p>
+        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Button href="/sign-up">Get Started Free</Button>
+          <Button variant="secondary" href="/contact">
+            Talk to Sales
+          </Button>
         </div>
       </Container>
     </section>
