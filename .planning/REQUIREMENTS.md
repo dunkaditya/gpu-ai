@@ -111,11 +111,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **DASH-01**: Landing page describes the product
 - [x] **DASH-02**: User can sign up and log in via Clerk
-- [ ] **DASH-03**: User can view real-time GPU availability with pricing
-- [ ] **DASH-04**: User can provision a GPU instance from the dashboard
+- [x] **DASH-03**: User can view real-time GPU availability with pricing
+- [x] **DASH-04**: User can provision a GPU instance from the dashboard
 - [x] **DASH-05**: User can view and manage running instances
-- [ ] **DASH-06**: User can manage SSH keys
-- [ ] **DASH-07**: User can view billing usage and costs
+- [x] **DASH-06**: User can manage SSH keys
+- [x] **DASH-07**: User can view billing usage and costs
 - [x] **DASH-08**: Dashboard displays instance status with SSH connection command
 
 ## v2 Requirements
@@ -230,11 +230,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HLTH-04 | Phase 6 | Complete |
 | DASH-01 | Phase 7 | Complete |
 | DASH-02 | Phase 7 | Complete |
-| DASH-03 | Phase 7 | Pending |
-| DASH-04 | Phase 7 | Pending |
+| DASH-03 | Phase 7 | Complete |
+| DASH-04 | Phase 7 | Complete |
 | DASH-05 | Phase 7 | Complete |
-| DASH-06 | Phase 7 | Pending |
-| DASH-07 | Phase 7 | Pending |
+| DASH-06 | Phase 7 | Complete |
+| DASH-07 | Phase 7 | Complete |
 | DASH-08 | Phase 7 | Complete |
 
 **Coverage:**
