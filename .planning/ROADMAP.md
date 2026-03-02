@@ -190,12 +190,13 @@ Plans:
   3. User can view real-time GPU availability with pricing and provision an instance from the dashboard
   4. User can view and manage running instances with status indicators and SSH connection commands
   5. User can manage SSH keys and view billing usage and costs from the dashboard
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
-- [ ] 07-03: TBD
+- [x] 07-01-PLAN.md -- Multi-domain routing (proxy.ts), marketing route group migration, root layout simplification
+- [ ] 07-02-PLAN.md -- Cloud dashboard shell (sidebar, topbar, instances table with mock data, settings placeholder)
+- [ ] 07-03-PLAN.md -- Clerk authentication (sign-in/sign-up pages, ClerkProvider, route protection)
+- [ ] 07-04-PLAN.md -- Real API pages (GPU availability, instance provisioning, SSH keys, billing) with SWR data fetching
 
 ## Progress
 
@@ -213,7 +214,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 4.2 -> 4.3 -> 5 -> 6
 | 4.3 Auth & Idempotency Edge Cases | 0/1 | Not started | - |
 | 5. SSH Keys + Billing | 0/3 | Not started | - |
 | 6. Availability + Health Monitoring | 4/4 | In Progress | - |
-| 7. Dashboard | 0/3 | Not started | - |
+| 7. Dashboard | 1/4 | In Progress | - |
 
 ### Phase 8: Rebuild frontend landing page to match Vercel homepage design
 

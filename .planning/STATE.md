@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-last_updated: "2026-02-26T20:30:10Z"
+last_updated: "2026-03-02T21:25:47Z"
 progress:
   total_phases: 9
   completed_phases: 9
-  total_plans: 30
-  completed_plans: 30
+  total_plans: 34
+  completed_plans: 31
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 8: Rebuild Frontend Landing Page
+**Current focus:** Phase 7: Dashboard
 
 ## Current Position
 
-Phase: 8 (Rebuild Frontend Landing Page to Match Vercel Homepage Design)
-Plan: 2 of 2 in current phase
-Status: Phase 08 Complete
-Last activity: 2026-02-26 -- Completed 08-02 (Landing page sections)
+Phase: 7 (Dashboard)
+Plan: 1 of 4 in current phase
+Status: Phase 07 In Progress
+Last activity: 2026-03-02 -- Completed 07-01 (Multi-domain routing)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30
+- Total plans completed: 31
 - Average duration: 2.0min
-- Total execution time: 0.90 hours
+- Total execution time: 0.93 hours
 
 **By Phase:**
 
@@ -51,7 +51,7 @@ Progress: [██████████] 100%
 | 06-availability-health-monitoring | 4 | 9min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-03 (2min), 06-04 (2min), 08-01 (4min), 08-02 (2min)
+- Last 5 plans: 06-04 (2min), 08-01 (4min), 08-02 (2min), 07-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 06 P04 | 2min | 2 tasks | 5 files |
 | Phase 08 P01 | 4min | 2 tasks | 29 files |
 | Phase 08 P02 | 2min | 2 tasks | 8 files |
+| Phase 07 P01 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,9 @@ Recent decisions affecting current work:
 - [08-02]: Only Navbar and UseCaseTabs use 'use client'; all other sections are server components
 - [08-02]: UseCaseTabs heading added for section context
 - [08-02]: FeaturePillars uses dot bullets to differentiate from UseCaseTabs checkmarks
+- [07-01]: proxy.ts (not middleware.ts) for Next.js 16 hostname routing convention
+- [07-01]: Template title pattern in root layout for flexible per-group page titles
+- [07-01]: Marketing metadata (title, OG tags) moved to (marketing)/layout.tsx
 
 ### Roadmap Evolution
 
@@ -211,6 +215,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Completed 08-02-PLAN.md (Landing page sections - Phase 08 complete)
+Last session: 2026-03-02
+Stopped at: Completed 07-01-PLAN.md (Multi-domain routing - Phase 07 plan 1 of 4)
 Resume file: None
