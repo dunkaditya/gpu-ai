@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/cloud/StatusBadge";
-import type { MockInstance } from "@/lib/mock-data";
+import { terminateInstance } from "@/lib/api";
+import type { InstanceResponse } from "@/lib/types";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -61,16 +62,61 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function formatTier(tier: MockInstance["tier"]) {
+function TerminateButton({
+  instanceId,
+  onRefresh,
+}: {
+  instanceId: string;
+  onRefresh?: () => void;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleTerminate() {
+    if (!window.confirm("Terminate this instance? This action cannot be undone."))
+      return;
+    setLoading(true);
+    try {
+      await terminateInstance(instanceId);
+      onRefresh?.();
+    } catch {
+      // Error will be visible via status change on refresh
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleTerminate}
+      disabled={loading}
+      className={cn(
+        "type-ui-2xs px-2 py-1 rounded border transition-colors font-medium",
+        loading
+          ? "border-border text-text-dim cursor-not-allowed"
+          : "border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
+      )}
+    >
+      {loading ? "..." : "Terminate"}
+    </button>
+  );
+}
+
+function formatTier(tier: InstanceResponse["tier"]) {
   return tier === "on_demand" ? "On-Demand" : "Spot";
 }
 
-function displayName(instance: MockInstance) {
+function displayName(instance: InstanceResponse) {
   return instance.name ?? instance.id.slice(0, 12);
 }
 
-/* ── Desktop Table ── */
-function DesktopTable({ instances }: { instances: MockInstance[] }) {
+/* -- Desktop Table -- */
+function DesktopTable({
+  instances,
+  onRefresh,
+}: {
+  instances: InstanceResponse[];
+  onRefresh?: () => void;
+}) {
   return (
     <div className="hidden md:block overflow-x-auto">
       <table className="w-full">
@@ -96,6 +142,9 @@ function DesktopTable({ instances }: { instances: MockInstance[] }) {
             </th>
             <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
               SSH Command
+            </th>
+            <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">
+              Actions
             </th>
           </tr>
         </thead>
@@ -152,6 +201,15 @@ function DesktopTable({ instances }: { instances: MockInstance[] }) {
                   <span className="type-ui-sm text-text-dim">--</span>
                 )}
               </td>
+              <td className="px-4 py-3 text-right">
+                {instance.status !== "terminated" &&
+                  instance.status !== "stopping" && (
+                    <TerminateButton
+                      instanceId={instance.id}
+                      onRefresh={onRefresh}
+                    />
+                  )}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -160,8 +218,14 @@ function DesktopTable({ instances }: { instances: MockInstance[] }) {
   );
 }
 
-/* ── Mobile Cards ── */
-function MobileCards({ instances }: { instances: MockInstance[] }) {
+/* -- Mobile Cards -- */
+function MobileCards({
+  instances,
+  onRefresh,
+}: {
+  instances: InstanceResponse[];
+  onRefresh?: () => void;
+}) {
   return (
     <div className="md:hidden space-y-3">
       {instances.map((instance) => (
@@ -222,14 +286,30 @@ function MobileCards({ instances }: { instances: MockInstance[] }) {
               {instance.error_reason}
             </p>
           )}
+
+          {instance.status !== "terminated" &&
+            instance.status !== "stopping" && (
+              <div className="pt-1">
+                <TerminateButton
+                  instanceId={instance.id}
+                  onRefresh={onRefresh}
+                />
+              </div>
+            )}
         </div>
       ))}
     </div>
   );
 }
 
-/* ── Main Component ── */
-export function InstancesTable({ instances }: { instances: MockInstance[] }) {
+/* -- Main Component -- */
+export function InstancesTable({
+  instances,
+  onRefresh,
+}: {
+  instances: InstanceResponse[];
+  onRefresh?: () => void;
+}) {
   if (instances.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -267,8 +347,8 @@ export function InstancesTable({ instances }: { instances: MockInstance[] }) {
 
   return (
     <>
-      <DesktopTable instances={instances} />
-      <MobileCards instances={instances} />
+      <DesktopTable instances={instances} onRefresh={onRefresh} />
+      <MobileCards instances={instances} onRefresh={onRefresh} />
     </>
   );
 }

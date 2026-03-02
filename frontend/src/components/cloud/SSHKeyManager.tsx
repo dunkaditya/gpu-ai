@@ -1,0 +1,271 @@
+"use client";
+
+import { useState } from "react";
+import useSWR from "swr";
+import { cn } from "@/lib/utils";
+import { fetcher, addSSHKey, deleteSSHKey } from "@/lib/api";
+import type { SSHKeyResponse } from "@/lib/types";
+
+function SkeletonRow() {
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+      <div className="space-y-2">
+        <div className="h-4 bg-bg-card-hover rounded animate-pulse w-32" />
+        <div className="h-3 bg-bg-card-hover rounded animate-pulse w-48" />
+      </div>
+      <div className="h-4 bg-bg-card-hover rounded animate-pulse w-16" />
+    </div>
+  );
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function truncateFingerprint(fp: string) {
+  if (fp.length <= 24) return fp;
+  return fp.slice(0, 12) + "..." + fp.slice(-8);
+}
+
+export function SSHKeyManager() {
+  const { data, error, isLoading, mutate } = useSWR<{
+    ssh_keys: SSHKeyResponse[];
+  }>("/api/v1/ssh-keys", fetcher);
+
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [publicKey, setPublicKey] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const keys = data?.ssh_keys ?? [];
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    setAddError(null);
+    setAddLoading(true);
+    try {
+      await addSSHKey(name, publicKey);
+      await mutate();
+      setName("");
+      setPublicKey("");
+      setShowForm(false);
+    } catch (err) {
+      setAddError(
+        err instanceof Error ? err.message : "Failed to add SSH key"
+      );
+    } finally {
+      setAddLoading(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm("Delete this SSH key? Instances using it will no longer accept connections with it."))
+      return;
+    setDeletingId(id);
+    try {
+      await deleteSSHKey(id);
+      await mutate();
+    } catch {
+      // Error will reflect on next fetch
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <p className="type-ui-sm text-red-400">Failed to load SSH keys</p>
+        <button
+          onClick={() => mutate()}
+          className="mt-3 type-ui-xs text-purple hover:text-purple-light transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Add key section */}
+      {!showForm ? (
+        <button
+          onClick={() => setShowForm(true)}
+          className="gradient-btn px-4 py-2 rounded-lg type-ui-sm font-medium transition-all"
+        >
+          Add SSH Key
+        </button>
+      ) : (
+        <form
+          onSubmit={handleAdd}
+          className="bg-bg-card border border-border rounded-xl p-5 space-y-4"
+        >
+          <div className="space-y-2">
+            <label className="type-ui-xs text-text-muted font-medium uppercase tracking-wider">
+              Key Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. work-laptop, macbook-pro"
+              required
+              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="type-ui-xs text-text-muted font-medium uppercase tracking-wider">
+              Public Key
+            </label>
+            <textarea
+              value={publicKey}
+              onChange={(e) => setPublicKey(e.target.value)}
+              placeholder="ssh-ed25519 AAAA... user@hostname"
+              required
+              rows={3}
+              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all resize-none"
+            />
+          </div>
+
+          {addError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
+              <p className="type-ui-xs text-red-400">{addError}</p>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setShowForm(false);
+                setAddError(null);
+              }}
+              className="px-4 py-2 rounded-lg type-ui-sm font-medium border border-border text-text-muted hover:text-text hover:bg-bg-card-hover transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={addLoading || !name || !publicKey}
+              className={cn(
+                "px-4 py-2 rounded-lg type-ui-sm font-medium transition-all",
+                addLoading || !name || !publicKey
+                  ? "bg-purple/30 text-text-dim cursor-not-allowed"
+                  : "gradient-btn"
+              )}
+            >
+              {addLoading ? "Adding..." : "Add Key"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Keys list */}
+      <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+        {isLoading ? (
+          <>
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+          </>
+        ) : keys.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-12 h-12 rounded-full bg-bg-card flex items-center justify-center mb-4">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 16 16"
+                fill="none"
+                className="text-text-dim"
+              >
+                <circle
+                  cx="6"
+                  cy="7"
+                  r="3"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M8.5 9.5L14 15"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M12 13L14 11"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+            <p className="type-ui-sm text-text-muted">No SSH keys</p>
+            <p className="type-ui-2xs text-text-dim mt-1">
+              Add an SSH key to connect to your instances.
+            </p>
+          </div>
+        ) : (
+          <div>
+            {/* Header row */}
+            <div className="hidden md:grid grid-cols-[1fr_1fr_auto_auto] gap-4 px-4 py-3 border-b border-border">
+              <span className="type-ui-2xs text-text-dim font-medium uppercase tracking-wider">
+                Name
+              </span>
+              <span className="type-ui-2xs text-text-dim font-medium uppercase tracking-wider">
+                Fingerprint
+              </span>
+              <span className="type-ui-2xs text-text-dim font-medium uppercase tracking-wider">
+                Added
+              </span>
+              <span className="type-ui-2xs text-text-dim font-medium uppercase tracking-wider text-right">
+                Actions
+              </span>
+            </div>
+
+            {keys.map((key) => (
+              <div
+                key={key.id}
+                className="flex flex-col md:grid md:grid-cols-[1fr_1fr_auto_auto] gap-2 md:gap-4 md:items-center px-4 py-3 border-b border-border/50 hover:bg-bg-card transition-colors"
+              >
+                <div>
+                  <p className="type-ui-sm text-text font-medium">{key.name}</p>
+                </div>
+                <div>
+                  <code className="type-ui-2xs text-text-muted font-mono">
+                    {truncateFingerprint(key.fingerprint)}
+                  </code>
+                </div>
+                <div>
+                  <span className="type-ui-xs text-text-dim">
+                    {formatDate(key.created_at)}
+                  </span>
+                </div>
+                <div className="md:text-right">
+                  <button
+                    onClick={() => handleDelete(key.id)}
+                    disabled={deletingId === key.id}
+                    className={cn(
+                      "type-ui-2xs px-2 py-1 rounded border transition-colors font-medium",
+                      deletingId === key.id
+                        ? "border-border text-text-dim cursor-not-allowed"
+                        : "border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
+                    )}
+                  >
+                    {deletingId === key.id ? "..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

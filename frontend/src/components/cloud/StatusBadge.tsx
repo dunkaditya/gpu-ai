@@ -1,10 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { MockInstance } from "@/lib/mock-data";
+import type { InstanceResponse } from "@/lib/types";
+
+type InstanceStatus = InstanceResponse["status"];
 
 const statusConfig: Record<
-  MockInstance["status"],
+  InstanceStatus,
   { label: string; dotClass: string; pillClass: string }
 > = {
   running: {
@@ -34,7 +36,7 @@ const statusConfig: Record<
   },
 };
 
-export function StatusBadge({ status }: { status: MockInstance["status"] }) {
+export function StatusBadge({ status }: { status: InstanceStatus }) {
   const config = statusConfig[status];
 
   return (
