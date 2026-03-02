@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { UserButton } from "@clerk/nextjs";
 
 const pathLabels: Record<string, string> = {
   "/instances": "Instances",
@@ -26,19 +26,13 @@ export function DashboardTopbar() {
 
       {/* User section */}
       <div className="flex items-center gap-4">
-        <button
-          className={cn(
-            "type-ui-xs text-text-muted hover:text-text transition-colors"
-          )}
-        >
-          Sign Out
-        </button>
-        <div
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-dim text-purple type-ui-xs font-bold"
-          aria-label="User avatar"
-        >
-          AR
-        </div>
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: "w-8 h-8",
+            },
+          }}
+        />
       </div>
     </header>
   );

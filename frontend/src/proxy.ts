@@ -1,16 +1,29 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export function proxy(request: NextRequest) {
-  const hostname = request.headers.get("host")?.split(":")[0] ?? "";
-  const { searchParams, pathname } = request.nextUrl;
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+]);
+
+export const proxy = clerkMiddleware(async (auth, req) => {
+  const hostname = req.headers.get("host")?.split(":")[0] ?? "";
+  const { searchParams, pathname } = req.nextUrl;
 
   const isCloud =
     hostname === "cloud.gpu.ai" || searchParams.get("site") === "cloud";
 
-  const url = request.nextUrl.clone();
+  // Protect cloud routes (require authentication)
+  if (isCloud && !isPublicRoute(req)) {
+    await auth.protect();
+  }
+
+  // Rewrite to appropriate route group
+  const url = req.nextUrl.clone();
   url.pathname = isCloud ? `/(cloud)${pathname}` : `/(marketing)${pathname}`;
   return NextResponse.rewrite(url);
-}
+});
 
 export const config = {
   matcher: [

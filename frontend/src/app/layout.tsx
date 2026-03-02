@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -24,12 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${vremenaGrotesk.variable} ${nectoMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className="dark">
+        <body
+          className={`${vremenaGrotesk.variable} ${nectoMono.variable} antialiased`}
+        >
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
