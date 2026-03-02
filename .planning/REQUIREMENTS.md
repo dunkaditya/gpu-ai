@@ -113,10 +113,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DASH-02**: User can sign up and log in via Clerk
 - [ ] **DASH-03**: User can view real-time GPU availability with pricing
 - [ ] **DASH-04**: User can provision a GPU instance from the dashboard
-- [ ] **DASH-05**: User can view and manage running instances
+- [x] **DASH-05**: User can view and manage running instances
 - [ ] **DASH-06**: User can manage SSH keys
 - [ ] **DASH-07**: User can view billing usage and costs
-- [ ] **DASH-08**: Dashboard displays instance status with SSH connection command
+- [x] **DASH-08**: Dashboard displays instance status with SSH connection command
 
 ## v2 Requirements
 
@@ -232,10 +232,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-02 | Phase 7 | Pending |
 | DASH-03 | Phase 7 | Pending |
 | DASH-04 | Phase 7 | Pending |
-| DASH-05 | Phase 7 | Pending |
+| DASH-05 | Phase 7 | Complete |
 | DASH-06 | Phase 7 | Pending |
 | DASH-07 | Phase 7 | Pending |
-| DASH-08 | Phase 7 | Pending |
+| DASH-08 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 75 total

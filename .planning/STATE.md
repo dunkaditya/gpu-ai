@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-last_updated: "2026-03-02T21:25:47Z"
+last_updated: "2026-03-02T21:37:00Z"
 progress:
   total_phases: 9
   completed_phases: 9
   total_plans: 34
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Project State
@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 7 (Dashboard)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: Phase 07 In Progress
-Last activity: 2026-03-02 -- Completed 07-01 (Multi-domain routing)
+Last activity: 2026-03-02 -- Completed 07-02 (Dashboard shell & instances table)
 
-Progress: [█████████░] 91%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 31
+- Total plans completed: 32
 - Average duration: 2.0min
 - Total execution time: 0.93 hours
 
@@ -51,7 +51,7 @@ Progress: [█████████░] 91%
 | 06-availability-health-monitoring | 4 | 9min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 06-04 (2min), 08-01 (4min), 08-02 (2min), 07-01 (2min)
+- Last 5 plans: 08-01 (4min), 08-02 (2min), 07-01 (2min), 07-02 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -65,6 +65,7 @@ Progress: [█████████░] 91%
 | Phase 08 P01 | 4min | 2 tasks | 29 files |
 | Phase 08 P02 | 2min | 2 tasks | 8 files |
 | Phase 07 P01 | 2min | 2 tasks | 4 files |
+| Phase 07 P02 | 2min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -198,6 +199,9 @@ Recent decisions affecting current work:
 - [07-01]: proxy.ts (not middleware.ts) for Next.js 16 hostname routing convention
 - [07-01]: Template title pattern in root layout for flexible per-group page titles
 - [07-01]: Marketing metadata (title, OG tags) moved to (marketing)/layout.tsx
+- [07-02]: StatusBadge uses design system CSS variables (green-dim, purple-dim) with animate-pulse-dot for starting state
+- [07-02]: DashboardSidebar preserves ?site=cloud query param via useSearchParams for local dev routing compatibility
+- [07-02]: InstancesTable provides both desktop table and mobile card layout with responsive breakpoints
 
 ### Roadmap Evolution
 
@@ -216,5 +220,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 07-01-PLAN.md (Multi-domain routing - Phase 07 plan 1 of 4)
+Stopped at: Completed 07-02-PLAN.md (Dashboard shell & instances table - Phase 07 plan 2 of 4)
 Resume file: None
