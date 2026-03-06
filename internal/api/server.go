@@ -118,7 +118,7 @@ func NewServer(deps ServerDeps) *Server {
 
 // Handler returns the root HTTP handler for the server.
 func (s *Server) Handler() http.Handler {
-	return s.mux
+	return RequestLogMiddleware(s.mux)
 }
 
 // PublishOrgEvent publishes an instance event to per-org SSE subscribers.

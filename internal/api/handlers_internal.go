@@ -42,7 +42,7 @@ func (s *Server) handleInstanceReady(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 3. Atomically transition booting -> running.
-	updated, err := s.db.SetInstanceRunning(ctx, instanceID)
+	updated, err := s.db.SetInstanceRunning(ctx, instanceID, "")
 	if err != nil {
 		slog.Error("failed to set instance running",
 			slog.String("instance_id", instanceID),

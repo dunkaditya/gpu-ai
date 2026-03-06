@@ -1,5 +1,4 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -8,21 +7,10 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export const proxy = clerkMiddleware(async (auth, req) => {
-  const hostname = req.headers.get("host")?.split(":")[0] ?? "";
-  const { searchParams, pathname } = req.nextUrl;
-
-  const isCloud =
-    hostname === "cloud.gpu.ai" || searchParams.get("site") === "cloud";
-
-  // Protect cloud routes (require authentication)
-  if (isCloud && !isPublicRoute(req)) {
+  // Protect cloud dashboard routes
+  if (!isPublicRoute(req) && req.nextUrl.pathname.startsWith("/cloud")) {
     await auth.protect();
   }
-
-  // Rewrite to appropriate route group
-  const url = req.nextUrl.clone();
-  url.pathname = isCloud ? `/(cloud)${pathname}` : `/(marketing)${pathname}`;
-  return NextResponse.rewrite(url);
 });
 
 export const config = {

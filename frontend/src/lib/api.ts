@@ -15,6 +15,15 @@ export const fetcher = (url: string) =>
     return r.json()
   })
 
+// Graceful fetcher — returns null on auth/server errors instead of throwing.
+// Allows dashboard pages to render empty states when backend is unavailable.
+export const gracefulFetcher = (url: string) =>
+  fetch(url).then((r) => {
+    if (r.status === 401 || r.status === 403) return null
+    if (!r.ok) throw new Error(`API error: ${r.status}`)
+    return r.json()
+  })
+
 // Instances
 export async function fetchInstances(): Promise<{ instances: InstanceResponse[] }> {
   const res = await fetch(`${API_BASE}/instances`)

@@ -44,7 +44,7 @@ type Instance struct {
 
 // instanceColumns is the ordered list of columns for SELECT queries.
 const instanceColumns = `instance_id, org_id, user_id, upstream_provider, upstream_id,
-	upstream_ip, hostname, wg_public_key, wg_private_key_enc, wg_address,
+	upstream_ip::TEXT, hostname, wg_public_key, wg_private_key_enc, wg_address,
 	name, gpu_type, gpu_count, tier, region,
 	price_per_hour, upstream_price_per_hour, billing_start, billing_end,
 	status, error_reason, internal_token,
@@ -275,17 +275,26 @@ func (p *Pool) UpdateInstanceStatus(ctx context.Context, instanceID, fromStatus,
 }
 
 // SetInstanceRunning atomically transitions an instance from booting to running,
-// recording the ready_at timestamp. Returns false if the instance is not in booting state.
-func (p *Pool) SetInstanceRunning(ctx context.Context, instanceID string) (bool, error) {
+// recording the ready_at timestamp and upstream IP. Returns false if the instance is not in booting state.
+func (p *Pool) SetInstanceRunning(ctx context.Context, instanceID, upstreamIP string) (bool, error) {
 	tag, err := p.pool.Exec(ctx,
-		`UPDATE instances SET status = 'running', ready_at = NOW(), updated_at = NOW()
+		`UPDATE instances SET status = 'running', ready_at = NOW(),
+		 upstream_ip = COALESCE($2::INET, upstream_ip), updated_at = NOW()
 		 WHERE instance_id = $1 AND status = 'booting'`,
-		instanceID,
+		instanceID, nilIfEmpty(upstreamIP),
 	)
 	if err != nil {
 		return false, err
 	}
 	return tag.RowsAffected() == 1, nil
+}
+
+// nilIfEmpty returns nil for empty strings, allowing nullable DB columns.
+func nilIfEmpty(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
 
 // TerminateInstance atomically terminates an instance, setting billing_end and

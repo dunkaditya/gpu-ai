@@ -3,14 +3,18 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gpuai/gpuctl/internal/auth"
 	"github.com/gpuai/gpuctl/internal/db"
 	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/provision"
+	"github.com/gpuai/gpuctl/internal/wireguard"
 )
 
 // CreateInstanceRequest is the JSON body for POST /api/v1/instances.
@@ -68,7 +72,9 @@ type ConnectionInfo struct {
 // instanceToResponse maps an internal db.Instance to a customer-facing InstanceResponse.
 // Uses provision.ExternalState to collapse internal states to external.
 // Excludes all upstream provider fields by structural omission.
-func instanceToResponse(inst *db.Instance) InstanceResponse {
+// When WireGuard is configured and the instance has a tunnel address, SSH connection
+// info points to the WG proxy (port derived from tunnel IP) instead of the raw hostname.
+func (s *Server) instanceToResponse(inst *db.Instance) InstanceResponse {
 	resp := InstanceResponse{
 		ID:           inst.InstanceID,
 		Name:         inst.Name,
@@ -82,22 +88,42 @@ func instanceToResponse(inst *db.Instance) InstanceResponse {
 		CreatedAt:    inst.CreatedAt.Format(time.RFC3339),
 	}
 
-	// Build connection info from hostname. Default SSH port 22.
-	sshPort := 22
-	resp.Connection = &ConnectionInfo{
-		Hostname:   inst.Hostname,
-		Port:       sshPort,
-		SSHCommand: "ssh root@" + inst.Hostname,
+	// Build connection info. Prefer WireGuard proxy coordinates when available.
+	if inst.WGAddress != nil && s.config.WGProxyEndpoint != "" {
+		// Parse tunnel IP from CIDR (e.g. "10.0.0.5/16" -> 10.0.0.5).
+		ipStr := strings.SplitN(*inst.WGAddress, "/", 2)[0]
+		tunnelIP := net.ParseIP(ipStr)
+
+		// Extract proxy host from WGProxyEndpoint (e.g. "203.0.113.1:51820" -> 203.0.113.1).
+		proxyHost, _, err := net.SplitHostPort(s.config.WGProxyEndpoint)
+
+		if tunnelIP != nil && err == nil {
+			port := wireguard.PortFromTunnelIP(tunnelIP)
+			resp.Connection = &ConnectionInfo{
+				Hostname:   proxyHost,
+				Port:       port,
+				SSHCommand: fmt.Sprintf("ssh -p %d root@%s", port, proxyHost),
+			}
+		}
+	}
+
+	// Fallback: direct hostname:22 when WG is not configured or parsing failed.
+	if resp.Connection == nil {
+		resp.Connection = &ConnectionInfo{
+			Hostname:   inst.Hostname,
+			Port:       22,
+			SSHCommand: "ssh root@" + inst.Hostname,
+		}
 	}
 
 	// Format optional timestamps.
 	if inst.ReadyAt != nil {
-		s := inst.ReadyAt.Format(time.RFC3339)
-		resp.ReadyAt = &s
+		ts := inst.ReadyAt.Format(time.RFC3339)
+		resp.ReadyAt = &ts
 	}
 	if inst.TerminatedAt != nil {
-		s := inst.TerminatedAt.Format(time.RFC3339)
-		resp.TerminatedAt = &s
+		ts := inst.TerminatedAt.Format(time.RFC3339)
+		resp.TerminatedAt = &ts
 	}
 
 	return resp
@@ -198,7 +224,7 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, instanceToResponse(inst))
+	writeJSON(w, http.StatusCreated, s.instanceToResponse(inst))
 }
 
 // handleListInstances handles GET /api/v1/instances.
@@ -262,7 +288,7 @@ func (s *Server) handleListInstances(w http.ResponseWriter, r *http.Request) {
 	// 6. Map to response type.
 	data := make([]InstanceResponse, 0, len(instances))
 	for i := range instances {
-		data = append(data, instanceToResponse(&instances[i]))
+		data = append(data, s.instanceToResponse(&instances[i]))
 	}
 
 	// 7. Encode cursor from last item.
@@ -321,7 +347,7 @@ func (s *Server) handleGetInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, instanceToResponse(inst))
+	writeJSON(w, http.StatusOK, s.instanceToResponse(inst))
 }
 
 // handleDeleteInstance handles DELETE /api/v1/instances/{id}.
@@ -367,7 +393,7 @@ func (s *Server) handleDeleteInstance(w http.ResponseWriter, r *http.Request) {
 
 	// 3. If already terminated, return 200 with current state (idempotent per INST-06).
 	if inst.Status == provision.StateTerminated {
-		writeJSON(w, http.StatusOK, instanceToResponse(inst))
+		writeJSON(w, http.StatusOK, s.instanceToResponse(inst))
 		return
 	}
 
@@ -394,5 +420,5 @@ func (s *Server) handleDeleteInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusOK, instanceToResponse(inst))
+	writeJSON(w, http.StatusOK, s.instanceToResponse(inst))
 }

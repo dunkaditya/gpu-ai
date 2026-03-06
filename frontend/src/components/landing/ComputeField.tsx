@@ -48,15 +48,6 @@ export function ComputeField() {
     ];
 
     const getBorders = (): { left: number; right: number } => {
-      const contained = window.__effects?.containEffects ?? false;
-      if (contained) {
-        const el = document.querySelector(".stripe-lines");
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          return { left: rect.left, right: rect.right };
-        }
-        return { left: 80, right: window.innerWidth - 80 };
-      }
       return { left: 0, right: window.innerWidth };
     };
 
@@ -120,19 +111,12 @@ export function ComputeField() {
     const draw = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const nodesEnabled = window.__effects?.nodes ?? true;
-
       ctx.clearRect(0, 0, w, h);
-
-      if (!nodesEnabled) {
-        animId = requestAnimationFrame(draw);
-        return;
-      }
 
       const borders = getBorders();
       const visibleTop = scrollY + NAV_HEIGHT;
       const visibleBottom = scrollY + h;
-      const cursorInteract = window.__effects?.cursorInteract ?? false;
+      const cursorInteract = true;
 
       // Parallax: each node's rendered Y shifts based on scroll and depth
       // Far nodes (depth≈0) move less with scroll, near nodes (depth≈1) move more

@@ -20,10 +20,10 @@ import (
 	"github.com/gpuai/gpuctl/internal/wireguard"
 )
 
-// providerCandidate pairs a provider with a matching offering for price-sorted selection.
-type providerCandidate struct {
-	prov     provider.Provider
-	offering provider.GPUOffering
+// ProviderCandidate pairs a provider with a matching offering for price-sorted selection.
+type ProviderCandidate struct {
+	Prov     provider.Provider
+	Offering provider.GPUOffering
 }
 
 // ProvisionRequest contains the parameters for provisioning a new instance.
@@ -173,13 +173,13 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 	}
 
 	// 4. Select provider candidates (sorted by price ascending).
-	candidates, err := e.selectProviderCandidates(ctx, req)
+	candidates, err := e.SelectProviderCandidates(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check price cap against cheapest candidate.
-	if req.MaxPricePerHour != nil && candidates[0].offering.PricePerHour > *req.MaxPricePerHour {
+	if req.MaxPricePerHour != nil && candidates[0].Offering.PricePerHour > *req.MaxPricePerHour {
 		return nil, ErrPriceExceeded
 	}
 
@@ -288,8 +288,8 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 
 	for attempt := 0; attempt < maxProvisionAttempts && attempt < len(candidates); attempt++ {
 		c := candidates[attempt]
-		prov = c.prov
-		offering = &c.offering
+		prov = c.Prov
+		offering = &c.Offering
 
 		e.logger.Info("attempting provision with provider",
 			slog.String("instance_id", instanceID),
@@ -584,22 +584,22 @@ func (e *Engine) checkSpendingLimit(ctx context.Context, orgID string) error {
 // and returns the cheapest match. Tiebreaker: registry iteration order provides
 // the implicit tiebreak via sort.SliceStable (earlier-registered provider preferred).
 func (e *Engine) selectProvider(ctx context.Context, req ProvisionRequest) (provider.Provider, *provider.GPUOffering, error) {
-	candidates, err := e.selectProviderCandidates(ctx, req)
+	candidates, err := e.SelectProviderCandidates(ctx, req)
 	if err != nil {
 		return nil, nil, err
 	}
-	return candidates[0].prov, &candidates[0].offering, nil
+	return candidates[0].Prov, &candidates[0].Offering, nil
 }
 
-// selectProviderCandidates returns all matching providers sorted by price ascending.
+// SelectProviderCandidates returns all matching providers sorted by price ascending.
 // Used by selectProvider (returns first) and by Provision (iterates for fallback retry).
-func (e *Engine) selectProviderCandidates(ctx context.Context, req ProvisionRequest) ([]providerCandidate, error) {
+func (e *Engine) SelectProviderCandidates(ctx context.Context, req ProvisionRequest) ([]ProviderCandidate, error) {
 	providers := e.registry.All()
 	if len(providers) == 0 {
 		return nil, ErrNoProvider
 	}
 
-	var candidates []providerCandidate
+	var candidates []ProviderCandidate
 
 	for _, prov := range providers {
 		offerings, err := prov.ListAvailable(ctx)
@@ -627,7 +627,7 @@ func (e *Engine) selectProviderCandidates(ctx context.Context, req ProvisionRequ
 			if o.AvailableCount <= 0 {
 				continue
 			}
-			candidates = append(candidates, providerCandidate{prov: prov, offering: o})
+			candidates = append(candidates, ProviderCandidate{Prov: prov, Offering: o})
 		}
 	}
 
@@ -641,7 +641,7 @@ func (e *Engine) selectProviderCandidates(ctx context.Context, req ProvisionRequ
 	// this -- no new mechanism)". sort.SliceStable preserves registry insertion
 	// order as the tiebreaker.
 	sort.SliceStable(candidates, func(i, j int) bool {
-		return candidates[i].offering.PricePerHour < candidates[j].offering.PricePerHour
+		return candidates[i].Offering.PricePerHour < candidates[j].Offering.PricePerHour
 	})
 
 	return candidates, nil
@@ -720,7 +720,7 @@ func (e *Engine) progressStatus(instanceID string) {
 				)
 				continue
 			}
-			if current.Status != StateProvisioning {
+			if current.Status != StateProvisioning && current.Status != StateBooting {
 				e.logger.Info("instance status changed during polling, exiting",
 					slog.String("instance_id", instanceID),
 					slog.String("status", current.Status),
@@ -745,43 +745,71 @@ func (e *Engine) progressStatus(instanceID string) {
 
 			switch status.Status {
 			case "running":
-				// Provider reports pod is running -> transition to booting.
-				// Cloud-init is now executing on the instance.
-				updated, err := e.db.UpdateInstanceStatus(ctx, instanceID, StateProvisioning, StateBooting)
-				if err != nil {
-					e.logger.Error("failed to transition to booting",
-						slog.String("instance_id", instanceID),
-						slog.String("error", err.Error()),
-					)
-					return
-				}
-				if updated {
-					e.logger.Info("instance transitioned to booting",
-						slog.String("instance_id", instanceID),
-					)
-					if e.onStatusChange != nil {
-						e.onStatusChange(instanceID, StateBooting)
-					}
-
-					// Billing starts at booting: provider has confirmed pod is allocated.
-					session := &db.BillingSession{
-						InstanceID:   instanceID,
-						OrgID:        inst.OrgID,
-						GPUType:      inst.GPUType,
-						GPUCount:     inst.GPUCount,
-						PricePerHour: inst.PricePerHour,
-						StartedAt:    time.Now().UTC(),
-					}
-					if err := e.db.CreateBillingSession(ctx, session); err != nil {
-						e.logger.Error("failed to create billing session at booting",
+				if current.Status == StateProvisioning {
+					// Provider reports pod is running -> transition to booting.
+					updated, err := e.db.UpdateInstanceStatus(ctx, instanceID, StateProvisioning, StateBooting)
+					if err != nil {
+						e.logger.Error("failed to transition to booting",
 							slog.String("instance_id", instanceID),
 							slog.String("error", err.Error()),
 						)
-						// Non-fatal: instance still transitions to booting. Billing gap is acceptable
-						// vs preventing instance from reaching running state.
+						return
 					}
+					if updated {
+						e.logger.Info("instance transitioned to booting",
+							slog.String("instance_id", instanceID),
+						)
+						if e.onStatusChange != nil {
+							e.onStatusChange(instanceID, StateBooting)
+						}
+
+						// Billing starts at booting: provider has confirmed pod is allocated.
+						session := &db.BillingSession{
+							InstanceID:   instanceID,
+							OrgID:        inst.OrgID,
+							GPUType:      inst.GPUType,
+							GPUCount:     inst.GPUCount,
+							PricePerHour: inst.PricePerHour,
+							StartedAt:    time.Now().UTC(),
+						}
+						if err := e.db.CreateBillingSession(ctx, session); err != nil {
+							e.logger.Error("failed to create billing session at booting",
+								slog.String("instance_id", instanceID),
+								slog.String("error", err.Error()),
+							)
+						}
+					}
+					// Continue polling to drive booting -> running.
+					continue
 				}
-				return // Polling complete; ready callback handles booting->running.
+
+				if current.Status == StateBooting {
+					// Wait until provider returns runtime networking info before marking running.
+					if status.IP == "" {
+						continue
+					}
+					// Provider reports running with networking ready, transition to running.
+					// Persist upstream IP (SSH connection info) from provider status.
+					updated, err := e.db.SetInstanceRunning(ctx, instanceID, status.IP)
+					if err != nil {
+						e.logger.Error("failed to transition to running",
+							slog.String("instance_id", instanceID),
+							slog.String("error", err.Error()),
+						)
+						return
+					}
+					if updated {
+						e.logger.Info("instance transitioned to running",
+							slog.String("instance_id", instanceID),
+							slog.String("upstream_ip", status.IP),
+							slog.Int("ssh_port", sshPortFromStatus(status)),
+						)
+						if e.onStatusChange != nil {
+							e.onStatusChange(instanceID, StateRunning)
+						}
+					}
+					return
+				}
 
 			case "terminated", "error":
 				e.logger.Error("upstream instance failed to start",
@@ -854,6 +882,17 @@ func generateInstanceID() (string, error) {
 		return "", err
 	}
 	return "gpu-" + hex.EncodeToString(b), nil
+}
+
+// sshPortFromStatus extracts the SSH public port from provider status port mappings.
+// Returns 22 as default if no SSH port mapping is found.
+func sshPortFromStatus(status *provider.InstanceStatus) int {
+	for _, p := range status.Ports {
+		if p.PrivatePort == 22 {
+			return p.PublicPort
+		}
+	}
+	return 22
 }
 
 // generateHexToken produces a random hex-encoded token of the specified byte length.

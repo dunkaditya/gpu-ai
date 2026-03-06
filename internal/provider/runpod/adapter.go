@@ -22,7 +22,7 @@ const (
 	statusTimeout    = 10 * time.Second
 	terminateTimeout = 30 * time.Second
 
-	defaultDockerImage    = "runpod/pytorch:latest"
+	defaultDockerImage    = "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04"
 	defaultContainerDisk  = 40
 	defaultEstReadySecond = 30
 )
@@ -142,7 +142,7 @@ func (a *Adapter) ListAvailable(ctx context.Context) ([]provider.GPUOffering, er
 	var offerings []provider.GPUOffering
 
 	for _, gpu := range resp.GPUTypes {
-		gpuType, ok := NormalizeGPUName(gpu.DisplayName)
+		gpuType, ok := NormalizeGPUName(gpu.ID)
 		if !ok {
 			slog.Warn("unmapped GPU type",
 				"runpod_name", gpu.DisplayName,
@@ -241,7 +241,7 @@ func (a *Adapter) Provision(ctx context.Context, req provider.ProvisionRequest) 
 	}
 	if len(req.SSHPublicKeys) > 0 {
 		envVars = append(envVars, envVar{
-			Key:   "SSH_PUBLIC_KEYS",
+			Key:   "PUBLIC_KEY",
 			Value: strings.Join(req.SSHPublicKeys, "\n"),
 		})
 	}

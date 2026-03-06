@@ -9,16 +9,48 @@ import (
 type GPUType string
 
 const (
-	GPUTypeH100SXM  GPUType = "h100_sxm"
-	GPUTypeH100PCIE GPUType = "h100_pcie"
+	// Blackwell
+	GPUTypeB200 GPUType = "b200"
+	GPUTypeB300 GPUType = "b300"
+
+	// Hopper
 	GPUTypeH200SXM  GPUType = "h200_sxm"
+	GPUTypeH200NVL  GPUType = "h200_nvl"
+	GPUTypeH100SXM  GPUType = "h100_sxm"
+	GPUTypeH100NVL  GPUType = "h100_nvl"
+	GPUTypeH100PCIE GPUType = "h100_pcie"
+
+	// Ampere data center
 	GPUTypeA10080GB GPUType = "a100_80gb"
 	GPUTypeA10040GB GPUType = "a100_40gb"
-	GPUTypeL40S     GPUType = "l40s"
 	GPUTypeA40      GPUType = "a40"
-	GPUTypeL4       GPUType = "l4"
-	GPUTypeRTX4090  GPUType = "rtx_4090"
-	GPUTypeRTXA6000 GPUType = "rtx_a6000"
+	GPUTypeA30      GPUType = "a30"
+
+	// Ada Lovelace / Ampere professional
+	GPUTypeL40S        GPUType = "l40s"
+	GPUTypeL40         GPUType = "l40"
+	GPUTypeL4          GPUType = "l4"
+	GPUTypeRTX6000Ada  GPUType = "rtx_6000_ada"
+	GPUTypeRTX5000Ada  GPUType = "rtx_5000_ada"
+	GPUTypeRTX4000Ada  GPUType = "rtx_4000_ada"
+	GPUTypeRTX2000Ada  GPUType = "rtx_2000_ada"
+	GPUTypeRTXA6000    GPUType = "rtx_a6000"
+	GPUTypeRTXA5000    GPUType = "rtx_a5000"
+	GPUTypeRTXA4500    GPUType = "rtx_a4500"
+	GPUTypeRTXA4000    GPUType = "rtx_a4000"
+	GPUTypeRTXPro6000  GPUType = "rtx_pro_6000"
+	GPUTypeRTXPro4500  GPUType = "rtx_pro_4500"
+
+	// Consumer
+	GPUTypeRTX5090 GPUType = "rtx_5090"
+	GPUTypeRTX5080 GPUType = "rtx_5080"
+	GPUTypeRTX4090 GPUType = "rtx_4090"
+	GPUTypeRTX4080 GPUType = "rtx_4080"
+	GPUTypeRTX3090 GPUType = "rtx_3090"
+	GPUTypeRTX3080 GPUType = "rtx_3080"
+
+	// Legacy
+	GPUTypeV100 GPUType = "v100"
 )
 
 // InstanceTier represents the pricing/availability tier.

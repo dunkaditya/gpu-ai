@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   {
     label: "Instances",
-    href: "/instances",
+    href: "/cloud/instances",
     icon: (
       <svg
         width="16"
@@ -41,7 +41,7 @@ const navItems = [
   },
   {
     label: "GPU Availability",
-    href: "/gpu-availability",
+    href: "/cloud/gpu-availability",
     icon: (
       <svg
         width="16"
@@ -82,7 +82,7 @@ const navItems = [
   },
   {
     label: "SSH Keys",
-    href: "/ssh-keys",
+    href: "/cloud/ssh-keys",
     icon: (
       <svg
         width="16"
@@ -109,7 +109,7 @@ const navItems = [
   },
   {
     label: "Billing",
-    href: "/billing",
+    href: "/cloud/billing",
     icon: (
       <svg
         width="16"
@@ -143,7 +143,7 @@ const navItems = [
   },
   {
     label: "Settings",
-    href: "/settings",
+    href: "/cloud/settings",
     icon: (
       <svg
         width="16"
@@ -166,22 +166,13 @@ const navItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const siteParam = searchParams.get("site");
-
-  function buildHref(path: string) {
-    if (siteParam === "cloud") {
-      return `${path}?site=cloud`;
-    }
-    return path;
-  }
 
   return (
     <aside className="hidden md:flex w-60 flex-col bg-bg-alt border-r border-border h-screen shrink-0">
       {/* Logo */}
       <div className="flex items-center h-14 px-5 border-b border-border">
         <Link
-          href={siteParam === "cloud" ? "/?site=marketing" : "/"}
+          href="/"
           className="font-sans text-lg font-bold tracking-tight text-text hover:text-purple transition-colors"
         >
           GPU.ai
@@ -196,7 +187,7 @@ export function DashboardSidebar() {
           return (
             <Link
               key={item.href}
-              href={buildHref(item.href)}
+              href={item.href}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md type-ui-sm transition-colors",
                 isActive

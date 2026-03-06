@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/clerk/clerk-sdk-go/v2"
@@ -9,19 +10,29 @@ import (
 
 // ClerkAuthMiddleware returns an HTTP middleware that verifies Clerk JWTs.
 //
-// If clerkSecretKey is empty, the middleware always returns 401 with a
-// ProblemDetail error. This prevents silent pass-through in dev environments
-// without Clerk configured -- endpoints are explicitly marked as unconfigured.
+// If clerkSecretKey is empty, the middleware passes requests through with a
+// dev user context (org "dev-org", user "dev-user"). This allows the dashboard
+// to work in local dev without Clerk configured.
 //
 // If clerkSecretKey is set, the middleware delegates to the Clerk SDK's
 // RequireHeaderAuthorization which verifies the JWT, fetches JWKS, and
 // injects SessionClaims into the request context.
 func ClerkAuthMiddleware(clerkSecretKey string) func(http.Handler) http.Handler {
 	if clerkSecretKey == "" {
+		slog.Warn("CLERK_SECRET_KEY not set — auth disabled, using dev user")
 		return func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				writeProblem(w, http.StatusUnauthorized, "auth-not-configured",
-					"Authentication not configured. Set CLERK_SECRET_KEY to enable.")
+				// Inject dev session claims so handlers can extract org/user IDs
+				claims := clerk.SessionClaims{
+					RegisteredClaims: clerk.RegisteredClaims{
+						Subject: "dev-user",
+					},
+					Claims: clerk.Claims{
+						ActiveOrganizationID: "dev-org",
+					},
+				}
+				ctx := clerk.ContextWithSessionClaims(r.Context(), &claims)
+				next.ServeHTTP(w, r.WithContext(ctx))
 			})
 		}
 	}

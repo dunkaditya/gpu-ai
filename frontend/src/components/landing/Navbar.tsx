@@ -23,7 +23,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-[88px] max-w-[1250px] items-center justify-between px-6">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5">
+        <a href="/" className="flex items-center gap-0.5">
           <ChipLogo size={38} />
           <span className="font-sans text-[22px] font-bold tracking-[-0.5px]">
             <span className="text-white">gpu</span>

@@ -1,28 +1,14 @@
 import { Container } from "@/components/ui/Container";
 import { Counter } from "@/components/ui/Counter";
 import { ComputeField } from "./ComputeField";
-import { LightFixture } from "./LightFixture";
 import { PricingWidget } from "./PricingWidget";
 import { HERO_STATS } from "@/lib/constants";
 
 export function Hero() {
   return (
     <section className="relative pt-[88px]">
-      {/* Black opaque layer + mesh zone — same clip path */}
-      {/* Black bg with hard clip edge */}
-      {/* Black opaque layer — full width, covers both stripe lines in hero area */}
-      <div className="absolute inset-0 z-[41] bg-bg" />
-      {/* Mesh effects with soft fade along the same diagonal */}
-      <div
-        className="absolute -bottom-[10vh] left-0 right-0 top-0 z-[42]"
-        style={{
-          WebkitMaskImage: "linear-gradient(192deg, black 40%, transparent 50%)",
-          maskImage: "linear-gradient(192deg, black 40%, transparent 50%)",
-        }}
-      >
-        <ComputeField />
-        <LightFixture />
-      </div>
+      {/* Nodes canvas — fills entire hero, no mask */}
+      <ComputeField />
 
       <Container className="relative z-[44] flex min-h-[calc(100vh-480px)] flex-col justify-center py-10 pb-10">
         <div className="flex w-full flex-col items-center gap-16 lg:flex-row lg:gap-20">
