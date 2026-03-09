@@ -226,3 +226,23 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 4.1 -> 4.2 -> 4.3 -> 5 -> 6
 Plans:
 - [ ] 08-01-PLAN.md — Fix broken build, install Geist fonts, rewrite design system (globals.css + layout.tsx), create lib/ utilities, delete 12 removed components
 - [ ] 08-02-PLAN.md — Build all 7 landing page sections (Navbar, Hero, UseCaseTabs, FeaturePillars, CLIDemo, FinalCTA, Footer) and compose page.tsx
+
+### Phase 9: Replace WireGuard with FRP tunneling
+
+**Goal:** Replace the WireGuard-based privacy/tunneling layer with FRP (Fast Reverse Proxy) TCP tunneling -- pure userspace, no kernel modules, no iptables, no CAP_NET_ADMIN -- making the system compatible with unprivileged container environments like RunPod pods
+**Requirements**: FRP-01, FRP-02, FRP-03, FRP-04, FRP-05, FRP-06, FRP-07
+**Depends on:** Phase 8
+**Success Criteria** (what must be TRUE):
+  1. FRP manager starts embedded frps server and accepts frpc connections from GPU instances
+  2. Port allocator assigns unique remote ports (10000-10255) per instance using advisory lock serialization
+  3. Bootstrap template renders frpc configuration that downloads the binary and establishes SSH tunnel
+  4. Provisioning engine uses FRP port allocation and bootstrap template instead of WireGuard keys/IPAM/AddPeer
+  5. API responses show SSH connection info derived from FRP remote port (ssh -p PORT root@PROXY_HOST)
+  6. Config loads FRP environment variables (FRP_BIND_PORT, FRP_TOKEN, FRP_ALLOW_PORTS) with sensible defaults
+  7. internal/wireguard/ package fully removed, wgctrl dependency removed, project builds clean
+**Plans:** 3 plans
+
+Plans:
+- [ ] 09-01-PLAN.md -- Create internal/tunnel/ package (types, port allocator, bootstrap template, FRP manager), v7 migration, FRP config fields
+- [ ] 09-02-PLAN.md -- Rewire provisioning engine, API handlers, DB layer, and main wiring from WireGuard to FRP tunnel
+- [ ] 09-03-PLAN.md -- Delete internal/wireguard/ package, remove wgctrl dependency, verify clean build
