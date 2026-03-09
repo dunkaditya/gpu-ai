@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-last_updated: "2026-03-02T21:37:00Z"
+last_updated: "2026-03-09T23:14:35Z"
 progress:
   total_phases: 9
-  completed_phases: 9
-  total_plans: 34
-  completed_plans: 34
+  completed_phases: 8
+  total_plans: 37
+  completed_plans: 35
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 7: Dashboard
+**Current focus:** Phase 9: Replace WireGuard with FRP Tunneling
 
 ## Current Position
 
-Phase: 7 (Dashboard)
-Plan: 4 of 4 in current phase (COMPLETE)
-Status: Phase 07 Complete
-Last activity: 2026-03-02 -- Completed 07-04 (Dashboard API integration)
+Phase: 9 (Replace WireGuard with FRP Tunneling)
+Plan: 1 of 3 in current phase
+Status: Phase 09 In Progress
+Last activity: 2026-03-09 -- Completed 09-01 (FRP tunnel infrastructure)
 
-Progress: [██████████] 100%
+Progress: [█████████▒] 95%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34
-- Average duration: 2.0min
-- Total execution time: 0.93 hours
+- Total plans completed: 35
+- Average duration: 2.1min
+- Total execution time: 1.05 hours
 
 **By Phase:**
 
@@ -51,7 +51,7 @@ Progress: [██████████] 100%
 | 06-availability-health-monitoring | 4 | 9min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 07-01 (2min), 07-02 (2min), 07-03 (2min), 07-04 (5min)
+- Last 5 plans: 07-02 (2min), 07-03 (2min), 07-04 (5min), 09-01 (7min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -68,6 +68,7 @@ Progress: [██████████] 100%
 | Phase 07 P02 | 2min | 2 tasks | 9 files |
 | Phase 07 P03 | 2min | 2 tasks | 6 files |
 | Phase 07 P04 | 5min | 2 tasks | 18 files |
+| Phase 09 P01 | 7min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -211,10 +212,16 @@ Recent decisions affecting current work:
 - [07-04]: LaunchInstanceForm reusable modal from both instances page and GPU availability table
 - [07-04]: Server layout + client page pattern for metadata on SWR-powered routes
 - [07-04]: Skeleton loading with bg-card-hover pulse animations matching design system
+- [09-01]: Embedded frps via Go library maintaining single-binary architecture (not subprocess)
+- [09-01]: FRP token auth (not OIDC) for simplicity in machine-to-machine auth
+- [09-01]: Port range 10000-10255 matches existing WG port formula for consistency during migration
+- [09-01]: Advisory lock ID 0x4650525054 (FRPPT) for port allocation serialization
+- [09-01]: Empty FRP_TOKEN disables FRP tunneling (same optional pattern as WireGuard)
 
 ### Roadmap Evolution
 
 - Phase 8 added: Rebuild frontend landing page to match Vercel homepage design
+- Phase 9 added: Replace WireGuard with FRP tunneling
 
 ### Pending Todos
 
@@ -228,6 +235,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Completed 07-04-PLAN.md (Dashboard API integration - Phase 07 plan 4 of 4, Phase 07 COMPLETE)
+Last session: 2026-03-09
+Stopped at: Completed 09-01-PLAN.md (FRP tunnel infrastructure - Phase 09 plan 1 of 3)
 Resume file: None
