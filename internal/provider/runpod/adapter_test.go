@@ -253,8 +253,8 @@ func TestProvisionOnDemand(t *testing.T) {
 	if !strings.Contains(receivedBody, "GPUAI_INTERNAL_TOKEN") {
 		t.Error("expected GPUAI_INTERNAL_TOKEN env var in request body")
 	}
-	if !strings.Contains(receivedBody, "SSH_PUBLIC_KEYS") {
-		t.Error("expected SSH_PUBLIC_KEYS env var in request body")
+	if !strings.Contains(receivedBody, "PUBLIC_KEY") {
+		t.Error("expected PUBLIC_KEY env var in request body")
 	}
 }
 

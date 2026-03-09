@@ -2,6 +2,7 @@ package runpod
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -9,6 +10,12 @@ import (
 
 	"github.com/gpuai/gpuctl/internal/provider"
 )
+
+// encodeScriptForDockerArgs base64-encodes a startup script so it can be
+// safely embedded in a dockerArgs string without shell escaping issues.
+func encodeScriptForDockerArgs(script string) string {
+	return base64.StdEncoding.EncodeToString([]byte(script))
+}
 
 // Compile-time check: Adapter implements provider.Provider.
 var _ provider.Provider = (*Adapter)(nil)
@@ -270,7 +277,7 @@ func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCo
 		"env":               env,
 	}
 	if startupScript != "" {
-		input["dockerArgs"] = startupScript
+		input["dockerArgs"] = "bash -c 'echo " + encodeScriptForDockerArgs(startupScript) + " | base64 -d | bash'"
 	}
 
 	var resp createPodResponse
@@ -322,7 +329,7 @@ func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount 
 		"env":               env,
 	}
 	if startupScript != "" {
-		input["dockerArgs"] = startupScript
+		input["dockerArgs"] = "bash -c 'echo " + encodeScriptForDockerArgs(startupScript) + " | base64 -d | bash'"
 	}
 
 	var resp createSpotPodResponse
