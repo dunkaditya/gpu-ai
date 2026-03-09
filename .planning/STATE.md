@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 09-02-PLAN.md (Provisioning and API rewiring for FRP - Phase 09 plan 2 of 3)
-last_updated: "2026-03-09T23:25:22.335Z"
-last_activity: 2026-03-09 -- Completed 09-02 (Provisioning and API rewiring for FRP)
+status: completed
+stopped_at: Completed 09-03-PLAN.md (WireGuard package deletion - Phase 09 plan 3 of 3)
+last_updated: "2026-03-09T23:26:31Z"
+last_activity: 2026-03-09 -- Completed 09-03 (WireGuard package deletion)
 progress:
   total_phases: 12
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 37
-  completed_plans: 36
-  percent: 97
+  completed_plans: 37
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 9 (Replace WireGuard with FRP Tunneling)
-Plan: 2 of 3 in current phase
-Status: Phase 09 In Progress
-Last activity: 2026-03-09 -- Completed 09-02 (Provisioning and API rewiring for FRP)
+Plan: 3 of 3 in current phase
+Status: Phase 09 Complete
+Last activity: 2026-03-09 -- Completed 09-03 (WireGuard package deletion)
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [██████████] 97%
 | Phase 07 P03 | 2min | 2 tasks | 6 files |
 | Phase 07 P04 | 5min | 2 tasks | 18 files |
 | Phase 09 P01 | 7min | 2 tasks | 12 files |
+| Phase 09 P03 | 7min | 1 tasks | 14 files |
 | Phase 09 P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
@@ -224,6 +225,8 @@ Recent decisions affecting current work:
 - [Phase 09]: FRPToken reuses per-instance internalToken for FRP auth
 - [Phase 09]: FRP cleanup is automatic: frpc dies with instance, port freed by DB status change
 - [Phase 09]: extractHost helper parses proxy hostname from GpuctlPublicURL using net/url.Parse
+- [09-03]: WireGuard indirect deps (wireguard, wintun) remain as transitive FRP library dependencies -- not removable without removing FRP
+- [09-03]: WG config env vars fully removed from Config struct and Load() validation
 
 ### Roadmap Evolution
 
@@ -242,6 +245,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T23:25:22.332Z
-Stopped at: Completed 09-02-PLAN.md (Provisioning and API rewiring for FRP - Phase 09 plan 2 of 3)
+Last session: 2026-03-09T23:26:31Z
+Stopped at: Completed 09-03-PLAN.md (WireGuard package deletion - Phase 09 plan 3 of 3)
 Resume file: None
