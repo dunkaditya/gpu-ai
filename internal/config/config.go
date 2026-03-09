@@ -2,7 +2,6 @@
 package config
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"os"
@@ -27,25 +26,6 @@ type Config struct {
 	// RunPodAPIKey is the RunPod API key for GPU provisioning. Optional.
 	// The RunPod adapter is only created if this key is present.
 	RunPodAPIKey string
-
-	// WGEncryptionKey is the hex-encoded AES-256-GCM key for encrypting
-	// WireGuard private keys at rest. Must be exactly 64 hex characters (32 bytes).
-	WGEncryptionKey string
-
-	// WGEncryptionKeyBytes is the decoded 32-byte encryption key derived from
-	// WGEncryptionKey. Not loaded from env; computed during Load().
-	WGEncryptionKeyBytes []byte
-
-	// WGProxyEndpoint is the public IP:port of the WireGuard proxy server.
-	// Example: "203.0.113.1:51820".
-	WGProxyEndpoint string
-
-	// WGProxyPublicKey is the proxy server's WireGuard public key (base64).
-	WGProxyPublicKey string
-
-	// WGInterfaceName is the WireGuard interface name on the proxy server.
-	// Default: "wg0".
-	WGInterfaceName string
 
 	// ClerkSecretKey is the Clerk API secret key for JWT verification.
 	// Optional -- empty disables Clerk auth for local dev.
@@ -74,7 +54,7 @@ type Config struct {
 	FRPBindPort int
 
 	// FRPToken is the shared auth token for frps<->frpc authentication.
-	// Optional -- if empty, FRP tunneling is disabled (like WG pattern).
+	// Optional -- if empty, FRP tunneling is disabled.
 	FRPToken string
 
 	// FRPAllowPorts is the allowed remote port range for FRP proxies.
@@ -110,45 +90,6 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("INTERNAL_API_TOKEN must be changed from default value 'change-me'")
 	}
 
-	// WireGuard config is optional. All three WG vars must be present together or all absent.
-	wgEncryptionKey := os.Getenv("WG_ENCRYPTION_KEY")
-	wgProxyEndpoint := os.Getenv("WG_PROXY_ENDPOINT")
-	wgProxyPublicKey := os.Getenv("WG_PROXY_PUBLIC_KEY")
-
-	wgVars := map[string]string{
-		"WG_ENCRYPTION_KEY":   wgEncryptionKey,
-		"WG_PROXY_ENDPOINT":   wgProxyEndpoint,
-		"WG_PROXY_PUBLIC_KEY": wgProxyPublicKey,
-	}
-	var wgPresent, wgMissing []string
-	for name, val := range wgVars {
-		if val != "" {
-			wgPresent = append(wgPresent, name)
-		} else {
-			wgMissing = append(wgMissing, name)
-		}
-	}
-
-	if len(wgPresent) > 0 && len(wgMissing) > 0 {
-		return nil, fmt.Errorf("incomplete WireGuard configuration: have %s but missing %s (all three WG vars must be set together or all absent)",
-			strings.Join(wgPresent, ", "), strings.Join(wgMissing, ", "))
-	}
-
-	// Validate and decode WG_ENCRYPTION_KEY only when present.
-	var wgEncryptionKeyBytes []byte
-	if wgEncryptionKey != "" {
-		if len(wgEncryptionKey) != 64 {
-			return nil, fmt.Errorf("WG_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes), got %d", len(wgEncryptionKey))
-		}
-		var err error
-		wgEncryptionKeyBytes, err = hex.DecodeString(wgEncryptionKey)
-		if err != nil {
-			return nil, fmt.Errorf("WG_ENCRYPTION_KEY is not valid hex: %w", err)
-		}
-	} else {
-		slog.Info("WireGuard config not set, privacy layer disabled")
-	}
-
 	if os.Getenv("STRIPE_API_KEY") == "" {
 		slog.Info("Stripe not configured, billing metering disabled")
 	}
@@ -180,13 +121,8 @@ func Load() (*Config, error) {
 		RedisURL:             redisURL,
 		InternalAPIToken:     internalAPIToken,
 		RunPodAPIKey:         os.Getenv("RUNPOD_API_KEY"),
-		WGEncryptionKey:      wgEncryptionKey,
-		WGEncryptionKeyBytes: wgEncryptionKeyBytes,
-		WGProxyEndpoint:      wgProxyEndpoint,
-		WGProxyPublicKey:     wgProxyPublicKey,
-		WGInterfaceName:      getEnvDefault("WG_INTERFACE_NAME", "wg0"),
 		ClerkSecretKey:       os.Getenv("CLERK_SECRET_KEY"),
-		GpuctlPublicURL:     os.Getenv("GPUCTL_PUBLIC_URL"),
+		GpuctlPublicURL:      os.Getenv("GPUCTL_PUBLIC_URL"),
 		StripeAPIKey:         os.Getenv("STRIPE_API_KEY"),
 		StripeMeterEventName: os.Getenv("STRIPE_METER_EVENT_NAME"),
 		PricingMarkupPct:     pricingMarkupPct,

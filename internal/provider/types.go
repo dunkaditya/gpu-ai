@@ -87,9 +87,8 @@ type ProvisionRequest struct {
 	Tier             InstanceTier `json:"tier"`
 	Region           string       `json:"region"`
 	SSHPublicKeys    []string     `json:"ssh_public_keys"`
-	DockerImage      string       `json:"docker_image,omitempty"`
-	WireGuardAddress string       `json:"wireguard_address"`
-	InternalToken    string       `json:"internal_token"`
+	DockerImage   string `json:"docker_image,omitempty"`
+	InternalToken string `json:"internal_token"`
 	CallbackURL      string       `json:"callback_url"`
 	StartupScript    string       `json:"startup_script,omitempty"`
 }
