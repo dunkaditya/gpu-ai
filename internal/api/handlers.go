@@ -5,16 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
-	"strings"
+	"net/url"
 	"time"
 
 	"github.com/gpuai/gpuctl/internal/auth"
 	"github.com/gpuai/gpuctl/internal/db"
 	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/provision"
-	"github.com/gpuai/gpuctl/internal/wireguard"
 )
 
 // CreateInstanceRequest is the JSON body for POST /api/v1/instances.
@@ -72,8 +70,8 @@ type ConnectionInfo struct {
 // instanceToResponse maps an internal db.Instance to a customer-facing InstanceResponse.
 // Uses provision.ExternalState to collapse internal states to external.
 // Excludes all upstream provider fields by structural omission.
-// When WireGuard is configured and the instance has a tunnel address, SSH connection
-// info points to the WG proxy (port derived from tunnel IP) instead of the raw hostname.
+// When FRP tunneling is configured and the instance has a remote port, SSH connection
+// info points to the proxy (host + FRP remote port) instead of the raw hostname.
 func (s *Server) instanceToResponse(inst *db.Instance) InstanceResponse {
 	resp := InstanceResponse{
 		ID:           inst.InstanceID,
@@ -88,26 +86,18 @@ func (s *Server) instanceToResponse(inst *db.Instance) InstanceResponse {
 		CreatedAt:    inst.CreatedAt.Format(time.RFC3339),
 	}
 
-	// Build connection info. Prefer WireGuard proxy coordinates when available.
-	if inst.WGAddress != nil && s.config.WGProxyEndpoint != "" {
-		// Parse tunnel IP from CIDR (e.g. "10.0.0.5/16" -> 10.0.0.5).
-		ipStr := strings.SplitN(*inst.WGAddress, "/", 2)[0]
-		tunnelIP := net.ParseIP(ipStr)
-
-		// Extract proxy host from WGProxyEndpoint (e.g. "203.0.113.1:51820" -> 203.0.113.1).
-		proxyHost, _, err := net.SplitHostPort(s.config.WGProxyEndpoint)
-
-		if tunnelIP != nil && err == nil {
-			port := wireguard.PortFromTunnelIP(tunnelIP)
-			resp.Connection = &ConnectionInfo{
-				Hostname:   proxyHost,
-				Port:       port,
-				SSHCommand: fmt.Sprintf("ssh -p %d root@%s", port, proxyHost),
-			}
+	// Build connection info. Prefer FRP tunnel coordinates when available.
+	if inst.FRPRemotePort != nil && s.config.GpuctlPublicURL != "" {
+		proxyHost := extractHost(s.config.GpuctlPublicURL)
+		port := *inst.FRPRemotePort
+		resp.Connection = &ConnectionInfo{
+			Hostname:   proxyHost,
+			Port:       port,
+			SSHCommand: fmt.Sprintf("ssh -p %d root@%s", port, proxyHost),
 		}
 	}
 
-	// Fallback: direct hostname:22 when WG is not configured or parsing failed.
+	// Fallback: direct hostname:22 when FRP is not configured or no port assigned.
 	if resp.Connection == nil {
 		resp.Connection = &ConnectionInfo{
 			Hostname:   inst.Hostname,
@@ -127,6 +117,17 @@ func (s *Server) instanceToResponse(inst *db.Instance) InstanceResponse {
 	}
 
 	return resp
+}
+
+// extractHost extracts the hostname from a URL string.
+// e.g., "https://api.gpu.ai" -> "api.gpu.ai", "http://134.199.214.138:9090" -> "134.199.214.138".
+// Falls back to the raw string if URL parsing fails.
+func extractHost(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Host == "" {
+		return rawURL
+	}
+	return u.Hostname()
 }
 
 // handleCreateInstance handles POST /api/v1/instances.

@@ -12,24 +12,22 @@ import (
 	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/provider/runpod"
 	"github.com/gpuai/gpuctl/internal/provision"
-	"github.com/gpuai/gpuctl/internal/wireguard"
+	"github.com/gpuai/gpuctl/internal/tunnel"
 	"github.com/redis/go-redis/v9"
-	"golang.zx2c4.com/wireguard/wgctrl"
 )
 
 // commonDeps holds shared infrastructure dependencies used by multiple subcommands.
 type commonDeps struct {
-	Config   *config.Config
-	DB       *db.Pool
-	Redis    *redis.Client
-	Registry *provider.Registry
-	WGMgr    *wireguard.Manager
-	IPAM     *wireguard.IPAM
-	Engine   *provision.Engine
-	Logger   *slog.Logger
+	Config    *config.Config
+	DB        *db.Pool
+	Redis     *redis.Client
+	Registry  *provider.Registry
+	TunnelMgr *tunnel.Manager
+	Engine    *provision.Engine
+	Logger    *slog.Logger
 }
 
-// setupCommonDeps initializes config, DB, Redis, provider registry, WireGuard, and engine.
+// setupCommonDeps initializes config, DB, Redis, provider registry, FRP tunnel manager, and engine.
 func setupCommonDeps(ctx context.Context, logger *slog.Logger) *commonDeps {
 	cfg, err := config.Load()
 	if err != nil {
@@ -76,29 +74,17 @@ func setupCommonDeps(ctx context.Context, logger *slog.Logger) *commonDeps {
 		slog.Info("registered provider", "name", "runpod")
 	}
 
-	// Initialize WireGuard Manager and IPAM if configured.
-	var wgMgr *wireguard.Manager
-	var ipam *wireguard.IPAM
-
-	if cfg.WGEncryptionKeyBytes != nil {
-		wgClient, err := wgctrl.New()
+	// Initialize FRP tunnel manager if configured.
+	var tunnelMgr *tunnel.Manager
+	if cfg.FRPToken != "" {
+		tunnelMgr, err = tunnel.NewManager(cfg.FRPBindPort, cfg.FRPToken, cfg.FRPAllowPorts, logger)
 		if err != nil {
-			slog.Error("failed to create WireGuard client", "error", err)
+			slog.Error("failed to create FRP tunnel manager", "error", err)
 			os.Exit(1)
 		}
-		// Note: wgClient.Close() is deferred by the caller.
-
-		wgMgr = wireguard.NewManager(wgClient, nil, cfg.WGInterfaceName, logger)
-		slog.Info("wireguard manager initialized", "interface", cfg.WGInterfaceName)
-
-		ipam, err = wireguard.NewIPAM("10.0.0.0/16", logger)
-		if err != nil {
-			slog.Error("failed to initialize IPAM", "error", err)
-			os.Exit(1)
-		}
-		slog.Info("wireguard IPAM initialized", "subnet", "10.0.0.0/16")
+		slog.Info("FRP tunnel manager initialized", "bind_port", cfg.FRPBindPort, "allow_ports", cfg.FRPAllowPorts)
 	} else {
-		slog.Info("wireguard not configured, privacy layer disabled")
+		slog.Info("FRP tunneling not configured, tunnel layer disabled")
 	}
 
 	// Create provisioning engine.
@@ -107,19 +93,17 @@ func setupCommonDeps(ctx context.Context, logger *slog.Logger) *commonDeps {
 		DB:        dbPool,
 		Config:    cfg,
 		Logger:    logger,
-		WGManager: wgMgr,
-		IPAM:      ipam,
+		TunnelMgr: tunnelMgr,
 	})
 
 	return &commonDeps{
-		Config:   cfg,
-		DB:       dbPool,
-		Redis:    redisClient,
-		Registry: providerRegistry,
-		WGMgr:    wgMgr,
-		IPAM:     ipam,
-		Engine:   engine,
-		Logger:   logger,
+		Config:    cfg,
+		DB:        dbPool,
+		Redis:     redisClient,
+		Registry:  providerRegistry,
+		TunnelMgr: tunnelMgr,
+		Engine:    engine,
+		Logger:    logger,
 	}
 }
 

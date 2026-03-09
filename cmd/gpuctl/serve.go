@@ -54,6 +54,12 @@ func runServe(args []string) {
 	defer deps.DB.Close()
 	defer deps.Redis.Close()
 
+	// Start FRP tunnel server if configured.
+	if deps.TunnelMgr != nil {
+		go deps.TunnelMgr.Start(ctx)
+		slog.Info("FRP tunnel server started", "port", deps.Config.FRPBindPort)
+	}
+
 	// Create availability cache and poller.
 	availCache := newAvailCache(deps.Redis)
 	availPoller := availability.NewPoller(
@@ -129,6 +135,13 @@ func runServe(args []string) {
 	if err := httpServer.Shutdown(shutdownCtx); err != nil {
 		slog.Error("shutdown error", "error", err)
 		os.Exit(1)
+	}
+
+	// Shut down FRP tunnel server if configured.
+	if deps.TunnelMgr != nil {
+		if err := deps.TunnelMgr.Close(); err != nil {
+			slog.Error("FRP tunnel shutdown error", "error", err)
+		}
 	}
 
 	slog.Info("gpuctl stopped")
