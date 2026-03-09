@@ -44,7 +44,7 @@ type Instance struct {
 
 // instanceColumns is the ordered list of columns for SELECT queries.
 const instanceColumns = `instance_id, org_id, user_id, upstream_provider, upstream_id,
-	upstream_ip::TEXT, hostname, wg_public_key, wg_private_key_enc, wg_address,
+	upstream_ip::TEXT, hostname, wg_public_key, wg_private_key_enc, wg_address::TEXT,
 	name, gpu_type, gpu_count, tier, region,
 	price_per_hour, upstream_price_per_hour, billing_start, billing_end,
 	status, error_reason, internal_token,

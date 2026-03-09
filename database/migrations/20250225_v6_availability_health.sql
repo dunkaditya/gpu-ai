@@ -7,7 +7,7 @@ BEGIN;
 CREATE TABLE instance_events (
     event_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     instance_id VARCHAR(32) NOT NULL REFERENCES instances(instance_id) ON DELETE RESTRICT,
-    org_id UUID NOT NULL REFERENCES organizations(org_id) ON DELETE RESTRICT,
+    org_id UUID NOT NULL REFERENCES organizations(organization_id) ON DELETE RESTRICT,
     event_type VARCHAR(50) NOT NULL
         CHECK (event_type IN ('ready', 'interrupted', 'failed', 'terminated')),
     metadata JSONB,
