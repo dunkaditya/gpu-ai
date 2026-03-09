@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
+	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -17,7 +17,7 @@ import (
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
 	"github.com/gpuai/gpuctl/internal/provider"
-	"github.com/gpuai/gpuctl/internal/wireguard"
+	"github.com/gpuai/gpuctl/internal/tunnel"
 )
 
 // ProviderCandidate pairs a provider with a matching offering for price-sorted selection.
@@ -55,23 +55,21 @@ type EngineDeps struct {
 	DB       *db.Pool
 	Config   *config.Config
 	Logger   *slog.Logger
-	// Optional: set to nil if WG proxy not configured.
-	WGManager *wireguard.Manager
-	IPAM      *wireguard.IPAM
+	// Optional: set to nil if FRP tunneling not configured.
+	TunnelMgr *tunnel.Manager
 	// OnStatusChange is called when progressStatus changes an instance's state.
 	// Used to publish SSE events. Nil means no notification.
 	OnStatusChange func(instanceID, status string)
 }
 
 // Engine orchestrates instance provisioning and termination.
-// It coordinates provider adapters, WireGuard, cloud-init, and DB persistence.
+// It coordinates provider adapters, FRP tunneling, and DB persistence.
 type Engine struct {
 	registry       *provider.Registry
 	db             *db.Pool
 	config         *config.Config
 	logger         *slog.Logger
-	wgMgr          *wireguard.Manager
-	ipam           *wireguard.IPAM
+	tunnelMgr      *tunnel.Manager
 	onStatusChange func(instanceID, status string)
 }
 
@@ -82,8 +80,7 @@ func NewEngine(deps EngineDeps) *Engine {
 		db:             deps.DB,
 		config:         deps.Config,
 		logger:         deps.Logger,
-		wgMgr:          deps.WGManager,
-		ipam:           deps.IPAM,
+		tunnelMgr:      deps.TunnelMgr,
 		onStatusChange: deps.OnStatusChange,
 	}
 }
@@ -114,7 +111,7 @@ var ErrSpendingLimitReached = errors.New("spending limit reached: new instance c
 //  2. Resolve SSH keys from DB
 //  3. Select provider and verify pricing
 //  4. Build callback URL (uses GPUCTL_PUBLIC_URL if configured)
-//  5. Optionally generate WireGuard keys and render cloud-init
+//  5. Optionally allocate FRP port and render bootstrap script
 //  6. Call provider to create upstream instance
 //  7. Persist instance record to DB
 //  8. Kick off async status progression (creating -> provisioning -> booting)
@@ -186,85 +183,56 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 	// 5. Build callback URL using public URL if configured, falling back to branded hostname.
 	callbackURL := buildCallbackURL(e.config.GpuctlPublicURL, hostname, instanceID)
 
-	// 6. Optionally generate WireGuard keys and cloud-init.
-	// WG setup happens once before the provider retry loop.
-	var wgPubKey, wgPrivKeyEnc, wgAddress *string
+	// 6. Optionally allocate FRP port and render bootstrap script.
+	// FRP setup happens once before the provider retry loop.
+	var frpPort *int
 	var startupScript string
 
-	if e.wgMgr != nil && e.config.WGEncryptionKeyBytes != nil {
-		kp, err := wireguard.GenerateKeyPair()
+	if e.tunnelMgr != nil {
+		// Allocate FRP remote port within a transaction (advisory lock prevents races).
+		tx, err := e.db.PgxPool().Begin(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("provision: generate wireguard keys: %w", err)
+			return nil, fmt.Errorf("provision: begin tx for FRP port: %w", err)
 		}
-
-		// Encrypt private key for DB storage.
-		encrypted, err := wireguard.EncryptPrivateKey(kp.PrivateKey, e.config.WGEncryptionKeyBytes)
+		remotePort, err := tunnel.AllocatePort(ctx, tx)
 		if err != nil {
-			return nil, fmt.Errorf("provision: encrypt wireguard key: %w", err)
+			_ = tx.Rollback(ctx)
+			return nil, fmt.Errorf("provision: allocate FRP port: %w", err)
 		}
-
-		wgPubKey = &kp.PublicKey
-		wgPrivKeyEnc = &encrypted
-
-		// Allocate tunnel IP if IPAM is configured.
-		if e.ipam != nil {
-			tx, err := e.db.PgxPool().Begin(ctx)
-			if err != nil {
-				return nil, fmt.Errorf("provision: begin tx for IPAM: %w", err)
-			}
-			tunnelIP, err := e.ipam.AllocateAddress(ctx, tx)
-			if err != nil {
-				_ = tx.Rollback(ctx)
-				return nil, fmt.Errorf("provision: allocate tunnel IP: %w", err)
-			}
-			if err := tx.Commit(ctx); err != nil {
-				return nil, fmt.Errorf("provision: commit IPAM tx: %w", err)
-			}
-			addr := tunnelIP.String() + "/16"
-			wgAddress = &addr
+		if err := tx.Commit(ctx); err != nil {
+			return nil, fmt.Errorf("provision: commit FRP port tx: %w", err)
 		}
+		frpPort = &remotePort
 
-		// Add WireGuard peer to proxy BEFORE provider call.
-		// The peer must be registered so the instance can establish the tunnel on boot.
-		if wgAddress != nil {
-			addrStr, _, _ := strings.Cut(*wgAddress, "/")
-			tunnelIP := net.ParseIP(addrStr)
-			if tunnelIP == nil {
-				return nil, fmt.Errorf("provision: invalid tunnel IP: %s", *wgAddress)
-			}
-			externalPort := wireguard.PortFromTunnelIP(tunnelIP)
-			if err := e.wgMgr.AddPeer(ctx, kp.PublicKey, tunnelIP, externalPort); err != nil {
-				return nil, fmt.Errorf("provision: add wireguard peer: %w", err)
-			}
-			e.logger.Info("added WireGuard peer for instance",
-				slog.String("instance_id", instanceID),
-				slog.String("tunnel_ip", tunnelIP.String()),
-				slog.Int("external_port", externalPort),
-			)
-		}
+		e.logger.Info("allocated FRP remote port",
+			slog.String("instance_id", instanceID),
+			slog.Int("remote_port", remotePort),
+		)
 
-		// Render cloud-init bootstrap script.
-		bootstrapData := wireguard.BootstrapData{
-			InstanceID:         instanceID,
-			ProxyEndpoint:      e.config.WGProxyEndpoint,
-			ProxyPublicKey:     e.config.WGProxyPublicKey,
-			InstancePrivateKey: kp.PrivateKey,
-			InstanceAddress:    *wgAddress,
-			AllowedIPs:         "10.0.0.0/16",
-			SSHAuthorizedKeys:  strings.Join(sshPubKeys, "\n"),
-			InternalToken:      internalToken,
-			Hostname:           hostname,
-			CallbackURL:        callbackURL,
+		// Extract proxy host from GpuctlPublicURL for the bootstrap data.
+		proxyHost := extractHost(e.config.GpuctlPublicURL)
+
+		// Render FRP bootstrap script.
+		bootstrapData := tunnel.BootstrapData{
+			InstanceID:        instanceID,
+			ProxyHost:         proxyHost,
+			FRPServerPort:     e.config.FRPBindPort,
+			FRPToken:          internalToken, // reuse per-instance token for FRP auth
+			RemotePort:        remotePort,
+			SSHAuthorizedKeys: strings.Join(sshPubKeys, "\n"),
+			InternalToken:     internalToken,
+			Hostname:          hostname,
+			CallbackURL:       callbackURL,
 		}
-		startupScript, err = wireguard.RenderBootstrap(bootstrapData)
+		startupScript, err = tunnel.RenderBootstrap(bootstrapData)
 		if err != nil {
-			return nil, fmt.Errorf("provision: render cloud-init: %w", err)
+			return nil, fmt.Errorf("provision: render bootstrap: %w", err)
 		}
 	}
 
 	// 7. Build provider-level request and try provisioning with fallback retry.
 	// Only the provider.Provision call is retried with different providers (max 3 attempts).
-	// WG setup (key gen, IPAM, AddPeer) happened once above.
+	// FRP port allocation happened once above.
 	provReq := provider.ProvisionRequest{
 		InstanceID:    instanceID,
 		GPUType:       req.GPUType,
@@ -275,9 +243,6 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		InternalToken: internalToken,
 		CallbackURL:   callbackURL,
 		StartupScript: startupScript,
-	}
-	if wgAddress != nil {
-		provReq.WireGuardAddress = *wgAddress
 	}
 
 	const maxProvisionAttempts = 3
@@ -312,19 +277,9 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 	}
 
 	if lastErr != nil {
-		// All attempts failed. Best-effort cleanup: remove WG peer if we added one.
-		if e.wgMgr != nil && wgPubKey != nil && wgAddress != nil {
-			addrStr, _, _ := strings.Cut(*wgAddress, "/")
-			if tunnelIP := net.ParseIP(addrStr); tunnelIP != nil {
-				externalPort := wireguard.PortFromTunnelIP(tunnelIP)
-				if rmErr := e.wgMgr.RemovePeer(ctx, *wgPubKey, tunnelIP, externalPort); rmErr != nil {
-					e.logger.Error("failed to clean up WireGuard peer after provision failure",
-						slog.String("instance_id", instanceID),
-						slog.String("error", rmErr.Error()),
-					)
-				}
-			}
-		}
+		// All attempts failed. FRP needs no cleanup -- the port allocation committed
+		// but the instance row was never created, so the port will be available for
+		// reclamation on next allocation (no active instance holds it).
 		return nil, fmt.Errorf("provision: all providers failed (last: %s): %w", prov.Name(), lastErr)
 	}
 
@@ -342,9 +297,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		UpstreamID:           provResult.UpstreamID,
 		UpstreamIP:           upstreamIP,
 		Hostname:             hostname,
-		WGPublicKey:          wgPubKey,
-		WGPrivateKeyEnc:      wgPrivKeyEnc,
-		WGAddress:            wgAddress,
+		FRPRemotePort:        frpPort,
 		Name:                 req.Name,
 		GPUType:              string(req.GPUType),
 		GPUCount:             req.GPUCount,
@@ -384,7 +337,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 //  3. Update status to stopping
 //  4. Call provider to terminate upstream instance
 //  5. Mark as terminated in DB
-//  6. Clean up WireGuard if configured
+//  6. FRP cleanup is automatic (frpc dies with instance)
 func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 	// 1. Get instance from DB.
 	inst, err := e.db.GetInstance(ctx, instanceID)
@@ -470,35 +423,10 @@ func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 		// Non-fatal: instance is terminated, event logging failure doesn't block.
 	}
 
-	// 6. Clean up WireGuard peer if configured.
-	if e.wgMgr != nil && inst.WGPublicKey != nil && inst.WGAddress != nil {
-		// WGAddress may contain a CIDR suffix (e.g., "10.0.0.2/16") from the INET column.
-		// Strip the prefix length before parsing.
-		addrStr, _, _ := strings.Cut(*inst.WGAddress, "/")
-		tunnelIP := net.ParseIP(addrStr)
-		if tunnelIP == nil {
-			e.logger.Error("failed to parse WG address for cleanup",
-				slog.String("instance_id", instanceID),
-				slog.String("wg_address", *inst.WGAddress),
-			)
-		} else {
-			externalPort := wireguard.PortFromTunnelIP(tunnelIP)
-			if err := e.wgMgr.RemovePeer(ctx, *inst.WGPublicKey, tunnelIP, externalPort); err != nil {
-				// Log but don't fail termination -- WG cleanup is best-effort.
-				// The instance is already terminated in the DB and provider.
-				e.logger.Error("WireGuard peer cleanup failed (best-effort)",
-					slog.String("instance_id", instanceID),
-					slog.String("error", err.Error()),
-				)
-			} else {
-				e.logger.Info("WireGuard peer removed",
-					slog.String("instance_id", instanceID),
-					slog.String("tunnel_ip", tunnelIP.String()),
-					slog.Int("external_port", externalPort),
-				)
-			}
-		}
-	}
+	// 6. FRP cleanup is automatic: when the provider terminates the instance,
+	// frpc dies, and frps drops the connection. The port is freed by the DB
+	// status change to 'terminated' (the partial unique index only covers
+	// non-terminated rows).
 
 	e.logger.Info("instance terminated",
 		slog.String("instance_id", instanceID),
@@ -863,6 +791,18 @@ func (e *Engine) createZeroBillingSession(ctx context.Context, instanceID string
 			slog.String("error", err.Error()),
 		)
 	}
+}
+
+// extractHost extracts the host portion from a URL string.
+// e.g., "https://api.gpu.ai" -> "api.gpu.ai", "http://134.199.214.138:9090" -> "134.199.214.138".
+// Falls back to the raw string if URL parsing fails.
+func extractHost(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Host == "" {
+		return rawURL
+	}
+	// url.Parse includes port in Host. Extract hostname only.
+	return u.Hostname()
 }
 
 // buildCallbackURL constructs the ready callback URL for an instance.

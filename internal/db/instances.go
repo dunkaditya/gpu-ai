@@ -24,6 +24,7 @@ type Instance struct {
 	WGPublicKey          *string
 	WGPrivateKeyEnc      *string
 	WGAddress            *string
+	FRPRemotePort        *int
 	Name                 *string
 	GPUType              string
 	GPUCount             int
@@ -45,7 +46,7 @@ type Instance struct {
 // instanceColumns is the ordered list of columns for SELECT queries.
 const instanceColumns = `instance_id, org_id, user_id, upstream_provider, upstream_id,
 	upstream_ip::TEXT, hostname, wg_public_key, wg_private_key_enc, wg_address::TEXT,
-	name, gpu_type, gpu_count, tier, region,
+	frp_remote_port, name, gpu_type, gpu_count, tier, region,
 	price_per_hour, upstream_price_per_hour, billing_start, billing_end,
 	status, error_reason, internal_token,
 	created_at, updated_at, ready_at, terminated_at`
@@ -56,7 +57,7 @@ func scanInstance(row pgx.Row) (*Instance, error) {
 	err := row.Scan(
 		&i.InstanceID, &i.OrgID, &i.UserID, &i.UpstreamProvider, &i.UpstreamID,
 		&i.UpstreamIP, &i.Hostname, &i.WGPublicKey, &i.WGPrivateKeyEnc, &i.WGAddress,
-		&i.Name, &i.GPUType, &i.GPUCount, &i.Tier, &i.Region,
+		&i.FRPRemotePort, &i.Name, &i.GPUType, &i.GPUCount, &i.Tier, &i.Region,
 		&i.PricePerHour, &i.UpstreamPricePerHour, &i.BillingStart, &i.BillingEnd,
 		&i.Status, &i.ErrorReason, &i.InternalToken,
 		&i.CreatedAt, &i.UpdatedAt, &i.ReadyAt, &i.TerminatedAt,
@@ -73,21 +74,21 @@ func (p *Pool) CreateInstance(ctx context.Context, inst *Instance) error {
 		INSERT INTO instances (
 			instance_id, org_id, user_id, upstream_provider, upstream_id,
 			upstream_ip, hostname, wg_public_key, wg_private_key_enc, wg_address,
-			name, gpu_type, gpu_count, tier, region,
+			frp_remote_port, name, gpu_type, gpu_count, tier, region,
 			price_per_hour, upstream_price_per_hour, billing_start, billing_end,
 			status, error_reason, internal_token,
 			ready_at, terminated_at
 		) VALUES (
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9, $10,
-			$11, $12, $13, $14, $15,
-			$16, $17, $18, $19,
-			$20, $21, $22,
-			$23, $24
+			$11, $12, $13, $14, $15, $16,
+			$17, $18, $19, $20,
+			$21, $22, $23,
+			$24, $25
 		)`,
 		inst.InstanceID, inst.OrgID, inst.UserID, inst.UpstreamProvider, inst.UpstreamID,
 		inst.UpstreamIP, inst.Hostname, inst.WGPublicKey, inst.WGPrivateKeyEnc, inst.WGAddress,
-		inst.Name, inst.GPUType, inst.GPUCount, inst.Tier, inst.Region,
+		inst.FRPRemotePort, inst.Name, inst.GPUType, inst.GPUCount, inst.Tier, inst.Region,
 		inst.PricePerHour, inst.UpstreamPricePerHour, inst.BillingStart, inst.BillingEnd,
 		inst.Status, inst.ErrorReason, inst.InternalToken,
 		inst.ReadyAt, inst.TerminatedAt,
@@ -157,7 +158,7 @@ func (p *Pool) ListInstances(ctx context.Context, orgID string, cursor *time.Tim
 		if err := rows.Scan(
 			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
 			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
-			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.FRPRemotePort, &inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
 			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
 			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
 			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
@@ -187,7 +188,7 @@ func (p *Pool) ListRunningInstancesByOrg(ctx context.Context, orgID string) ([]I
 		if err := rows.Scan(
 			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
 			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
-			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.FRPRemotePort, &inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
 			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
 			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
 			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
@@ -217,7 +218,7 @@ func (p *Pool) ListStoppedInstancesByOrg(ctx context.Context, orgID string) ([]I
 		if err := rows.Scan(
 			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
 			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
-			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.FRPRemotePort, &inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
 			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
 			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
 			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
@@ -248,7 +249,7 @@ func (p *Pool) ListActiveInstances(ctx context.Context) ([]Instance, error) {
 		if err := rows.Scan(
 			&inst.InstanceID, &inst.OrgID, &inst.UserID, &inst.UpstreamProvider, &inst.UpstreamID,
 			&inst.UpstreamIP, &inst.Hostname, &inst.WGPublicKey, &inst.WGPrivateKeyEnc, &inst.WGAddress,
-			&inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
+			&inst.FRPRemotePort, &inst.Name, &inst.GPUType, &inst.GPUCount, &inst.Tier, &inst.Region,
 			&inst.PricePerHour, &inst.UpstreamPricePerHour, &inst.BillingStart, &inst.BillingEnd,
 			&inst.Status, &inst.ErrorReason, &inst.InternalToken,
 			&inst.CreatedAt, &inst.UpdatedAt, &inst.ReadyAt, &inst.TerminatedAt,
