@@ -68,6 +68,18 @@ type Config struct {
 	// PricingMarkupPct is the percentage markup applied to provider prices for retail pricing.
 	// Default: 15.0 (15% markup). Set via PRICING_MARKUP_PCT env var.
 	PricingMarkupPct float64
+
+	// FRPBindPort is the port that the embedded FRP server (frps) listens on
+	// for frpc client connections. Default: 7000.
+	FRPBindPort int
+
+	// FRPToken is the shared auth token for frps<->frpc authentication.
+	// Optional -- if empty, FRP tunneling is disabled (like WG pattern).
+	FRPToken string
+
+	// FRPAllowPorts is the allowed remote port range for FRP proxies.
+	// Default: "10000-10255".
+	FRPAllowPorts string
 }
 
 // Load reads configuration from environment variables, validates required
@@ -148,6 +160,20 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("PRICING_MARKUP_PCT must be a valid number: %w", err)
 	}
 
+	// FRP tunneling config (optional, replaces WireGuard for SSH access).
+	frpToken := os.Getenv("FRP_TOKEN")
+	frpAllowPorts := getEnvDefault("FRP_ALLOW_PORTS", "10000-10255")
+
+	frpBindPortStr := getEnvDefault("FRP_BIND_PORT", "7000")
+	frpBindPort, err := strconv.Atoi(frpBindPortStr)
+	if err != nil {
+		return nil, fmt.Errorf("FRP_BIND_PORT must be a valid integer: %w", err)
+	}
+
+	if frpToken == "" {
+		slog.Info("FRP tunneling not configured, tunnel layer disabled")
+	}
+
 	return &Config{
 		Port:                 getEnvDefault("GPUCTL_PORT", "9090"),
 		DatabaseURL:          databaseURL,
@@ -164,6 +190,9 @@ func Load() (*Config, error) {
 		StripeAPIKey:         os.Getenv("STRIPE_API_KEY"),
 		StripeMeterEventName: os.Getenv("STRIPE_METER_EVENT_NAME"),
 		PricingMarkupPct:     pricingMarkupPct,
+		FRPBindPort:          frpBindPort,
+		FRPToken:             frpToken,
+		FRPAllowPorts:        frpAllowPorts,
 	}, nil
 }
 
