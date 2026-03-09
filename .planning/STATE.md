@@ -2,13 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-last_updated: "2026-03-09T23:14:35Z"
+status: executing
+stopped_at: Completed 09-02-PLAN.md (Provisioning and API rewiring for FRP - Phase 09 plan 2 of 3)
+last_updated: "2026-03-09T23:25:22.335Z"
+last_activity: 2026-03-09 -- Completed 09-02 (Provisioning and API rewiring for FRP)
 progress:
-  total_phases: 9
-  completed_phases: 8
+  total_phases: 12
+  completed_phases: 11
   total_plans: 37
-  completed_plans: 35
+  completed_plans: 36
+  percent: 97
 ---
 
 # Project State
@@ -23,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 9 (Replace WireGuard with FRP Tunneling)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Phase 09 In Progress
-Last activity: 2026-03-09 -- Completed 09-01 (FRP tunnel infrastructure)
+Last activity: 2026-03-09 -- Completed 09-02 (Provisioning and API rewiring for FRP)
 
-Progress: [█████████▒] 95%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -69,6 +72,7 @@ Progress: [█████████▒] 95%
 | Phase 07 P03 | 2min | 2 tasks | 6 files |
 | Phase 07 P04 | 5min | 2 tasks | 18 files |
 | Phase 09 P01 | 7min | 2 tasks | 12 files |
+| Phase 09 P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -217,6 +221,9 @@ Recent decisions affecting current work:
 - [09-01]: Port range 10000-10255 matches existing WG port formula for consistency during migration
 - [09-01]: Advisory lock ID 0x4650525054 (FRPPT) for port allocation serialization
 - [09-01]: Empty FRP_TOKEN disables FRP tunneling (same optional pattern as WireGuard)
+- [Phase 09]: FRPToken reuses per-instance internalToken for FRP auth
+- [Phase 09]: FRP cleanup is automatic: frpc dies with instance, port freed by DB status change
+- [Phase 09]: extractHost helper parses proxy hostname from GpuctlPublicURL using net/url.Parse
 
 ### Roadmap Evolution
 
@@ -235,6 +242,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09
-Stopped at: Completed 09-01-PLAN.md (FRP tunnel infrastructure - Phase 09 plan 1 of 3)
+Last session: 2026-03-09T23:25:22.332Z
+Stopped at: Completed 09-02-PLAN.md (Provisioning and API rewiring for FRP - Phase 09 plan 2 of 3)
 Resume file: None
