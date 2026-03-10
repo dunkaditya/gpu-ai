@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { createInstance } from "@/lib/api";
-import type { CreateInstanceRequest } from "@/lib/types";
+import type { CreateInstanceRequest, AvailableOffering } from "@/lib/types";
 
 interface LaunchInstanceFormProps {
   onClose: () => void;
   onSuccess: () => void;
   defaultGPU?: string;
   defaultRegion?: string;
+  offering?: AvailableOffering;
 }
 
 export function LaunchInstanceForm({
@@ -17,6 +18,7 @@ export function LaunchInstanceForm({
   onSuccess,
   defaultGPU,
   defaultRegion,
+  offering,
 }: LaunchInstanceFormProps) {
   const [gpuType, setGpuType] = useState(defaultGPU ?? "");
   const [gpuCount, setGpuCount] = useState(1);

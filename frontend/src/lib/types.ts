@@ -43,6 +43,20 @@ export interface AvailableOffering {
   avg_uptime_pct: number
 }
 
+// GPU card data grouped by model (client-side aggregation)
+export interface GPUCardData {
+  gpu_model: string
+  vram_gb: number
+  cpu_cores: number
+  ram_gb: number
+  storage_gb: number
+  regions: string[]
+  spot_price?: number
+  on_demand_price?: number
+  total_available: number
+  offerings: AvailableOffering[]
+}
+
 // Matches internal/api/handlers_ssh_keys.go
 export interface SSHKeyResponse {
   id: string
