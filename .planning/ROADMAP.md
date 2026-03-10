@@ -246,3 +246,25 @@ Plans:
 - [ ] 09-01-PLAN.md -- Create internal/tunnel/ package (types, port allocator, bootstrap template, FRP manager), v7 migration, FRP config fields
 - [ ] 09-02-PLAN.md -- Rewire provisioning engine, API handlers, DB layer, and main wiring from WireGuard to FRP tunnel
 - [ ] 09-03-PLAN.md -- Delete internal/wireguard/ package, remove wgctrl dependency, verify clean build
+
+### Phase 10: Frontend dashboard with GPU availability, provisioning, and instance management
+
+**Goal:** Redesign and elevate the Phase 7 cloud dashboard to production quality -- GPU availability as card grid, enhanced instance management with detail pages and inline rename, launch modal with price confirmation, polished billing/SSH keys/settings pages, mobile-responsive sidebar with coming-soon items, and confirmation dialogs throughout. Clean, spacious Lambda Labs aesthetic with dark theme.
+**Requirements**: DASH-01, DASH-02, DASH-03, DASH-04, DASH-05, DASH-06, DASH-07, DASH-08
+**Depends on:** Phase 9
+**Success Criteria** (what must be TRUE):
+  1. Sidebar shows 7 nav items including coming-soon badges for API Keys and Team
+  2. GPU availability displays as card grid grouped by GPU model with spot/on-demand pricing
+  3. Launch modal shows price confirmation with GPU specs when opened from availability card
+  4. Instance table rows are clickable, name is editable inline, uptime is displayed
+  5. Instance detail page at /cloud/instances/[id] shows full specs, SSH command, billing info
+  6. All destructive actions use ConfirmDialog instead of window.confirm()
+  7. Settings page manages spending limits via existing API endpoints
+  8. Mobile sidebar accessible via hamburger menu
+**Plans:** 4 plans
+
+Plans:
+- [ ] 10-01-PLAN.md -- Backend rename endpoint, dashboard shell redesign (sidebar, topbar, layout), ConfirmDialog, coming-soon pages
+- [ ] 10-02-PLAN.md -- GPU availability card grid with filters/sorting, enhanced launch modal with price confirmation
+- [ ] 10-03-PLAN.md -- Enhanced instances table (clickable rows, rename, uptime, confirmation), instance detail page
+- [ ] 10-04-PLAN.md -- Polish SSH Keys, Billing, Settings pages; visual verification checkpoint
