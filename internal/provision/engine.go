@@ -217,7 +217,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 			InstanceID:        instanceID,
 			ProxyHost:         proxyHost,
 			FRPServerPort:     e.config.FRPBindPort,
-			FRPToken:          internalToken, // reuse per-instance token for FRP auth
+			FRPToken:          e.config.FRPToken,
 			RemotePort:        remotePort,
 			SSHAuthorizedKeys: strings.Join(sshPubKeys, "\n"),
 			InternalToken:     internalToken,
