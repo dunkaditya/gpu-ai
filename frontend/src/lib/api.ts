@@ -4,6 +4,7 @@ import type {
   SSHKeyResponse,
   UsageResponse,
   CreateInstanceRequest,
+  SpendingLimitResponse,
 } from './types'
 
 const API_BASE = '/api/v1'
@@ -105,4 +106,32 @@ export async function fetchBillingUsage(period?: string): Promise<UsageResponse>
   const res = await fetch(`${API_BASE}/billing/usage${qs ? `?${qs}` : ''}`)
   if (!res.ok) throw new Error('Failed to fetch billing usage')
   return res.json()
+}
+
+// Spending Limits
+export async function getSpendingLimit(): Promise<SpendingLimitResponse> {
+  const res = await fetch(`${API_BASE}/billing/spending-limit`)
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('no_limit')
+    throw new Error('Failed to fetch spending limit')
+  }
+  return res.json()
+}
+
+export async function setSpendingLimit(limitDollars: number): Promise<SpendingLimitResponse> {
+  const res = await fetch(`${API_BASE}/billing/spending-limit`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ monthly_limit_dollars: limitDollars }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || 'Failed to set spending limit')
+  }
+  return res.json()
+}
+
+export async function deleteSpendingLimit(): Promise<void> {
+  const res = await fetch(`${API_BASE}/billing/spending-limit`, { method: 'DELETE' })
+  if (!res.ok && res.status !== 204) throw new Error('Failed to delete spending limit')
 }

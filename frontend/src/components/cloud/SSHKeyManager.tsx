@@ -4,11 +4,12 @@ import { useState } from "react";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { fetcher, addSSHKey, deleteSSHKey } from "@/lib/api";
+import { ConfirmDialog } from "@/components/cloud/ConfirmDialog";
 import type { SSHKeyResponse } from "@/lib/types";
 
 function SkeletonRow() {
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+    <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
       <div className="space-y-2">
         <div className="h-4 bg-bg-card-hover rounded animate-pulse w-32" />
         <div className="h-3 bg-bg-card-hover rounded animate-pulse w-48" />
@@ -41,7 +42,8 @@ export function SSHKeyManager() {
   const [publicKey, setPublicKey] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingKeyId, setDeletingKeyId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const keys = data?.ssh_keys ?? [];
 
@@ -64,17 +66,18 @@ export function SSHKeyManager() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm("Delete this SSH key? Instances using it will no longer accept connections with it."))
-      return;
-    setDeletingId(id);
+  async function handleDeleteConfirm() {
+    if (!deletingKeyId) return;
+    setDeleteLoading(true);
     try {
-      await deleteSSHKey(id);
+      await deleteSSHKey(deletingKeyId);
       await mutate();
+      setDeletingKeyId(null);
     } catch {
       // Error will reflect on next fetch
+      setDeletingKeyId(null);
     } finally {
-      setDeletingId(null);
+      setDeleteLoading(false);
     }
   }
 
@@ -93,19 +96,12 @@ export function SSHKeyManager() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Add key section */}
-      {!showForm ? (
-        <button
-          onClick={() => setShowForm(true)}
-          className="gradient-btn px-4 py-2 rounded-lg type-ui-sm font-medium transition-all"
-        >
-          Add SSH Key
-        </button>
-      ) : (
+    <div className="space-y-5">
+      {/* Add key form */}
+      {showForm && (
         <form
           onSubmit={handleAdd}
-          className="bg-bg-card border border-border rounded-xl p-5 space-y-4"
+          className="bg-bg-card border border-border rounded-xl p-6 space-y-5"
         >
           <div className="space-y-2">
             <label className="type-ui-xs text-text-muted font-medium uppercase tracking-wider">
@@ -168,7 +164,22 @@ export function SSHKeyManager() {
       )}
 
       {/* Keys list */}
-      <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+      <div className="rounded-xl border border-border bg-bg-card/50 overflow-hidden">
+        {/* Section header */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-bg-card/80">
+          <span className="type-ui-sm text-text font-medium">
+            SSH Keys{!isLoading && ` (${keys.length})`}
+          </span>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="gradient-btn px-3.5 py-1.5 rounded-lg type-ui-xs font-medium transition-all"
+            >
+              Add Key
+            </button>
+          )}
+        </div>
+
         {isLoading ? (
           <>
             <SkeletonRow />
@@ -214,7 +225,7 @@ export function SSHKeyManager() {
         ) : (
           <div>
             {/* Header row */}
-            <div className="hidden md:grid grid-cols-[1fr_1fr_auto_auto] gap-4 px-4 py-3 border-b border-border">
+            <div className="hidden md:grid grid-cols-[1fr_1fr_auto_auto] gap-4 px-5 py-3 border-b border-border/60">
               <span className="type-ui-2xs text-text-dim font-medium uppercase tracking-wider">
                 Name
               </span>
@@ -232,13 +243,13 @@ export function SSHKeyManager() {
             {keys.map((key) => (
               <div
                 key={key.id}
-                className="flex flex-col md:grid md:grid-cols-[1fr_1fr_auto_auto] gap-2 md:gap-4 md:items-center px-4 py-3 border-b border-border/50 hover:bg-bg-card transition-colors"
+                className="flex flex-col md:grid md:grid-cols-[1fr_1fr_auto_auto] gap-2 md:gap-4 md:items-center px-5 py-4 border-b border-border/30 hover:bg-bg-card/80 transition-colors"
               >
                 <div>
                   <p className="type-ui-sm text-text font-medium">{key.name}</p>
                 </div>
                 <div>
-                  <code className="type-ui-2xs text-text-muted font-mono">
+                  <code className="type-ui-2xs text-text-muted font-mono bg-bg/60 px-2 py-0.5 rounded">
                     {truncateFingerprint(key.fingerprint)}
                   </code>
                 </div>
@@ -249,16 +260,10 @@ export function SSHKeyManager() {
                 </div>
                 <div className="md:text-right">
                   <button
-                    onClick={() => handleDelete(key.id)}
-                    disabled={deletingId === key.id}
-                    className={cn(
-                      "type-ui-2xs px-2 py-1 rounded border transition-colors font-medium",
-                      deletingId === key.id
-                        ? "border-border text-text-dim cursor-not-allowed"
-                        : "border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
-                    )}
+                    onClick={() => setDeletingKeyId(key.id)}
+                    className="type-ui-2xs px-2.5 py-1 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors font-medium"
                   >
-                    {deletingId === key.id ? "..." : "Delete"}
+                    Delete
                   </button>
                 </div>
               </div>
@@ -266,6 +271,19 @@ export function SSHKeyManager() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      {deletingKeyId && (
+        <ConfirmDialog
+          title="Delete SSH Key"
+          message="Instances using this key will no longer accept connections with it. This action cannot be undone."
+          confirmLabel="Delete"
+          confirmVariant="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeletingKeyId(null)}
+          loading={deleteLoading}
+        />
+      )}
     </div>
   );
 }

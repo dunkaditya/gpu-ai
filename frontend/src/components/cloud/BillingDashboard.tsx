@@ -4,7 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { fetcher } from "@/lib/api";
-import type { UsageResponse } from "@/lib/types";
+import type { UsageResponse, SpendingLimitResponse } from "@/lib/types";
 
 const periods = [
   { label: "Current Month", value: "current_month" },
@@ -49,6 +49,18 @@ export function BillingDashboard() {
     { refreshInterval: 60000 }
   );
 
+  // Fetch spending limit (404 means no limit set -- graceful handling)
+  const { data: limitData } = useSWR<SpendingLimitResponse>(
+    "/api/v1/billing/spending-limit",
+    (url: string) =>
+      fetch(url).then((r) => {
+        if (r.status === 404) return null;
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      }),
+    { refreshInterval: 60000 }
+  );
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -71,7 +83,7 @@ export function BillingDashboard() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Cost */}
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <div className="bg-bg-card border border-border rounded-xl p-5 border-l-[3px] border-l-purple">
           <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
             Total Cost
           </p>
@@ -89,7 +101,7 @@ export function BillingDashboard() {
         </div>
 
         {/* Active Sessions */}
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <div className="bg-bg-card border border-border rounded-xl p-5 border-l-[3px] border-l-green">
           <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
             Active Sessions
           </p>
@@ -103,17 +115,52 @@ export function BillingDashboard() {
           <p className="type-ui-2xs text-text-dim mt-1">Currently running</p>
         </div>
 
-        {/* Total Sessions */}
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        {/* Spending Limit */}
+        <div className="bg-bg-card border border-border rounded-xl p-5 border-l-[3px] border-l-text-dim">
           <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
-            Total Sessions
+            Spending Limit
           </p>
-          {isLoading ? (
-            <div className="h-10 bg-bg-card-hover rounded animate-pulse w-12" />
+          {limitData ? (
+            <>
+              <p className="type-h2 font-mono text-text">
+                <span className="text-text-muted">$</span>
+                {limitData.monthly_limit_dollars.toFixed(2)}
+              </p>
+              <div className="mt-2">
+                <div className="w-full h-1.5 bg-bg rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      limitData.percent_used > 90
+                        ? "bg-red-500"
+                        : limitData.percent_used > 70
+                          ? "bg-yellow-500"
+                          : "bg-purple"
+                    )}
+                    style={{
+                      width: `${Math.min(limitData.percent_used, 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="type-ui-2xs text-text-dim mt-1">
+                  {limitData.percent_used.toFixed(0)}% used
+                </p>
+              </div>
+            </>
           ) : (
-            <p className="type-h2 font-mono text-text">{sessions.length}</p>
+            <>
+              <p className="type-ui-sm text-text-dim mt-1">No limit set</p>
+              <p className="type-ui-2xs text-text-dim mt-1">
+                Set one in{" "}
+                <a
+                  href="/cloud/settings"
+                  className="text-purple hover:text-purple-light transition-colors"
+                >
+                  Settings
+                </a>
+              </p>
+            </>
           )}
-          <p className="type-ui-2xs text-text-dim mt-1">In this period</p>
         </div>
       </div>
 
@@ -136,7 +183,7 @@ export function BillingDashboard() {
       </div>
 
       {/* Sessions Table */}
-      <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+      <div className="rounded-xl border border-border bg-bg-card/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

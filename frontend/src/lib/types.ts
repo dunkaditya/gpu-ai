@@ -86,6 +86,16 @@ export interface UsageResponse {
   currency: string
 }
 
+export interface SpendingLimitResponse {
+  monthly_limit_cents: number
+  monthly_limit_dollars: number
+  current_month_spend_cents: number
+  current_month_spend_dollars: number
+  percent_used: number
+  billing_cycle_start: string
+  limit_reached_at?: string
+}
+
 export interface PaginatedResponse<T> {
   next_cursor?: string
   items: T[]
