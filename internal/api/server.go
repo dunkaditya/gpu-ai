@@ -74,6 +74,8 @@ func NewServer(deps ServerDeps) *Server {
 		authChain(http.HandlerFunc(s.handleListInstances)))
 	s.mux.Handle("GET /api/v1/instances/{id}",
 		authChain(http.HandlerFunc(s.handleGetInstance)))
+	s.mux.Handle("PATCH /api/v1/instances/{id}",
+		authChain(http.HandlerFunc(s.handleUpdateInstance)))
 	s.mux.Handle("DELETE /api/v1/instances/{id}",
 		authChain(http.HandlerFunc(s.handleDeleteInstance)))
 

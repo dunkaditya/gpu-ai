@@ -351,6 +351,73 @@ func (s *Server) handleGetInstance(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, s.instanceToResponse(inst))
 }
 
+// UpdateInstanceRequest is the JSON body for PATCH /api/v1/instances/{id}.
+type UpdateInstanceRequest struct {
+	Name *string `json:"name"`
+}
+
+// handleUpdateInstance handles PATCH /api/v1/instances/{id}.
+// Updates mutable instance fields (currently only name).
+func (s *Server) handleUpdateInstance(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// 1. Extract instance ID from path.
+	instanceID := r.PathValue("id")
+	if instanceID == "" {
+		writeProblem(w, http.StatusBadRequest, "missing-id", "Instance ID is required")
+		return
+	}
+
+	// 2. Extract org ID from claims.
+	claims, ok := auth.ClaimsFromContext(ctx)
+	if !ok {
+		writeProblem(w, http.StatusUnauthorized, "unauthenticated", "Valid authentication required")
+		return
+	}
+
+	orgID, err := s.db.GetOrgIDByClerkOrgID(ctx, claims.OrgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
+			return
+		}
+		slog.Error("failed to look up org", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+
+	// 3. Decode request body.
+	var req UpdateInstanceRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeProblem(w, http.StatusBadRequest, "invalid-request", "Invalid JSON request body")
+		return
+	}
+
+	// 4. Update instance name.
+	if err := s.db.UpdateInstanceName(ctx, instanceID, orgID, req.Name); err != nil {
+		slog.Error("failed to update instance name",
+			slog.String("instance_id", instanceID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to update instance")
+		return
+	}
+
+	// 5. Re-fetch and return updated instance.
+	inst, err := s.db.GetInstanceForOrg(ctx, instanceID, orgID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			writeProblem(w, http.StatusNotFound, "not-found", "Instance not found")
+			return
+		}
+		slog.Error("failed to get instance", slog.String("error", err.Error()))
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to retrieve instance")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, s.instanceToResponse(inst))
+}
+
 // handleDeleteInstance handles DELETE /api/v1/instances/{id}.
 // Terminates an instance idempotently (returns 200 if already terminated).
 func (s *Server) handleDeleteInstance(w http.ResponseWriter, r *http.Request) {

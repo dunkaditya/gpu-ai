@@ -44,6 +44,19 @@ export async function createInstance(req: CreateInstanceRequest): Promise<Instan
   return res.json()
 }
 
+export async function renameInstance(id: string, name: string): Promise<InstanceResponse> {
+  const res = await fetch(`${API_BASE}/instances/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || 'Failed to rename instance')
+  }
+  return res.json()
+}
+
 export async function terminateInstance(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/instances/${id}`, { method: 'DELETE' })
   if (!res.ok && res.status !== 204) throw new Error('Failed to terminate instance')

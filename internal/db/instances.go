@@ -313,6 +313,14 @@ func (p *Pool) TerminateInstance(ctx context.Context, instanceID string) (bool, 
 	return tag.RowsAffected() == 1, nil
 }
 
+// UpdateInstanceName updates the display name of an instance scoped to an organization.
+func (p *Pool) UpdateInstanceName(ctx context.Context, instanceID, orgID string, name *string) error {
+	_, err := p.pool.Exec(ctx,
+		`UPDATE instances SET name = $1, updated_at = NOW() WHERE instance_id = $2 AND org_id = $3`,
+		name, instanceID, orgID)
+	return err
+}
+
 // SetInstanceError sets an instance to error state with a human-readable reason.
 func (p *Pool) SetInstanceError(ctx context.Context, instanceID, reason string) error {
 	_, err := p.pool.Exec(ctx,
