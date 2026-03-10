@@ -256,6 +256,9 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		prov = c.Prov
 		offering = &c.Offering
 
+		// Set bid price for spot instances (provider's raw price, pre-markup).
+		provReq.BidPricePerGPU = c.Offering.PricePerHour
+
 		e.logger.Info("attempting provision with provider",
 			slog.String("instance_id", instanceID),
 			slog.String("provider", prov.Name()),

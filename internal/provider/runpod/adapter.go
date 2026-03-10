@@ -257,7 +257,7 @@ func (a *Adapter) Provision(ctx context.Context, req provider.ProvisionRequest) 
 	case provider.TierOnDemand:
 		return a.provisionOnDemand(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars, req.StartupScript)
 	case provider.TierSpot:
-		return a.provisionSpot(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars, req.StartupScript)
+		return a.provisionSpot(ctx, rpGPUName, gpuCount, dockerImage, req.InstanceID, envVars, req.StartupScript, req.BidPricePerGPU)
 	default:
 		return nil, fmt.Errorf("unsupported tier: %s", req.Tier)
 	}
@@ -314,7 +314,7 @@ func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCo
 	}, nil
 }
 
-func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount int, imageName, name string, env []envVar, startupScript string) (*provider.ProvisionResult, error) {
+func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount int, imageName, name string, env []envVar, startupScript string, bidPerGPU float64) (*provider.ProvisionResult, error) {
 	input := map[string]any{
 		"cloudType":         "COMMUNITY",
 		"gpuCount":          gpuCount,
@@ -325,7 +325,7 @@ func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount 
 		"volumeInGb":        0,
 		"startSsh":          true,
 		"ports":             "22/tcp",
-		"bidPerGpu":         float64(0),
+		"bidPerGpu":         bidPerGPU,
 		"env":               env,
 	}
 	if startupScript != "" {

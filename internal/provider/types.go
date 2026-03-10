@@ -91,6 +91,7 @@ type ProvisionRequest struct {
 	InternalToken string `json:"internal_token"`
 	CallbackURL      string       `json:"callback_url"`
 	StartupScript    string       `json:"startup_script,omitempty"`
+	BidPricePerGPU   float64      `json:"bid_price_per_gpu,omitempty"` // spot bid price (provider's raw price, pre-markup)
 }
 
 // ProvisionResult is returned after a successful provisioning call.
