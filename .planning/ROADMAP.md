@@ -261,7 +261,7 @@ Plans:
   6. All destructive actions use ConfirmDialog instead of window.confirm()
   7. Settings page manages spending limits via existing API endpoints
   8. Mobile sidebar accessible via hamburger menu
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] 10-01-PLAN.md -- Backend rename endpoint, dashboard shell redesign (sidebar, topbar, layout), ConfirmDialog, coming-soon pages

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 10 context gathered
-last_updated: "2026-03-10T05:28:15.575Z"
-last_activity: 2026-03-09 -- Completed 09-03 (WireGuard package deletion)
+status: in-progress
+stopped_at: Completed 10-01 (Dashboard shell)
+last_updated: "2026-03-10T06:03:38Z"
+last_activity: 2026-03-10 -- Completed 10-01 (Dashboard shell)
 progress:
   total_phases: 13
   completed_phases: 12
-  total_plans: 37
-  completed_plans: 37
-  percent: 100
+  total_plans: 41
+  completed_plans: 38
+  percent: 93
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 9: Replace WireGuard with FRP Tunneling
+**Current focus:** Phase 10: Frontend Dashboard with GPU Availability, Provisioning, and Instance Management
 
 ## Current Position
 
-Phase: 9 (Replace WireGuard with FRP Tunneling)
-Plan: 3 of 3 in current phase
-Status: Phase 09 Complete
-Last activity: 2026-03-09 -- Completed 09-03 (WireGuard package deletion)
+Phase: 10 (Frontend Dashboard)
+Plan: 1 of 4 in current phase
+Status: Plan 10-01 Complete
+Last activity: 2026-03-10 -- Completed 10-01 (Dashboard shell)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -54,7 +54,7 @@ Progress: [██████████] 100%
 | 06-availability-health-monitoring | 4 | 9min | 2.3min |
 
 **Recent Trend:**
-- Last 5 plans: 07-02 (2min), 07-03 (2min), 07-04 (5min), 09-01 (7min)
+- Last 5 plans: 07-03 (2min), 07-04 (5min), 09-01 (7min), 09-03 (7min), 10-01 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -74,6 +74,7 @@ Progress: [██████████] 100%
 | Phase 09 P01 | 7min | 2 tasks | 12 files |
 | Phase 09 P03 | 7min | 1 tasks | 14 files |
 | Phase 09 P02 | 5min | 2 tasks | 5 files |
+| Phase 10 P01 | 3min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -227,6 +228,9 @@ Recent decisions affecting current work:
 - [Phase 09]: extractHost helper parses proxy hostname from GpuctlPublicURL using net/url.Parse
 - [09-03]: WireGuard indirect deps (wireguard, wintun) remain as transitive FRP library dependencies -- not removable without removing FRP
 - [09-03]: WG config env vars fully removed from Config struct and Load() validation
+- [10-01]: Cloud layout converted to client component for mobile sidebar state sharing between sidebar and topbar
+- [10-01]: Sidebar icons extracted to named components for readability and reuse
+- [10-01]: Coming-soon pages use server components with static content (no client-side JS needed)
 
 ### Roadmap Evolution
 
@@ -246,6 +250,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T05:28:15.567Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-frontend-dashboard-with-gpu-availability-provisioning-and-instance-management/10-CONTEXT.md
+Last session: 2026-03-10T06:03:38Z
+Stopped at: Completed 10-01 (Dashboard shell)
+Resume file: .planning/phases/10-frontend-dashboard-with-gpu-availability-provisioning-and-instance-management/10-01-SUMMARY.md
