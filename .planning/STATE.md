@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 10-01 (Dashboard shell)
-last_updated: "2026-03-10T06:03:38Z"
-last_activity: 2026-03-10 -- Completed 10-01 (Dashboard shell)
+stopped_at: Completed 10-03 (Instances table & detail page)
+last_updated: "2026-03-10T06:11:53.983Z"
+last_activity: 2026-03-10 -- Completed 10-03 (Instances table & detail page)
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 41
-  completed_plans: 38
-  percent: 93
+  completed_plans: 40
+  percent: 95
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 10 (Frontend Dashboard)
-Plan: 1 of 4 in current phase
-Status: Plan 10-01 Complete
-Last activity: 2026-03-10 -- Completed 10-01 (Dashboard shell)
+Plan: 3 of 4 in current phase
+Status: Plan 10-03 Complete
+Last activity: 2026-03-10 -- Completed 10-03 (Instances table & detail page)
 
-Progress: [█████████░] 93%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -75,6 +75,8 @@ Progress: [█████████░] 93%
 | Phase 09 P03 | 7min | 1 tasks | 14 files |
 | Phase 09 P02 | 5min | 2 tasks | 5 files |
 | Phase 10 P01 | 3min | 2 tasks | 11 files |
+| Phase 10 P02 | 4min | 2 tasks | 5 files |
+| Phase 10 P03 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -231,6 +233,12 @@ Recent decisions affecting current work:
 - [10-01]: Cloud layout converted to client component for mobile sidebar state sharing between sidebar and topbar
 - [10-01]: Sidebar icons extracted to named components for readability and reuse
 - [10-01]: Coming-soon pages use server components with static content (no client-side JS needed)
+- [10-02]: Filters apply BEFORE grouping: flat offerings filtered by region/tier, then grouped into GPUCardData by gpu_model
+- [10-02]: GPUCard launches cheapest available offering when Launch button clicked
+- [10-02]: Launch modal pre-filled mode omits ssh_key_ids -- backend auto-attaches all user SSH keys
+- [10-02]: GPU availability page converted to client component for GPUAvailabilityTable
+- [Phase 10-03]: ConfirmDialog replaces window.confirm for all terminate actions
+- [Phase 10-03]: SWR globalMutate used on detail page to invalidate list cache key for cross-page consistency
 
 ### Roadmap Evolution
 
@@ -250,6 +258,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T06:03:38Z
-Stopped at: Completed 10-01 (Dashboard shell)
-Resume file: .planning/phases/10-frontend-dashboard-with-gpu-availability-provisioning-and-instance-management/10-01-SUMMARY.md
+Last session: 2026-03-10T06:11:53.980Z
+Stopped at: Completed 10-03 (Instances table & detail page)
+Resume file: None
