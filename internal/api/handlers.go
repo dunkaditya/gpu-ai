@@ -93,7 +93,7 @@ func (s *Server) instanceToResponse(inst *db.Instance) InstanceResponse {
 		resp.Connection = &ConnectionInfo{
 			Hostname:   proxyHost,
 			Port:       port,
-			SSHCommand: fmt.Sprintf("ssh -p %d root@%s", port, proxyHost),
+			SSHCommand: fmt.Sprintf("ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p %d root@%s", port, proxyHost),
 		}
 	}
 

@@ -57,7 +57,6 @@ export function GPUAvailabilityTable() {
   }>("/api/v1/gpu/available", fetcher, { refreshInterval: 30000 });
 
   const [regionFilter, setRegionFilter] = useState("");
-  const [tierFilter, setTierFilter] = useState("");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   // Launch form state
@@ -74,14 +73,13 @@ export function GPUAvailabilityTable() {
     [offerings]
   );
 
-  // Filter flat offerings BEFORE grouping
+  // Filter to on-demand only (beta), then apply user filters
   const filteredOfferings = useMemo(() => {
-    let result = offerings;
+    let result = offerings.filter((o) => o.tier === "on_demand");
     if (regionFilter)
       result = result.filter((o) => o.region === regionFilter);
-    if (tierFilter) result = result.filter((o) => o.tier === tierFilter);
     return result;
-  }, [offerings, regionFilter, tierFilter]);
+  }, [offerings, regionFilter]);
 
   // Group filtered offerings into cards by gpu_model
   const cards: GPUCardData[] = useMemo(() => {
@@ -140,7 +138,6 @@ export function GPUAvailabilityTable() {
 
   function clearFilters() {
     setRegionFilter("");
-    setTierFilter("");
   }
 
   if (error) {
@@ -175,27 +172,6 @@ export function GPUAvailabilityTable() {
             </option>
           ))}
         </select>
-
-        <div className="flex rounded-lg border border-border overflow-hidden">
-          {[
-            { label: "All", value: "" },
-            { label: "Spot", value: "spot" },
-            { label: "On-Demand", value: "on_demand" },
-          ].map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setTierFilter(opt.value)}
-              className={cn(
-                "px-3 py-2 type-ui-xs font-medium transition-colors",
-                tierFilter === opt.value
-                  ? "bg-purple-dim text-purple-light"
-                  : "text-text-muted hover:text-text hover:bg-bg-card"
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
 
         <button
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}

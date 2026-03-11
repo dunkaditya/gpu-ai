@@ -56,16 +56,16 @@ type gpuTypesResponse struct {
 }
 
 type runpodGPUType struct {
-	ID               string        `json:"id"`
-	DisplayName      string        `json:"displayName"`
-	MemoryInGB       int           `json:"memoryInGb"`
-	SecureCloud      bool          `json:"secureCloud"`
-	CommunityCloud   bool          `json:"communityCloud"`
-	SecurePrice      float64       `json:"securePrice"`
-	CommunityPrice   float64       `json:"communityPrice"`
-	SecureSpotPrice  float64       `json:"secureSpotPrice"`
-	CommunitySpotPrc float64       `json:"communitySpotPrice"`
-	LowestPrice      *lowestPrice  `json:"lowestPrice"`
+	ID               string       `json:"id"`
+	DisplayName      string       `json:"displayName"`
+	MemoryInGB       int          `json:"memoryInGb"`
+	SecureCloud      bool         `json:"secureCloud"`
+	CommunityCloud   bool         `json:"communityCloud"`
+	SecurePrice      float64      `json:"securePrice"`
+	CommunityPrice   float64      `json:"communityPrice"`
+	SecureSpotPrice  float64      `json:"secureSpotPrice"`
+	CommunitySpotPrc float64      `json:"communitySpotPrice"`
+	LowestPrice      *lowestPrice `json:"secureLowestPrice"`
 }
 
 type lowestPrice struct {
@@ -158,58 +158,34 @@ func (a *Adapter) ListAvailable(ctx context.Context) ([]provider.GPUOffering, er
 			continue
 		}
 
-		var availableCount int
+		if !gpu.SecureCloud || gpu.SecurePrice <= 0 {
+			continue
+		}
+
+		var availableCount, cpuCores, ramGB int
 		var stockStatus string
 		if gpu.LowestPrice != nil {
 			availableCount = gpu.LowestPrice.MaxUnreservedGPUCount
 			stockStatus = gpu.LowestPrice.StockStatus
+			cpuCores = gpu.LowestPrice.MinVcpu
+			ramGB = gpu.LowestPrice.MinMemory
 		}
 
-		// On-demand offering (Secure Cloud).
-		if gpu.SecureCloud {
-			price := gpu.SecurePrice
-			if gpu.LowestPrice != nil && gpu.LowestPrice.UninterruptablePrice > 0 {
-				price = gpu.LowestPrice.UninterruptablePrice
-			}
-			if price > 0 {
-				region, dcLocation := NormalizeRegion("")
-				offerings = append(offerings, provider.GPUOffering{
-					Provider:           "runpod",
-					GPUType:            gpuType,
-					GPUCount:           1,
-					VRAMPerGPUGB:       gpu.MemoryInGB,
-					PricePerHour:       price,
-					Tier:               provider.TierOnDemand,
-					Region:             region,
-					DatacenterLocation: dcLocation,
-					StockStatus:        stockStatus,
-					AvailableCount:     availableCount,
-				})
-			}
-		}
-
-		// Spot offering (Community Cloud).
-		if gpu.CommunityCloud {
-			price := gpu.CommunitySpotPrc
-			if gpu.LowestPrice != nil && gpu.LowestPrice.MinimumBidPrice > 0 {
-				price = gpu.LowestPrice.MinimumBidPrice
-			}
-			if price > 0 {
-				region, dcLocation := NormalizeRegion("")
-				offerings = append(offerings, provider.GPUOffering{
-					Provider:           "runpod",
-					GPUType:            gpuType,
-					GPUCount:           1,
-					VRAMPerGPUGB:       gpu.MemoryInGB,
-					PricePerHour:       price,
-					Tier:               provider.TierSpot,
-					Region:             region,
-					DatacenterLocation: dcLocation,
-					StockStatus:        stockStatus,
-					AvailableCount:     availableCount,
-				})
-			}
-		}
+		region, dcLocation := NormalizeRegion("")
+		offerings = append(offerings, provider.GPUOffering{
+			Provider:           "runpod",
+			GPUType:            gpuType,
+			GPUCount:           1,
+			VRAMPerGPUGB:       gpu.MemoryInGB,
+			CPUCores:           cpuCores,
+			RAMGB:              ramGB,
+			PricePerHour:       gpu.SecurePrice,
+			Tier:               provider.TierOnDemand,
+			Region:             region,
+			DatacenterLocation: dcLocation,
+			StockStatus:        stockStatus,
+			AvailableCount:     availableCount,
+		})
 	}
 
 	slog.Info("listed RunPod GPU offerings",

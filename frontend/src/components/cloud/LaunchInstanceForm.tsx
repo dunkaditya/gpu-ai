@@ -26,10 +26,6 @@ export function LaunchInstanceForm({
   // Manual mode state
   const [gpuType, setGpuType] = useState(defaultGPU ?? "");
   const [region, setRegion] = useState(defaultRegion ?? "");
-  const [tier, setTier] = useState<"spot" | "on_demand">(
-    offering?.tier ?? "spot"
-  );
-
   // Shared state
   const [gpuCount, setGpuCount] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -66,13 +62,13 @@ export function LaunchInstanceForm({
           gpu_type: offering.gpu_model,
           gpu_count: gpuCount,
           region: offering.region,
-          tier: offering.tier,
+          tier: "on_demand",
         }
       : {
           gpu_type: gpuType,
           gpu_count: gpuCount,
           region,
-          tier,
+          tier: "on_demand",
         };
 
     try {
@@ -167,20 +163,13 @@ export function LaunchInstanceForm({
                 </div>
               </div>
 
-              {/* Region + Tier */}
+              {/* Region */}
               <div className="flex items-center gap-3">
                 <span className="type-ui-2xs bg-bg-card-hover text-text-muted rounded-full px-2.5 py-0.5">
                   {offering.region}
                 </span>
-                <span
-                  className={cn(
-                    "type-ui-2xs rounded-full px-2.5 py-0.5 font-medium",
-                    offering.tier === "spot"
-                      ? "bg-purple-dim text-purple-light"
-                      : "bg-bg-card-hover text-text-muted"
-                  )}
-                >
-                  {offering.tier === "on_demand" ? "On-Demand" : "Spot"}
+                <span className="type-ui-2xs bg-bg-card-hover text-text-muted rounded-full px-2.5 py-0.5">
+                  On-Demand
                 </span>
               </div>
 
@@ -267,38 +256,6 @@ export function LaunchInstanceForm({
                 </div>
               </div>
 
-              {/* Tier Toggle */}
-              <div className="space-y-2">
-                <label className="type-ui-xs text-text-muted font-medium uppercase tracking-wider">
-                  Tier
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setTier("spot")}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-lg type-ui-sm font-medium border transition-all",
-                      tier === "spot"
-                        ? "bg-purple-dim border-purple/40 text-purple-light"
-                        : "bg-bg border-border text-text-muted hover:text-text hover:border-border-light"
-                    )}
-                  >
-                    Spot
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTier("on_demand")}
-                    className={cn(
-                      "flex-1 py-2.5 rounded-lg type-ui-sm font-medium border transition-all",
-                      tier === "on_demand"
-                        ? "bg-purple-dim border-purple/40 text-purple-light"
-                        : "bg-bg border-border text-text-muted hover:text-text hover:border-border-light"
-                    )}
-                  >
-                    On-Demand
-                  </button>
-                </div>
-              </div>
             </>
           )}
 

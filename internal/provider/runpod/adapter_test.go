@@ -51,11 +51,11 @@ func TestListAvailable(t *testing.T) {
 						"communityPrice": 0.34,
 						"secureSpotPrice": 0.0,
 						"communitySpotPrice": 0.34,
-						"lowestPrice": {
+						"secureLowestPrice": {
 							"minimumBidPrice": 0.34,
 							"uninterruptablePrice": 0.74,
-							"minVcpu": 1,
-							"minMemory": 1,
+							"minVcpu": 16,
+							"minMemory": 62,
 							"stockStatus": "High",
 							"maxUnreservedGpuCount": 15
 						}
@@ -70,7 +70,7 @@ func TestListAvailable(t *testing.T) {
 						"communityPrice": 0.0,
 						"secureSpotPrice": 0.0,
 						"communitySpotPrice": 0.0,
-						"lowestPrice": {
+						"secureLowestPrice": {
 							"minimumBidPrice": 0.0,
 							"uninterruptablePrice": 5.00,
 							"minVcpu": 4,
@@ -95,25 +95,15 @@ func TestListAvailable(t *testing.T) {
 		t.Fatalf("ListAvailable returned error: %v", err)
 	}
 
-	// RTX 4090 is mapped, RTX 9090 SUPER is not. RTX 4090 has both tiers.
-	// Expected: 2 offerings (on-demand + spot for RTX 4090), 0 for unmapped.
-	if len(offerings) != 2 {
-		t.Fatalf("expected 2 offerings, got %d", len(offerings))
+	// RTX 4090 is mapped, RTX 9090 SUPER is not. On-demand only.
+	// Expected: 1 offering (on-demand for RTX 4090), 0 for unmapped.
+	if len(offerings) != 1 {
+		t.Fatalf("expected 1 offering, got %d", len(offerings))
 	}
 
-	// Verify on-demand offering.
-	var onDemand, spot *provider.GPUOffering
-	for i := range offerings {
-		switch offerings[i].Tier {
-		case provider.TierOnDemand:
-			onDemand = &offerings[i]
-		case provider.TierSpot:
-			spot = &offerings[i]
-		}
-	}
-
-	if onDemand == nil {
-		t.Fatal("expected on-demand offering")
+	onDemand := offerings[0]
+	if onDemand.Tier != provider.TierOnDemand {
+		t.Errorf("expected tier on_demand, got %s", onDemand.Tier)
 	}
 	if onDemand.GPUType != provider.GPUTypeRTX4090 {
 		t.Errorf("expected GPU type %s, got %s", provider.GPUTypeRTX4090, onDemand.GPUType)
@@ -123,6 +113,12 @@ func TestListAvailable(t *testing.T) {
 	}
 	if onDemand.VRAMPerGPUGB != 24 {
 		t.Errorf("expected VRAM 24 GB, got %d", onDemand.VRAMPerGPUGB)
+	}
+	if onDemand.CPUCores != 16 {
+		t.Errorf("expected 16 CPU cores, got %d", onDemand.CPUCores)
+	}
+	if onDemand.RAMGB != 62 {
+		t.Errorf("expected 62 GB RAM, got %d", onDemand.RAMGB)
 	}
 	if onDemand.Provider != "runpod" {
 		t.Errorf("expected provider runpod, got %s", onDemand.Provider)
@@ -135,20 +131,6 @@ func TestListAvailable(t *testing.T) {
 	}
 	if onDemand.AvailableCount != 15 {
 		t.Errorf("expected available count 15, got %d", onDemand.AvailableCount)
-	}
-
-	// Verify spot offering.
-	if spot == nil {
-		t.Fatal("expected spot offering")
-	}
-	if spot.GPUType != provider.GPUTypeRTX4090 {
-		t.Errorf("expected GPU type %s, got %s", provider.GPUTypeRTX4090, spot.GPUType)
-	}
-	if spot.PricePerHour != 0.34 {
-		t.Errorf("expected spot price 0.34, got %f", spot.PricePerHour)
-	}
-	if spot.Tier != provider.TierSpot {
-		t.Errorf("expected tier spot, got %s", spot.Tier)
 	}
 }
 

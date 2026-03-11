@@ -108,7 +108,61 @@ if [ "$FRPC_DOWNLOADED" = true ]; then
 fi
 
 # ============================================================
-# 5. Branded Hostname + MOTD
+# 5. Provider Scrubbing (BEFORE branding, so we start clean)
+# ============================================================
+# Block cloud metadata endpoint
+if command -v iptables &>/dev/null; then
+    iptables -A OUTPUT -d 169.254.169.254 -j DROP 2>/dev/null || true
+fi
+
+# Remove provider environment variables
+for var in $(env | grep -iE '^(RUNPOD_|LAMBDA_|E2E_|VAST_|COREWEAVE_)' | cut -d= -f1 || true); do
+    unset "$var" 2>/dev/null || true
+done
+
+# Clean provider branding from all MOTD/login sources
+rm -f /etc/update-motd.d/* 2>/dev/null || true
+rm -f /etc/motd.d/* 2>/dev/null || true
+rm -f /etc/legal 2>/dev/null || true
+
+# Remove provider login scripts (RunPod injects ASCII art via profile.d)
+for f in /etc/profile.d/*; do
+    if grep -qiE 'runpod|lambda|vast\.ai|coreweave' "$f" 2>/dev/null; then
+        rm -f "$f" 2>/dev/null || true
+    fi
+done
+
+# Nuke provider ASCII banners from shell rc files.
+# RunPod bakes a multi-line ASCII art block into bash.bashrc / .bashrc that
+# simple sed can't reliably catch (the art lines are just pipes and underscores).
+# Use awk to delete everything from the first line of the banner block through
+# the docs URL, then strip any remaining runpod references.
+for rc in /root/.bashrc /root/.profile /etc/bash.bashrc; do
+    if [ -f "$rc" ] && grep -qiE 'runpod|docs\.runpod' "$rc" 2>/dev/null; then
+        awk '
+            /______.*______/ && !skip { skip=1 }
+            /docs\.runpod\.io|blog\.runpod\.io/ { skip=0; next }
+            skip { next }
+            /[Rr]un[Pp]od|RUNPOD/ { next }
+            { print }
+        ' "$rc" > "${rc}.tmp" && mv "${rc}.tmp" "$rc"
+    fi
+done
+
+# Remove provider CLI tools
+for tool in runpodctl lambda-cloud e2ectl vastai; do
+    rm -f "$(which "$tool" 2>/dev/null)" 2>/dev/null || true
+done
+
+# Stop provider agents (VM or container)
+for svc in runpod-agent lambda-agent; do
+    systemctl stop "$svc" 2>/dev/null || true
+    systemctl disable "$svc" 2>/dev/null || true
+    pkill -f "$svc" 2>/dev/null || true
+done
+
+# ============================================================
+# 6. Branded Hostname + MOTD (after scrubbing)
 # ============================================================
 # Set hostname (hostnamectl for VMs, direct write for containers)
 hostnamectl set-hostname '{{.Hostname}}' 2>/dev/null || \
@@ -129,35 +183,6 @@ cat > /etc/motd << 'MOTDEOF'
  Support: support@gpu.ai
 
 MOTDEOF
-
-# ============================================================
-# 6. Provider Scrubbing
-# ============================================================
-# Block cloud metadata endpoint
-if command -v iptables &>/dev/null; then
-    iptables -A OUTPUT -d 169.254.169.254 -j DROP 2>/dev/null || true
-fi
-
-# Remove provider environment variables
-for var in $(env | grep -iE '^(RUNPOD_|LAMBDA_|E2E_|VAST_|COREWEAVE_)' | cut -d= -f1 || true); do
-    unset "$var" 2>/dev/null || true
-done
-
-# Clean provider branding
-rm -f /etc/update-motd.d/* 2>/dev/null || true
-rm -f /etc/motd.d/* 2>/dev/null || true
-
-# Remove provider CLI tools
-for tool in runpodctl lambda-cloud e2ectl vastai; do
-    rm -f "$(which "$tool" 2>/dev/null)" 2>/dev/null || true
-done
-
-# Stop provider agents (VM or container)
-for svc in runpod-agent lambda-agent; do
-    systemctl stop "$svc" 2>/dev/null || true
-    systemctl disable "$svc" 2>/dev/null || true
-    pkill -f "$svc" 2>/dev/null || true
-done
 
 # ============================================================
 # 7. NVIDIA Driver Verification

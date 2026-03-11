@@ -254,7 +254,7 @@ query GpuTypes {
     communityPrice
     secureSpotPrice
     communitySpotPrice
-    lowestPrice(input: { gpuCount: 1 }) {
+    secureLowestPrice: lowestPrice(input: { gpuCount: 1 }) {
       minimumBidPrice
       uninterruptablePrice
       minVcpu

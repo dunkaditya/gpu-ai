@@ -10,8 +10,10 @@ interface GPUCardProps {
 
 export function GPUCard({ card, onLaunch }: GPUCardProps) {
   function handleLaunch() {
-    // Pick cheapest available offering
-    const available = card.offerings.filter((o) => o.available_count > 0);
+    // Pick cheapest available on-demand offering
+    const available = card.offerings.filter(
+      (o) => o.available_count > 0 && o.tier === "on_demand"
+    );
     if (available.length === 0) return;
     const cheapest = available.reduce((a, b) =>
       a.price_per_hour < b.price_per_hour ? a : b
@@ -55,28 +57,16 @@ export function GPUCard({ card, onLaunch }: GPUCardProps) {
         </div>
       </div>
 
-      {/* Pricing section: spot + on-demand side by side */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <span className="type-ui-2xs text-text-dim uppercase block mb-1">
-            Spot
-          </span>
-          <span className="type-ui-sm font-mono text-text">
-            {card.spot_price != null && card.spot_price !== Infinity
-              ? `$${card.spot_price.toFixed(2)}/hr`
-              : "--"}
-          </span>
-        </div>
-        <div>
-          <span className="type-ui-2xs text-text-dim uppercase block mb-1">
-            On-Demand
-          </span>
-          <span className="type-ui-sm font-mono text-text">
-            {card.on_demand_price != null && card.on_demand_price !== Infinity
-              ? `$${card.on_demand_price.toFixed(2)}/hr`
-              : "--"}
-          </span>
-        </div>
+      {/* Pricing */}
+      <div className="mb-4">
+        <span className="type-ui-2xs text-text-dim uppercase block mb-1">
+          Price
+        </span>
+        <span className="type-ui-sm font-mono text-text">
+          {card.on_demand_price != null && card.on_demand_price !== Infinity
+            ? `$${card.on_demand_price.toFixed(2)}/hr`
+            : "--"}
+        </span>
       </div>
 
       {/* Region tags */}

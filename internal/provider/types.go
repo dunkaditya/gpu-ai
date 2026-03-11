@@ -167,7 +167,7 @@ func (i *Instance) ToCustomer() CustomerInstance {
 	return CustomerInstance{
 		ID:           i.InstanceID,
 		Hostname:     i.Hostname,
-		SSHCommand:   fmt.Sprintf("ssh root@%s", i.Hostname),
+		SSHCommand:   fmt.Sprintf("ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@%s", i.Hostname),
 		Status:       i.Status,
 		GPUType:      i.GPUType,
 		GPUCount:     i.GPUCount,
