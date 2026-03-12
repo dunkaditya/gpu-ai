@@ -268,3 +268,23 @@ Plans:
 - [ ] 10-02-PLAN.md -- GPU availability card grid with filters/sorting, enhanced launch modal with price confirmation
 - [ ] 10-03-PLAN.md -- Enhanced instances table (clickable rows, rename, uptime, confirmation), instance detail page
 - [ ] 10-04-PLAN.md -- Polish SSH Keys, Billing, Settings pages; visual verification checkpoint
+
+### Phase 11: Dashboard UI redesign — clean linear aesthetic, GPU catalog with categories and search, instances table fixes, professional polish
+
+**Goal:** Transform the dashboard from functional-but-generic into a polished, Linear-inspired product -- refine the design system toward a clean monochrome aesthetic with minimal accent color, restructure GPU availability as a searchable catalog with GPU family categories, fix instances table column alignment by replacing the colSpan hack with CSS grid, and apply consistent professional polish across all dashboard pages (buttons, empty states, border radius, spacing, focus rings)
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06
+**Depends on:** Phase 10
+**Success Criteria** (what must be TRUE):
+  1. Dashboard pages use refined Linear aesthetic -- flat buttons, subtle borders, near-monochrome palette with purple accent only on primary CTAs
+  2. Film grain overlay scoped to marketing pages only -- dashboard renders without grain
+  3. GPU catalog shows category tabs (Blackwell, Hopper, Ada Lovelace, Ampere, Legacy) with text search filtering
+  4. Instances table columns align properly with headers using CSS grid layout (no colSpan hack)
+  5. All dashboard components use btn-primary/btn-secondary instead of gradient-btn
+  6. Consistent shared EmptyState component used across all empty states
+  7. Sidebar uses left-border active indicators, topbar has refined breadcrumb
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Design system refinement (Linear tokens, film grain scoping, btn-primary/btn-secondary), shared EmptyState component, GPU category constants, sidebar/topbar polish
+- [ ] 11-02-PLAN.md — GPU catalog with category tabs and debounced search, GPU card and launch modal redesign
+- [ ] 11-03-PLAN.md — Instances table CSS grid fix, professional polish across billing/SSH keys/settings pages
