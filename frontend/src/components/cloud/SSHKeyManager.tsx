@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { fetcher, addSSHKey, deleteSSHKey } from "@/lib/api";
 import { ConfirmDialog } from "@/components/cloud/ConfirmDialog";
+import { EmptyState } from "@/components/cloud/EmptyState";
 import type { SSHKeyResponse } from "@/lib/types";
 
 function SkeletonRow() {
@@ -87,7 +88,7 @@ export function SSHKeyManager() {
         <p className="type-ui-sm text-red-400">Failed to load SSH keys</p>
         <button
           onClick={() => mutate()}
-          className="mt-3 type-ui-xs text-purple hover:text-purple-light transition-colors"
+          className="mt-3 type-ui-xs text-text-muted hover:text-text transition-colors"
         >
           Retry
         </button>
@@ -101,7 +102,7 @@ export function SSHKeyManager() {
       {showForm && (
         <form
           onSubmit={handleAdd}
-          className="bg-bg-card border border-border rounded-xl p-6 space-y-5"
+          className="bg-bg-card border border-border rounded-[10px] p-6 space-y-5"
         >
           <div className="space-y-2">
             <label className="type-ui-xs text-text-muted font-medium uppercase tracking-wider">
@@ -113,7 +114,7 @@ export function SSHKeyManager() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. work-laptop, macbook-pro"
               required
-              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
             />
           </div>
           <div className="space-y-2">
@@ -126,7 +127,7 @@ export function SSHKeyManager() {
               placeholder="ssh-ed25519 AAAA... user@hostname"
               required
               rows={3}
-              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all resize-none"
+              className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all resize-none"
             />
           </div>
 
@@ -143,7 +144,7 @@ export function SSHKeyManager() {
                 setShowForm(false);
                 setAddError(null);
               }}
-              className="px-4 py-2 rounded-lg type-ui-sm font-medium border border-border text-text-muted hover:text-text hover:bg-bg-card-hover transition-all"
+              className="btn-secondary"
             >
               Cancel
             </button>
@@ -151,10 +152,9 @@ export function SSHKeyManager() {
               type="submit"
               disabled={addLoading || !name || !publicKey}
               className={cn(
-                "px-4 py-2 rounded-lg type-ui-sm font-medium transition-all",
-                addLoading || !name || !publicKey
-                  ? "bg-purple/30 text-text-dim cursor-not-allowed"
-                  : "gradient-btn"
+                "btn-primary",
+                (addLoading || !name || !publicKey) &&
+                  "opacity-50 cursor-not-allowed"
               )}
             >
               {addLoading ? "Adding..." : "Add Key"}
@@ -164,7 +164,7 @@ export function SSHKeyManager() {
       )}
 
       {/* Keys list */}
-      <div className="rounded-xl border border-border bg-bg-card/50 overflow-hidden">
+      <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
         {/* Section header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-bg-card/80">
           <span className="type-ui-sm text-text font-medium">
@@ -173,7 +173,7 @@ export function SSHKeyManager() {
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="gradient-btn px-3.5 py-1.5 rounded-lg type-ui-xs font-medium transition-all"
+              className="btn-primary !py-1.5 !px-3.5 !type-ui-xs"
             >
               Add Key
             </button>
@@ -187,14 +187,13 @@ export function SSHKeyManager() {
             <SkeletonRow />
           </>
         ) : keys.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-12 h-12 rounded-full bg-bg-card flex items-center justify-center mb-4">
+          <EmptyState
+            icon={
               <svg
                 width="20"
                 height="20"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="text-text-dim"
               >
                 <circle
                   cx="6"
@@ -216,12 +215,10 @@ export function SSHKeyManager() {
                   strokeLinecap="round"
                 />
               </svg>
-            </div>
-            <p className="type-ui-sm text-text-muted">No SSH keys</p>
-            <p className="type-ui-2xs text-text-dim mt-1">
-              Add an SSH key to connect to your instances.
-            </p>
-          </div>
+            }
+            title="No SSH keys"
+            description="Add an SSH key to connect to your instances."
+          />
         ) : (
           <div>
             {/* Header row */}

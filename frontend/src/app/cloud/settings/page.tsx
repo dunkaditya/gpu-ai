@@ -69,7 +69,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Spending Limit Section */}
-      <div className="bg-bg-card border border-border rounded-xl overflow-hidden">
+      <div className="bg-bg-card border border-border rounded-[10px] overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60">
           <h2 className="type-ui-sm text-text font-medium">
             Monthly Spending Limit
@@ -88,7 +88,7 @@ export default function SettingsPage() {
               </p>
               <button
                 onClick={() => mutate()}
-                className="mt-3 type-ui-xs text-purple hover:text-purple-light transition-colors"
+                className="mt-3 type-ui-xs text-text-muted hover:text-text transition-colors"
               >
                 Retry
               </button>
@@ -133,7 +133,7 @@ export default function SettingsPage() {
                           ? "bg-red-500"
                           : limitData.percent_used > 70
                             ? "bg-yellow-500"
-                            : "bg-purple"
+                            : "bg-text-muted"
                       )}
                       style={{
                         width: `${Math.min(limitData.percent_used, 100)}%`,
@@ -176,7 +176,7 @@ export default function SettingsPage() {
                       value={limitInput}
                       onChange={(e) => setLimitInput(e.target.value)}
                       placeholder={limitData.monthly_limit_dollars.toFixed(2)}
-                      className="w-full bg-bg border border-border rounded-lg pl-7 pr-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+                      className="w-full bg-bg border border-border rounded-lg pl-7 pr-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
                     />
                   </div>
                 </div>
@@ -184,10 +184,9 @@ export default function SettingsPage() {
                   type="submit"
                   disabled={saving || !limitInput}
                   className={cn(
-                    "px-4 py-2.5 rounded-lg type-ui-sm font-medium transition-all whitespace-nowrap",
-                    saving || !limitInput
-                      ? "bg-purple/30 text-text-dim cursor-not-allowed"
-                      : "gradient-btn"
+                    "btn-primary whitespace-nowrap",
+                    (saving || !limitInput) &&
+                      "opacity-50 cursor-not-allowed"
                   )}
                 >
                   {saving ? "Saving..." : "Update"}
@@ -205,7 +204,7 @@ export default function SettingsPage() {
             <>
               {/* No limit set */}
               <div className="bg-bg rounded-lg border border-border/60 p-5 text-center">
-                <div className="w-10 h-10 rounded-full bg-bg-card flex items-center justify-center mx-auto mb-3">
+                <div className="w-10 h-10 rounded-full bg-bg-card-hover flex items-center justify-center mx-auto mb-3">
                   <svg
                     width="18"
                     height="18"
@@ -254,7 +253,7 @@ export default function SettingsPage() {
                       value={limitInput}
                       onChange={(e) => setLimitInput(e.target.value)}
                       placeholder="100.00"
-                      className="w-full bg-bg border border-border rounded-lg pl-7 pr-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+                      className="w-full bg-bg border border-border rounded-lg pl-7 pr-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
                     />
                   </div>
                 </div>
@@ -262,10 +261,9 @@ export default function SettingsPage() {
                   type="submit"
                   disabled={saving || !limitInput}
                   className={cn(
-                    "px-4 py-2.5 rounded-lg type-ui-sm font-medium transition-all whitespace-nowrap",
-                    saving || !limitInput
-                      ? "bg-purple/30 text-text-dim cursor-not-allowed"
-                      : "gradient-btn"
+                    "btn-primary whitespace-nowrap",
+                    (saving || !limitInput) &&
+                      "opacity-50 cursor-not-allowed"
                   )}
                 >
                   {saving ? "Saving..." : "Set Limit"}
@@ -291,7 +289,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Organization Section (placeholder) */}
-      <div className="bg-bg-card border border-border rounded-xl overflow-hidden">
+      <div className="bg-bg-card border border-border rounded-[10px] overflow-hidden">
         <div className="px-6 py-4 border-b border-border/60">
           <h2 className="type-ui-sm text-text font-medium">Organization</h2>
         </div>

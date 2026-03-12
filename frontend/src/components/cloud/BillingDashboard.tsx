@@ -4,6 +4,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { fetcher } from "@/lib/api";
+import { EmptyState } from "@/components/cloud/EmptyState";
 import type { UsageResponse, SpendingLimitResponse } from "@/lib/types";
 
 const periods = [
@@ -67,7 +68,7 @@ export function BillingDashboard() {
         <p className="type-ui-sm text-red-400">Failed to load billing data</p>
         <button
           onClick={() => mutate()}
-          className="mt-3 type-ui-xs text-purple hover:text-purple-light transition-colors"
+          className="mt-3 type-ui-xs text-text-muted hover:text-text transition-colors"
         >
           Retry
         </button>
@@ -83,7 +84,7 @@ export function BillingDashboard() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Cost */}
-        <div className="bg-bg-card border border-border rounded-xl p-5 border-l-[3px] border-l-purple">
+        <div className="bg-bg-card border border-border rounded-[10px] p-5">
           <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
             Total Cost
           </p>
@@ -101,7 +102,7 @@ export function BillingDashboard() {
         </div>
 
         {/* Active Sessions */}
-        <div className="bg-bg-card border border-border rounded-xl p-5 border-l-[3px] border-l-green">
+        <div className="bg-bg-card border border-border rounded-[10px] p-5">
           <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
             Active Sessions
           </p>
@@ -116,7 +117,7 @@ export function BillingDashboard() {
         </div>
 
         {/* Spending Limit */}
-        <div className="bg-bg-card border border-border rounded-xl p-5 border-l-[3px] border-l-text-dim">
+        <div className="bg-bg-card border border-border rounded-[10px] p-5">
           <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
             Spending Limit
           </p>
@@ -135,7 +136,7 @@ export function BillingDashboard() {
                         ? "bg-red-500"
                         : limitData.percent_used > 70
                           ? "bg-yellow-500"
-                          : "bg-purple"
+                          : "bg-text-muted"
                     )}
                     style={{
                       width: `${Math.min(limitData.percent_used, 100)}%`,
@@ -154,7 +155,7 @@ export function BillingDashboard() {
                 Set one in{" "}
                 <a
                   href="/cloud/settings"
-                  className="text-purple hover:text-purple-light transition-colors"
+                  className="text-text-muted hover:text-text transition-colors underline"
                 >
                   Settings
                 </a>
@@ -173,7 +174,7 @@ export function BillingDashboard() {
             className={cn(
               "px-4 py-2 type-ui-xs font-medium transition-colors",
               period === p.value
-                ? "bg-purple-dim text-purple-light"
+                ? "bg-bg-card-hover text-text"
                 : "text-text-muted hover:text-text hover:bg-bg-card"
             )}
           >
@@ -183,7 +184,7 @@ export function BillingDashboard() {
       </div>
 
       {/* Sessions Table */}
-      <div className="rounded-xl border border-border bg-bg-card/50 overflow-hidden">
+      <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -218,13 +219,18 @@ export function BillingDashboard() {
                 ))
               ) : sessions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
-                    <p className="type-ui-sm text-text-muted">
-                      No billing sessions in this period
-                    </p>
-                    <p className="type-ui-2xs text-text-dim mt-1">
-                      Launch an instance to start tracking usage.
-                    </p>
+                  <td colSpan={7}>
+                    <EmptyState
+                      icon={
+                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                          <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+                          <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
+                          <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
+                        </svg>
+                      }
+                      title="No billing sessions in this period"
+                      description="Launch an instance to start tracking usage."
+                    />
                   </td>
                 </tr>
               ) : (
