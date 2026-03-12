@@ -5,10 +5,11 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/cloud/StatusBadge";
 import { ConfirmDialog } from "@/components/cloud/ConfirmDialog";
+import { EmptyState } from "@/components/cloud/EmptyState";
 import { terminateInstance, renameInstance } from "@/lib/api";
 import type { InstanceResponse } from "@/lib/types";
 
-/* ── Utility Functions ── */
+/* -- Utility Functions -- */
 
 function formatUptime(instance: InstanceResponse): string {
   if (instance.status === "terminated") return "--";
@@ -32,7 +33,7 @@ function displayName(instance: InstanceResponse) {
   return instance.name ?? instance.id.slice(0, 12);
 }
 
-/* ── CopyButton ── */
+/* -- CopyButton -- */
 
 function CopyButton({
   text,
@@ -99,7 +100,7 @@ function CopyButton({
   );
 }
 
-/* ── EditableName ── */
+/* -- EditableName -- */
 
 function EditableName({
   instance,
@@ -159,7 +160,7 @@ function EditableName({
           onBlur={save}
           onKeyDown={handleKeyDown}
           disabled={saving}
-          className="type-ui-sm text-text font-medium bg-bg border border-purple/40 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-purple/50 w-40"
+          className="type-ui-sm text-text font-medium bg-bg border border-border-light rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-border-light w-40"
         />
         {instance.name && (
           <span className="type-ui-2xs text-text-dim font-mono mt-0.5">
@@ -206,7 +207,7 @@ function EditableName({
   );
 }
 
-/* ── Desktop Table ── */
+/* -- Desktop Table (CSS Grid) -- */
 function DesktopTable({
   instances,
   onRefresh,
@@ -223,116 +224,121 @@ function DesktopTable({
     onRefresh?.();
   }
 
-  const thClass =
-    "type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3";
+  const headerCellClass =
+    "px-4 py-3 type-ui-2xs text-text-dim font-medium uppercase tracking-wider border-b border-border";
+
+  const cellClass =
+    "px-4 py-3 flex items-center border-b border-border/30 group-hover:bg-bg-card transition-colors";
 
   return (
-    <div className="hidden md:block overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border">
-            <th className={thClass}>Name</th>
-            <th className={thClass}>GPU</th>
-            <th className={thClass}>Status</th>
-            <th className={thClass}>Region</th>
-            <th className={thClass}>Cost</th>
-            <th className={thClass}>Uptime</th>
-            <th className={thClass}>SSH Command</th>
-            <th className={cn(thClass, "text-right")}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {instances.map((instance) => (
-            <tr key={instance.id} className="border-b border-border/50 group">
-              <td colSpan={8} className="p-0">
-                <Link
-                  href={`/cloud/instances/${instance.id}`}
-                  className="flex items-center hover:bg-bg-card transition-colors cursor-pointer"
-                >
-                  {/* Name */}
-                  <div className="px-4 py-3 w-[180px] shrink-0">
-                    <EditableName
-                      instance={instance}
-                      onRename={handleRename}
-                    />
-                  </div>
-                  {/* GPU */}
-                  <div className="px-4 py-3 shrink-0">
-                    <span className="type-ui-sm text-text font-mono">
-                      {instance.gpu_type} x{instance.gpu_count}
-                    </span>
-                  </div>
-                  {/* Status */}
-                  <div className="px-4 py-3 shrink-0">
-                    <StatusBadge status={instance.status} />
-                  </div>
-                  {/* Region */}
-                  <div className="px-4 py-3 shrink-0">
-                    <span className="type-ui-sm text-text-muted">
-                      {instance.region}
-                    </span>
-                  </div>
-                  {/* Cost */}
-                  <div className="px-4 py-3 shrink-0">
-                    <span className="type-ui-sm text-text font-mono">
-                      ${instance.price_per_hour.toFixed(2)}/hr
-                    </span>
-                  </div>
-                  {/* Uptime */}
-                  <div className="px-4 py-3 shrink-0">
-                    <span className="type-ui-sm text-text-muted font-mono">
-                      {formatUptime(instance)}
-                    </span>
-                  </div>
-                  {/* SSH Command */}
-                  <div className="px-4 py-3 flex-1 min-w-0">
-                    {instance.connection ? (
-                      <div className="flex items-center gap-2">
-                        <code className="type-ui-2xs text-text-muted font-mono bg-bg-card px-2 py-1 rounded max-w-[260px] truncate">
-                          {instance.connection.ssh_command}
-                        </code>
-                        <CopyButton
-                          text={instance.connection.ssh_command}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <span className="type-ui-sm text-text-dim">--</span>
+    <div className="hidden md:block">
+      <div
+        className="grid"
+        style={{
+          gridTemplateColumns:
+            "minmax(160px, 1.5fr) minmax(100px, 1fr) 100px 100px 100px 100px minmax(200px, 2fr) 80px",
+        }}
+      >
+        {/* Header row */}
+        <div className={cn(headerCellClass, "contents")}>
+          <div className={headerCellClass}>Name</div>
+          <div className={headerCellClass}>GPU</div>
+          <div className={headerCellClass}>Status</div>
+          <div className={headerCellClass}>Region</div>
+          <div className={headerCellClass}>Cost</div>
+          <div className={headerCellClass}>Uptime</div>
+          <div className={headerCellClass}>SSH Command</div>
+          <div className={cn(headerCellClass, "text-right")}>Actions</div>
+        </div>
+
+        {/* Data rows */}
+        {instances.map((instance) => (
+          <Link
+            key={instance.id}
+            href={`/cloud/instances/${instance.id}`}
+            className="contents group"
+          >
+            {/* Name */}
+            <div className={cellClass}>
+              <EditableName
+                instance={instance}
+                onRename={handleRename}
+              />
+            </div>
+            {/* GPU */}
+            <div className={cellClass}>
+              <span className="type-ui-sm text-text font-mono">
+                {instance.gpu_type} x{instance.gpu_count}
+              </span>
+            </div>
+            {/* Status */}
+            <div className={cellClass}>
+              <StatusBadge status={instance.status} />
+            </div>
+            {/* Region */}
+            <div className={cellClass}>
+              <span className="type-ui-sm text-text-muted">
+                {instance.region}
+              </span>
+            </div>
+            {/* Cost */}
+            <div className={cellClass}>
+              <span className="type-ui-sm text-text font-mono">
+                ${instance.price_per_hour.toFixed(2)}/hr
+              </span>
+            </div>
+            {/* Uptime */}
+            <div className={cellClass}>
+              <span className="type-ui-sm text-text-muted font-mono">
+                {formatUptime(instance)}
+              </span>
+            </div>
+            {/* SSH Command */}
+            <div className={cn(cellClass, "min-w-0")}>
+              {instance.connection ? (
+                <div className="flex items-center gap-2 min-w-0">
+                  <code className="type-ui-2xs text-text-muted font-mono bg-bg-card px-2 py-1 rounded truncate min-w-0">
+                    {instance.connection.ssh_command}
+                  </code>
+                  <CopyButton
+                    text={instance.connection.ssh_command}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                  />
+                </div>
+              ) : (
+                <span className="type-ui-sm text-text-dim">--</span>
+              )}
+            </div>
+            {/* Actions */}
+            <div className={cn(cellClass, "justify-end")}>
+              {instance.status !== "terminated" &&
+                instance.status !== "stopping" && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setTerminatingId(instance.id);
+                    }}
+                    className={cn(
+                      "type-ui-2xs px-2 py-1 rounded border transition-colors font-medium",
+                      "border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
                     )}
-                  </div>
-                  {/* Actions */}
-                  <div className="px-4 py-3 shrink-0 text-right">
-                    {instance.status !== "terminated" &&
-                      instance.status !== "stopping" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            setTerminatingId(instance.id);
-                          }}
-                          className={cn(
-                            "type-ui-2xs px-2 py-1 rounded border transition-colors font-medium",
-                            "border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
-                          )}
-                        >
-                          Terminate
-                        </button>
-                      )}
-                  </div>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  >
+                    Terminate
+                  </button>
+                )}
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
 
-/* ── Mobile Cards ── */
+/* -- Mobile Cards -- */
 function MobileCards({
   instances,
   onRefresh,
@@ -355,7 +361,7 @@ function MobileCards({
         <Link
           key={instance.id}
           href={`/cloud/instances/${instance.id}`}
-          className="block bg-bg-card rounded-lg border border-border p-4 space-y-3 hover:border-border-light transition-colors"
+          className="block bg-bg-card rounded-[10px] border border-border p-4 space-y-3 hover:border-border-light transition-colors"
         >
           <div className="flex items-center justify-between">
             <EditableName instance={instance} onRename={handleRename} />
@@ -429,7 +435,7 @@ function MobileCards({
   );
 }
 
-/* ── Main Component ── */
+/* -- Main Component -- */
 export function InstancesTable({
   instances,
   onRefresh,
@@ -456,8 +462,8 @@ export function InstancesTable({
 
   if (instances.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-12 h-12 rounded-full bg-bg-card flex items-center justify-center mb-4">
+      <EmptyState
+        icon={
           <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
             <rect
               x="1"
@@ -467,7 +473,6 @@ export function InstancesTable({
               rx="1"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="text-text-dim"
             />
             <rect
               x="1"
@@ -477,21 +482,13 @@ export function InstancesTable({
               rx="1"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="text-text-dim"
             />
           </svg>
-        </div>
-        <p className="type-ui-sm text-text-muted">No instances running</p>
-        <p className="type-ui-2xs text-text-dim mt-1 mb-4">
-          Launch your first GPU instance to get started.
-        </p>
-        <Link
-          href="/cloud/gpu-availability"
-          className="gradient-btn px-4 py-2 rounded-lg type-ui-sm font-medium transition-all inline-block"
-        >
-          Browse GPU Availability
-        </Link>
-      </div>
+        }
+        title="No instances running"
+        description="Launch your first GPU instance to get started."
+        action={{ label: "Browse GPUs", href: "/cloud/gpu-availability" }}
+      />
     );
   }
 

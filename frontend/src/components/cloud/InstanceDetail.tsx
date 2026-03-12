@@ -221,7 +221,7 @@ function InfoCard({
   return (
     <div
       className={cn(
-        "bg-bg-card border border-border rounded-xl p-5",
+        "bg-bg-card border border-border rounded-[10px] p-5",
         className
       )}
     >
@@ -312,7 +312,7 @@ export function InstanceDetail({
 
       {/* Error banner */}
       {instance.error_reason && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-5 py-4">
+        <div className="bg-red-500/10 border border-red-500/30 rounded-[10px] px-5 py-4">
           <p className="type-ui-xs text-red-400 font-medium uppercase tracking-wider mb-1">
             Error
           </p>
@@ -375,7 +375,7 @@ export function InstanceDetail({
                   <p className="type-ui-xs text-text-dim font-medium uppercase tracking-wider mb-2">
                     SSH Command
                   </p>
-                  <div className="bg-bg rounded-lg border border-border p-4 flex items-center gap-3">
+                  <div className="bg-bg rounded-[10px] border border-border p-4 flex items-center gap-3">
                     <code className="type-ui-sm text-text font-mono flex-1 break-all">
                       {instance.connection.ssh_command}
                     </code>
@@ -484,13 +484,13 @@ export function InstanceDetail({
 
       {/* Terminated state CTA */}
       {isTerminated && (
-        <div className="flex flex-col items-center justify-center py-8 text-center bg-bg-card border border-border rounded-xl">
+        <div className="flex flex-col items-center justify-center py-8 text-center bg-bg-card border border-border rounded-[10px]">
           <p className="type-ui-sm text-text-dim mb-3">
             This instance has been terminated.
           </p>
           <Link
             href="/cloud/gpu-availability"
-            className="gradient-btn px-4 py-2 rounded-lg type-ui-sm font-medium transition-all inline-block"
+            className="btn-primary"
           >
             Launch New Instance
           </Link>

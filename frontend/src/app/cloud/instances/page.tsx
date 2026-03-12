@@ -24,7 +24,7 @@ export default function InstancesPage() {
         <h1 className="type-h3 text-text">Instances</h1>
         <button
           onClick={() => setShowLaunch(true)}
-          className="gradient-btn px-4 py-2 rounded-lg type-ui-sm font-medium transition-all"
+          className="btn-primary"
         >
           Launch Instance
         </button>
@@ -32,21 +32,21 @@ export default function InstancesPage() {
 
       {/* Content */}
       {error ? (
-        <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+        <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="type-ui-sm text-red-400">
               Failed to load instances
             </p>
             <button
               onClick={() => mutate()}
-              className="mt-3 type-ui-xs text-purple hover:text-purple-light transition-colors"
+              className="mt-3 type-ui-xs text-text-muted hover:text-text transition-colors"
             >
               Retry
             </button>
           </div>
         </div>
       ) : isLoading ? (
-        <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+        <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
           <div className="space-y-0">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -64,7 +64,7 @@ export default function InstancesPage() {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-bg-card/50 overflow-hidden">
+        <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
           <InstancesTable
             instances={data?.data ?? []}
             onRefresh={() => mutate()}
