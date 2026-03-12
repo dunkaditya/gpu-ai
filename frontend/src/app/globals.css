@@ -11,8 +11,12 @@
   --color-text: #e2e2ea;
   --color-text-muted: #8585a0;
   --color-text-dim: #5c5c78;
-  --color-border: #1c1c2a;
-  --color-border-light: #2a2a3d;
+  --color-border: #18182a;
+  --color-border-light: #252538;
+
+  /* ── Radius ── */
+  --radius-card: 10px;
+  --radius-sm: 6px;
 
   /* ── 10% Accents ── */
   --color-purple: #7c6bf0;
@@ -72,8 +76,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Film Grain Overlay ── */
-body::after {
+/* ── Film Grain Overlay (marketing pages only) ── */
+.film-grain {
+  position: relative;
+}
+.film-grain::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -83,6 +90,51 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
+}
+
+/* ── Flat Buttons (Linear aesthetic) ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-purple);
+  color: #fff;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: background-color 0.15s ease;
+}
+.btn-primary:hover {
+  background-color: var(--color-purple-light);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.btn-secondary:hover {
+  color: var(--color-text);
+  background-color: var(--color-bg-card-hover);
+}
+.btn-secondary:disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 ::selection {
