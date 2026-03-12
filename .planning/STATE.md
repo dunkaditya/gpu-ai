@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 10-03 (Instances table & detail page)
-last_updated: "2026-03-10T06:11:53.983Z"
-last_activity: 2026-03-10 -- Completed 10-03 (Instances table & detail page)
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-03-12T01:42:45.083Z"
+last_activity: 2026-03-12 -- Completed 11-01 (Design system refinement)
 progress:
-  total_phases: 13
+  total_phases: 14
   completed_phases: 12
-  total_plans: 41
-  completed_plans: 40
-  percent: 95
+  total_plans: 44
+  completed_plans: 41
+  percent: 93
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 10: Frontend Dashboard with GPU Availability, Provisioning, and Instance Management
+**Current focus:** Phase 11: Dashboard UI Redesign -- Linear aesthetic, GPU catalog, instances table fixes
 
 ## Current Position
 
-Phase: 10 (Frontend Dashboard)
-Plan: 3 of 4 in current phase
-Status: Plan 10-03 Complete
-Last activity: 2026-03-10 -- Completed 10-03 (Instances table & detail page)
+Phase: 11 (Dashboard UI Redesign)
+Plan: 1 of 3 in current phase
+Status: Plan 11-01 Complete
+Last activity: 2026-03-12 -- Completed 11-01 (Design system refinement)
 
-Progress: [██████████] 95%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Progress: [██████████] 95%
 | Phase 10 P01 | 3min | 2 tasks | 11 files |
 | Phase 10 P02 | 4min | 2 tasks | 5 files |
 | Phase 10 P03 | 3min | 2 tasks | 4 files |
+| Phase 11 P01 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -239,12 +240,17 @@ Recent decisions affecting current work:
 - [10-02]: GPU availability page converted to client component for GPUAvailabilityTable
 - [Phase 10-03]: ConfirmDialog replaces window.confirm for all terminate actions
 - [Phase 10-03]: SWR globalMutate used on detail page to invalidate list cache key for cross-page consistency
+- [Phase 11]: Film grain moved from body::after to .film-grain::after -- dashboard renders grain-free
+- [Phase 11]: btn-primary is solid purple with no gradient or glow -- clean Linear aesthetic
+- [Phase 11]: Sidebar active state uses 2px left border instead of background highlight -- minimal visual weight
+- [Phase 11]: Breadcrumb separator changed from / to > with 40% opacity -- subtler hierarchy
 
 ### Roadmap Evolution
 
 - Phase 8 added: Rebuild frontend landing page to match Vercel homepage design
 - Phase 9 added: Replace WireGuard with FRP tunneling
 - Phase 10 added: Frontend dashboard with GPU availability, provisioning, and instance management
+- Phase 11 added: Dashboard UI redesign — clean linear aesthetic, GPU catalog with categories and search, instances table fixes, professional polish
 
 ### Pending Todos
 
@@ -258,6 +264,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T06:11:53.980Z
-Stopped at: Completed 10-03 (Instances table & detail page)
+Last session: 2026-03-12T01:42:45.080Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
