@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 11-01-PLAN.md
+stopped_at: Completed 11-02-PLAN.md
 last_updated: "2026-03-12T01:42:45.083Z"
-last_activity: 2026-03-12 -- Completed 11-01 (Design system refinement)
+last_activity: 2026-03-12 -- Completed 11-02 (GPU catalog with categories and search)
 progress:
   total_phases: 14
   completed_phases: 12
   total_plans: 44
-  completed_plans: 41
-  percent: 93
+  completed_plans: 42
+  percent: 95
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 11 (Dashboard UI Redesign)
-Plan: 1 of 3 in current phase
-Status: Plan 11-01 Complete
-Last activity: 2026-03-12 -- Completed 11-01 (Design system refinement)
+Plan: 2 of 3 in current phase
+Status: Plan 11-02 Complete
+Last activity: 2026-03-12 -- Completed 11-02 (GPU catalog with categories and search)
 
-Progress: [█████████░] 93%
+Progress: [█████████░] 95%
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Progress: [█████████░] 93%
 | Phase 10 P02 | 4min | 2 tasks | 5 files |
 | Phase 10 P03 | 3min | 2 tasks | 4 files |
 | Phase 11 P01 | 3min | 2 tasks | 8 files |
+| Phase 11 P02 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -244,6 +245,9 @@ Recent decisions affecting current work:
 - [Phase 11]: btn-primary is solid purple with no gradient or glow -- clean Linear aesthetic
 - [Phase 11]: Sidebar active state uses 2px left border instead of background highlight -- minimal visual weight
 - [Phase 11]: Breadcrumb separator changed from / to > with 40% opacity -- subtler hierarchy
+- [Phase 11-02]: useDebouncedCallback for search (not useDebounce hook) -- direct callback control
+- [Phase 11-02]: Category chips as horizontal scrollable row -- quick visual scanning over dropdown
+- [Phase 11-02]: Focus rings use border-light not purple -- subtle non-colored focus matching Linear
 
 ### Roadmap Evolution
 
@@ -264,6 +268,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T01:42:45.080Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-03-12T01:47:24Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None
