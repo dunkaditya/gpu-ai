@@ -22,19 +22,19 @@ export function GPUCard({ card, onLaunch }: GPUCardProps) {
   }
 
   return (
-    <div className="bg-bg-card border border-border rounded-xl p-5 hover:border-border-light transition-all group">
+    <div className="bg-bg-card border border-border rounded-[10px] p-5 hover:border-border-light transition-colors">
       {/* Header: GPU model + VRAM badge */}
       <div className="flex items-start justify-between mb-4">
-        <h3 className="type-h5 font-sans text-text font-bold leading-tight">
+        <h3 className="type-ui-sm text-text font-medium leading-tight">
           {card.gpu_model}
         </h3>
-        <span className="type-ui-xs bg-purple-dim text-purple-light rounded-full px-2 py-0.5 whitespace-nowrap ml-2">
+        <span className="type-ui-2xs bg-bg-card-hover text-text-muted rounded-full px-2 py-0.5 whitespace-nowrap ml-2">
           {card.vram_gb} GB
         </span>
       </div>
 
       {/* Specs row */}
-      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-border/50">
+      <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border/50">
         <div>
           <span className="type-ui-2xs text-text-dim uppercase block">CPU</span>
           <span className="type-ui-sm text-text-muted font-mono">
@@ -57,11 +57,8 @@ export function GPUCard({ card, onLaunch }: GPUCardProps) {
         </div>
       </div>
 
-      {/* Pricing */}
+      {/* Price display */}
       <div className="mb-4">
-        <span className="type-ui-2xs text-text-dim uppercase block mb-1">
-          Price
-        </span>
         <span className="type-ui-sm font-mono text-text">
           {card.on_demand_price != null && card.on_demand_price !== Infinity
             ? `$${card.on_demand_price.toFixed(2)}/hr`
@@ -74,7 +71,7 @@ export function GPUCard({ card, onLaunch }: GPUCardProps) {
         {card.regions.map((region) => (
           <span
             key={region}
-            className="type-ui-2xs bg-bg-card-hover text-text-muted rounded-full px-2 py-0.5"
+            className="type-ui-2xs bg-bg-card-hover text-text-dim rounded-full px-2 py-0.5"
           >
             {region}
           </span>
@@ -98,7 +95,7 @@ export function GPUCard({ card, onLaunch }: GPUCardProps) {
         {card.total_available > 0 ? (
           <button
             onClick={handleLaunch}
-            className="gradient-btn px-4 py-1.5 rounded-lg type-ui-xs font-medium transition-all"
+            className="btn-primary px-4 py-1.5 rounded-lg type-ui-xs font-medium"
           >
             Launch
           </button>

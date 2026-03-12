@@ -96,10 +96,10 @@ export function LaunchInstanceForm({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-4 bg-bg-card border border-border rounded-xl shadow-2xl">
+      <div className="relative w-full max-w-lg mx-4 bg-bg-card border border-border rounded-[10px] shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="type-h4 font-sans text-text">Launch Instance</h2>
+          <h2 className="type-ui-sm font-medium text-text">Launch Instance</h2>
           <button
             onClick={onClose}
             disabled={loading}
@@ -128,7 +128,7 @@ export function LaunchInstanceForm({
               </div>
 
               {/* Specs grid */}
-              <div className="grid grid-cols-2 gap-3 bg-bg rounded-lg border border-border p-4">
+              <div className="grid grid-cols-2 gap-3 bg-bg rounded-[10px] border border-border p-4">
                 <div>
                   <span className="type-ui-2xs text-text-dim uppercase block">
                     VRAM
@@ -175,7 +175,7 @@ export function LaunchInstanceForm({
 
               {/* Price confirmation */}
               <div className="text-center py-3 border-t border-b border-border/50">
-                <span className="type-h3 font-mono text-purple-light">
+                <span className="type-h4 font-mono text-text">
                   ${hourlyPrice?.toFixed(2)}/hr
                 </span>
                 <p className="type-ui-2xs text-text-dim mt-1">
@@ -199,7 +199,7 @@ export function LaunchInstanceForm({
                       Math.max(1, Math.min(8, Number(e.target.value)))
                     )
                   }
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
                 />
               </div>
 
@@ -222,7 +222,7 @@ export function LaunchInstanceForm({
                   onChange={(e) => setGpuType(e.target.value)}
                   placeholder="e.g. H100 SXM, A100 SXM, RTX 4090"
                   required
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
                 />
               </div>
 
@@ -238,7 +238,7 @@ export function LaunchInstanceForm({
                     max={8}
                     value={gpuCount}
                     onChange={(e) => setGpuCount(Number(e.target.value))}
-                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
                   />
                 </div>
                 <div className="space-y-2">
@@ -251,7 +251,7 @@ export function LaunchInstanceForm({
                     onChange={(e) => setRegion(e.target.value)}
                     placeholder="e.g. us-east"
                     required
-                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-2 focus:ring-purple/50 focus:border-purple/50 transition-all"
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 type-ui-sm text-text font-mono placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
                   />
                 </div>
               </div>
@@ -272,7 +272,7 @@ export function LaunchInstanceForm({
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="flex-1 py-2.5 rounded-lg type-ui-sm font-medium border border-border text-text-muted hover:text-text hover:bg-bg-card-hover transition-all disabled:opacity-50"
+              className="btn-secondary flex-1 py-2.5 rounded-lg type-ui-sm font-medium"
             >
               Cancel
             </button>
@@ -282,8 +282,8 @@ export function LaunchInstanceForm({
               className={cn(
                 "flex-1 py-2.5 rounded-lg type-ui-sm font-medium transition-all",
                 loading || !canSubmit
-                  ? "bg-purple/30 text-text-dim cursor-not-allowed"
-                  : "gradient-btn"
+                  ? "bg-bg-card-hover text-text-dim cursor-not-allowed"
+                  : "btn-primary"
               )}
             >
               {loading
