@@ -282,7 +282,7 @@ Plans:
   5. All dashboard components use btn-primary/btn-secondary instead of gradient-btn
   6. Consistent shared EmptyState component used across all empty states
   7. Sidebar uses left-border active indicators, topbar has refined breadcrumb
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — Design system refinement (Linear tokens, film grain scoping, btn-primary/btn-secondary), shared EmptyState component, GPU category constants, sidebar/topbar polish

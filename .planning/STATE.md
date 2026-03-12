@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in-progress
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-03-12T01:42:45.083Z"
-last_activity: 2026-03-12 -- Completed 11-02 (GPU catalog with categories and search)
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-03-12T01:50:11Z"
+last_activity: 2026-03-12 -- Completed 11-03 (Instances table fix and dashboard polish)
 progress:
   total_phases: 14
-  completed_phases: 12
+  completed_phases: 14
   total_plans: 44
-  completed_plans: 42
-  percent: 95
+  completed_plans: 44
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 11 (Dashboard UI Redesign)
-Plan: 2 of 3 in current phase
-Status: Plan 11-02 Complete
-Last activity: 2026-03-12 -- Completed 11-02 (GPU catalog with categories and search)
+Plan: 3 of 3 in current phase
+Status: Phase 11 Complete
+Last activity: 2026-03-12 -- Completed 11-03 (Instances table fix and dashboard polish)
 
-Progress: [█████████░] 95%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -79,6 +79,7 @@ Progress: [█████████░] 95%
 | Phase 10 P03 | 3min | 2 tasks | 4 files |
 | Phase 11 P01 | 3min | 2 tasks | 8 files |
 | Phase 11 P02 | 3min | 2 tasks | 5 files |
+| Phase 11 P03 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -248,6 +249,10 @@ Recent decisions affecting current work:
 - [Phase 11-02]: useDebouncedCallback for search (not useDebounce hook) -- direct callback control
 - [Phase 11-02]: Category chips as horizontal scrollable row -- quick visual scanning over dropdown
 - [Phase 11-02]: Focus rings use border-light not purple -- subtle non-colored focus matching Linear
+- [Phase 11-03]: CSS grid with display:contents on Link elements for clickable rows with proper column alignment
+- [Phase 11-03]: SSH command column uses minmax(200px, 2fr) -- flexible width instead of truncated 260px
+- [Phase 11-03]: Billing summary cards use standard border (no colored left accents) for Linear aesthetic
+- [Phase 11-03]: Progress bars use bg-text-muted for under-70% state -- reduce purple in non-CTA contexts
 
 ### Roadmap Evolution
 
@@ -268,6 +273,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T01:47:24Z
-Stopped at: Completed 11-02-PLAN.md
+Last session: 2026-03-12T01:50:11Z
+Stopped at: Completed 11-03-PLAN.md
 Resume file: None
