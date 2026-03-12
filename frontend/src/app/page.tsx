@@ -10,7 +10,7 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function LandingPage() {
   return (
-    <div className="stripe-borders">
+    <div className="stripe-borders film-grain">
       {/* Stripe-style vertical border lines */}
       <div className="stripe-lines" aria-hidden="true" />
 

@@ -42,7 +42,7 @@ export function StatusBadge({ status }: { status: InstanceStatus }) {
   return (
     <span
       className={cn(
-        "type-ui-xs inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-medium",
+        "type-ui-xs inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-medium",
         config.pillClass
       )}
     >

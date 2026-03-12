@@ -68,8 +68,8 @@ export function DashboardTopbar({ onMenuToggle }: { onMenuToggle?: () => void })
           <span className="text-text-dim">Cloud</span>
           {breadcrumb.map((crumb, idx) => (
             <span key={idx} className="flex items-center gap-2">
-              <span className="text-text-dim">/</span>
-              <span className={crumb.isLast ? "text-text font-medium" : "text-text-dim"}>
+              <span className="text-text-dim/40">&gt;</span>
+              <span className={crumb.isLast ? "text-text" : "text-text-dim"}>
                 {crumb.label}
               </span>
             </span>
@@ -89,8 +89,8 @@ export function DashboardTopbar({ onMenuToggle }: { onMenuToggle?: () => void })
           />
         ) : (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center">
-              <span className="text-xs font-medium text-accent">D</span>
+            <div className="w-8 h-8 rounded-full bg-bg-card-hover border border-border flex items-center justify-center">
+              <span className="text-xs font-medium text-text-dim">D</span>
             </div>
             <span className="text-xs text-text-dim font-mono">Dev User</span>
           </div>

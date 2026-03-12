@@ -100,16 +100,16 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
       href={item.href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-md type-ui-sm transition-colors",
+        "flex items-center gap-3 px-3 py-1.5 type-ui-sm transition-colors",
         isActive
-          ? "bg-bg-card-hover text-text"
-          : "text-text-muted hover:text-text hover:bg-bg-card"
+          ? "border-l-2 border-purple text-text"
+          : "border-l-2 border-transparent text-text-muted hover:text-text"
       )}
     >
       <span className="shrink-0 opacity-70">{item.icon}</span>
       <span className="flex-1">{item.label}</span>
       {item.comingSoon && (
-        <span className="type-ui-2xs bg-purple-dim text-purple-light rounded-full px-1.5 py-0.5">
+        <span className="type-ui-2xs bg-bg-card-hover text-text-dim rounded-full px-1.5 py-0.5">
           Soon
         </span>
       )}
@@ -126,7 +126,7 @@ function SidebarContent({ pathname, onNavClick }: { pathname: string; onNavClick
       <div className="flex items-center h-14 px-5 border-b border-border">
         <Link
           href="/"
-          className="font-sans text-lg font-bold tracking-tight text-text hover:text-purple transition-colors"
+          className="font-sans text-lg font-bold tracking-tight text-text"
         >
           GPU.ai
         </Link>
@@ -141,8 +141,8 @@ function SidebarContent({ pathname, onNavClick }: { pathname: string; onNavClick
           ))}
         </div>
 
-        {/* Divider */}
-        <div className="my-3 border-t border-border" />
+        {/* Spacer between nav groups */}
+        <div className="my-4" />
 
         {/* Management: SSH Keys, Billing, API Keys, Team */}
         <div className="space-y-0.5">
@@ -164,7 +164,7 @@ function SidebarContent({ pathname, onNavClick }: { pathname: string; onNavClick
 
       {/* Footer */}
       <div className="px-5 py-4 border-t border-border">
-        <p className="type-ui-2xs text-text-dim">v1.0.0</p>
+        <p className="type-ui-2xs text-text-dim/50">v1.0.0</p>
       </div>
     </>
   );

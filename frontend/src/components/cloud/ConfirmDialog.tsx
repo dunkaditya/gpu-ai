@@ -79,7 +79,7 @@ export function ConfirmDialog({
             ref={cancelRef}
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 rounded-lg type-ui-sm font-medium text-text-muted hover:text-text bg-bg-card-hover hover:bg-border transition-colors disabled:opacity-50"
+            className="btn-secondary type-ui-sm"
           >
             Cancel
           </button>
@@ -89,7 +89,7 @@ export function ConfirmDialog({
             className={`px-4 py-2 rounded-lg type-ui-sm font-medium transition-all disabled:opacity-50 ${
               confirmVariant === "danger"
                 ? "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/20"
-                : "gradient-btn"
+                : "btn-primary"
             }`}
           >
             {loading ? "Processing..." : confirmLabel}
