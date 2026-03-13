@@ -304,7 +304,7 @@ func nilIfEmpty(s string) *string {
 func (p *Pool) TerminateInstance(ctx context.Context, instanceID string) (bool, error) {
 	tag, err := p.pool.Exec(ctx,
 		`UPDATE instances SET status = 'terminated', terminated_at = NOW(), billing_end = NOW(), updated_at = NOW()
-		 WHERE instance_id = $1 AND status NOT IN ('terminated', 'error')`,
+		 WHERE instance_id = $1 AND status NOT IN ('terminated')`,
 		instanceID,
 	)
 	if err != nil {

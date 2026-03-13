@@ -7,7 +7,8 @@ import { fetcher } from "@/lib/api";
 import { GPUCard } from "@/components/cloud/GPUCard";
 import { LaunchInstanceForm } from "@/components/cloud/LaunchInstanceForm";
 import { EmptyState } from "@/components/cloud/EmptyState";
-import { GPU_CATEGORIES, classifyGPU } from "@/lib/gpu-categories";
+import { GPU_CATEGORIES, classifyGPU, FEATURED_MODELS } from "@/lib/gpu-categories";
+import { getRegionDisplay } from "@/lib/regions";
 import type { AvailableOffering, GPUCardData } from "@/lib/types";
 
 const CATEGORY_LABELS = ["All", ...GPU_CATEGORIES.map((c) => c.label)];
@@ -67,9 +68,7 @@ export function GPUAvailabilityTable() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   // Launch form state
-  const [launchOffering, setLaunchOffering] = useState<
-    AvailableOffering | undefined
-  >();
+  const [launchCard, setLaunchCard] = useState<GPUCardData | undefined>();
   const [showLaunch, setShowLaunch] = useState(false);
 
   const debouncedSetQuery = useDebouncedCallback((value: string) => {
@@ -89,9 +88,6 @@ export function GPUAvailabilityTable() {
     () => [...new Set(offerings.map((o) => o.region))].sort(),
     [offerings]
   );
-
-  const filtersActive =
-    activeCategory !== "All" || debouncedQuery !== "" || regionFilter !== "";
 
   // Filter chain: on_demand -> category -> search -> region -> group -> sort
   const cards: GPUCardData[] = useMemo(() => {
@@ -170,8 +166,15 @@ export function GPUAvailabilityTable() {
     });
   }, [offerings, activeCategory, debouncedQuery, regionFilter, sortDir]);
 
-  function handleLaunch(offering: AvailableOffering) {
-    setLaunchOffering(offering);
+  // Featured cards: filtered by the same filters as the main grid
+  const featuredCards = useMemo(() => {
+    return cards.filter((c) =>
+      FEATURED_MODELS.some((fm) => c.gpu_model.toLowerCase() === fm)
+    );
+  }, [cards]);
+
+  function handleLaunch(card: GPUCardData) {
+    setLaunchCard(card);
     setShowLaunch(true);
   }
 
@@ -201,7 +204,7 @@ export function GPUAvailabilityTable() {
   return (
     <>
       {/* Filter toolbar */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         {/* Search input */}
         <div className="relative w-full sm:w-64">
           <svg
@@ -223,7 +226,7 @@ export function GPUAvailabilityTable() {
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Search GPUs..."
-            className="w-full bg-bg border border-border rounded-lg px-3 py-2 pl-9 type-ui-sm text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
+            className="w-full bg-bg border border-border rounded-md px-3 py-2 pl-9 type-ui-sm text-text placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-purple/40 focus:border-purple/40 transition-all"
           />
         </div>
 
@@ -235,7 +238,7 @@ export function GPUAvailabilityTable() {
               onClick={() => setActiveCategory(label)}
               className={
                 label === activeCategory
-                  ? "bg-bg-card-hover text-text rounded-md px-3 py-1.5 type-ui-xs font-medium whitespace-nowrap transition-colors"
+                  ? "bg-purple/15 text-purple-light rounded-md px-3 py-1.5 type-ui-xs font-medium whitespace-nowrap transition-colors"
                   : "text-text-dim hover:text-text-muted rounded-md px-3 py-1.5 type-ui-xs font-medium whitespace-nowrap transition-colors"
               }
             >
@@ -245,23 +248,41 @@ export function GPUAvailabilityTable() {
         </div>
 
         {/* Region filter */}
-        <select
-          value={regionFilter}
-          onChange={(e) => setRegionFilter(e.target.value)}
-          className="bg-bg border border-border rounded-lg px-3 py-2 type-ui-xs text-text-muted focus:outline-none focus:ring-1 focus:ring-border-light focus:border-border-light transition-all"
-        >
-          <option value="">All Regions</option>
-          {regions.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            className="appearance-none bg-bg border border-border rounded-md pl-3 pr-8 py-2 type-ui-xs text-text-muted focus:outline-none focus:ring-1 focus:ring-purple/40 focus:border-purple/40 transition-all cursor-pointer"
+          >
+            <option value="">{getRegionDisplay("unknown").flag} All Regions</option>
+            {regions.filter((r) => r !== "unknown").map((r) => {
+              const display = getRegionDisplay(r);
+              return (
+                <option key={r} value={r}>
+                  {display.flag} {display.label}
+                </option>
+              );
+            })}
+          </select>
+          <svg
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim pointer-events-none"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </div>
 
         {/* Sort button */}
         <button
           onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-          className="flex items-center gap-1.5 bg-bg border border-border rounded-lg px-3 py-2 type-ui-xs text-text-muted hover:text-text hover:border-border-light transition-all"
+          className="flex items-center gap-1.5 bg-bg border border-border rounded-md px-3 py-2 type-ui-xs text-text-muted hover:text-text hover:border-border-light transition-all"
         >
           Price
           <span className="text-purple">
@@ -270,11 +291,23 @@ export function GPUAvailabilityTable() {
         </button>
       </div>
 
-      {/* Results count */}
-      {filtersActive && !isLoading && (
-        <p className="type-ui-2xs text-text-dim mb-4">
-          {cards.length} {cards.length === 1 ? "GPU" : "GPUs"} found
-        </p>
+      {/* Featured GPUs section */}
+      {!isLoading && featuredCards.length > 0 && (
+        <div className="mb-8">
+          <p className="type-ui-2xs text-text-dim uppercase tracking-wider mb-3">
+            Featured GPUs
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            {featuredCards.map((card) => (
+              <GPUCard
+                key={card.gpu_model}
+                card={card}
+                onLaunch={handleLaunch}
+              />
+            ))}
+          </div>
+          <div className="border-b border-border mt-8" />
+        </div>
       )}
 
       {/* Card grid */}
@@ -318,13 +351,13 @@ export function GPUAvailabilityTable() {
       )}
 
       {/* Launch modal */}
-      {showLaunch && (
+      {showLaunch && launchCard && (
         <LaunchInstanceForm
           onClose={() => setShowLaunch(false)}
           onSuccess={() => mutate()}
-          offering={launchOffering}
-          defaultGPU={launchOffering?.gpu_model}
-          defaultRegion={launchOffering?.region}
+          offerings={launchCard.offerings}
+          defaultGPU={launchCard.gpu_model}
+          defaultRegion={regionFilter || undefined}
         />
       )}
     </>

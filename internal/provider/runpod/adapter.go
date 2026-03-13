@@ -274,6 +274,8 @@ func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCo
 		dcLocation = pod.Machine.Location
 	}
 
+	region, _ := NormalizeRegion(dcLocation)
+
 	slog.Info("provisioned on-demand RunPod pod",
 		"pod_id", pod.ID,
 		"cost_per_hr", pod.CostPerHr,
@@ -286,6 +288,7 @@ func (a *Adapter) provisionOnDemand(ctx context.Context, gpuTypeID string, gpuCo
 		Status:                "creating",
 		CostPerHour:           pod.CostPerHr,
 		DatacenterLocation:    dcLocation,
+		Region:                region,
 		EstimatedReadySeconds: defaultEstReadySecond,
 	}, nil
 }
@@ -326,6 +329,8 @@ func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount 
 		dcLocation = pod.Machine.Location
 	}
 
+	region, _ := NormalizeRegion(dcLocation)
+
 	slog.Info("provisioned spot RunPod pod",
 		"pod_id", pod.ID,
 		"cost_per_hr", pod.CostPerHr,
@@ -338,6 +343,7 @@ func (a *Adapter) provisionSpot(ctx context.Context, gpuTypeID string, gpuCount 
 		Status:                "creating",
 		CostPerHour:           pod.CostPerHr,
 		DatacenterLocation:    dcLocation,
+		Region:                region,
 		EstimatedReadySeconds: defaultEstReadySecond,
 	}, nil
 }

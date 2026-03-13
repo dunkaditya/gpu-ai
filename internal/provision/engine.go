@@ -305,7 +305,7 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 		GPUType:              string(req.GPUType),
 		GPUCount:             req.GPUCount,
 		Tier:                 string(req.Tier),
-		Region:               offering.Region,
+		Region:               regionFromResult(provResult, offering),
 		PricePerHour:         offering.PricePerHour,
 		UpstreamPricePerHour: provResult.CostPerHour,
 		Status:               StateCreating,
@@ -380,15 +380,31 @@ func (e *Engine) Terminate(ctx context.Context, instanceID string) error {
 		)
 	} else {
 		if err := prov.Terminate(ctx, inst.UpstreamID); err != nil {
-			// Set instance to error state with reason.
-			reason := fmt.Sprintf("provider terminate failed: %v", err)
-			if setErr := e.db.SetInstanceError(ctx, instanceID, reason); setErr != nil {
-				e.logger.Error("failed to set error state after terminate failure",
+			// If the pod no longer exists upstream, treat as already terminated.
+			if strings.Contains(err.Error(), "not found") {
+				e.logger.Warn("pod already gone upstream, proceeding with local cleanup",
 					slog.String("instance_id", instanceID),
-					slog.String("error", setErr.Error()),
+					slog.String("provider", inst.UpstreamProvider),
+					slog.String("error", err.Error()),
 				)
+			} else {
+				// Real provider error — set error state AND close billing.
+				reason := fmt.Sprintf("provider terminate failed: %v", err)
+				if setErr := e.db.SetInstanceError(ctx, instanceID, reason); setErr != nil {
+					e.logger.Error("failed to set error state after terminate failure",
+						slog.String("instance_id", instanceID),
+						slog.String("error", setErr.Error()),
+					)
+				}
+				// Close billing even on error — don't let it accumulate.
+				if billErr := e.db.CloseBillingSession(ctx, instanceID, time.Now().UTC()); billErr != nil {
+					e.logger.Error("failed to close billing session on terminate error",
+						slog.String("instance_id", instanceID),
+						slog.String("error", billErr.Error()),
+					)
+				}
+				return fmt.Errorf("terminate: provider %s: %w", inst.UpstreamProvider, err)
 			}
-			return fmt.Errorf("terminate: provider %s: %w", inst.UpstreamProvider, err)
 		}
 	}
 
@@ -836,6 +852,15 @@ func sshPortFromStatus(status *provider.InstanceStatus) int {
 		}
 	}
 	return 22
+}
+
+// regionFromResult returns the region from the provision result if available,
+// falling back to the offering's region.
+func regionFromResult(result *provider.ProvisionResult, offering *provider.GPUOffering) string {
+	if result.Region != "" {
+		return result.Region
+	}
+	return offering.Region
 }
 
 // generateHexToken produces a random hex-encoded token of the specified byte length.

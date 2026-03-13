@@ -103,6 +103,7 @@ type ProvisionResult struct {
 	EstimatedReadySeconds int     `json:"estimated_ready_seconds"`
 	CostPerHour           float64 `json:"cost_per_hour"`
 	DatacenterLocation    string  `json:"datacenter_location"`
+	Region                string  `json:"region"`
 }
 
 // PortMapping represents a port mapping on an upstream instance.

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { fetcher } from "@/lib/api";
 import { InstancesTable } from "@/components/cloud/InstancesTable";
-import { LaunchInstanceForm } from "@/components/cloud/LaunchInstanceForm";
 import type { InstanceResponse } from "@/lib/types";
 
 export default function InstancesPage() {
+  const router = useRouter();
   const { data, error, isLoading, mutate } = useSWR<{
     data: InstanceResponse[];
     has_more: boolean;
@@ -15,21 +15,8 @@ export default function InstancesPage() {
     refreshInterval: 10000,
   });
 
-  const [showLaunch, setShowLaunch] = useState(false);
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="type-h3 text-text">Instances</h1>
-        <button
-          onClick={() => setShowLaunch(true)}
-          className="btn-primary"
-        >
-          Launch Instance
-        </button>
-      </div>
-
       {/* Content */}
       {error ? (
         <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
@@ -68,16 +55,9 @@ export default function InstancesPage() {
           <InstancesTable
             instances={data?.data ?? []}
             onRefresh={() => mutate()}
+            onLaunch={() => router.push("/cloud/gpu-availability")}
           />
         </div>
-      )}
-
-      {/* Launch modal */}
-      {showLaunch && (
-        <LaunchInstanceForm
-          onClose={() => setShowLaunch(false)}
-          onSuccess={() => mutate()}
-        />
       )}
     </div>
   );

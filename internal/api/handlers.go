@@ -465,6 +465,15 @@ func (s *Server) handleDeleteInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// If in error state, force-terminate locally (provider already failed/gone).
+	if inst.Status == provision.StateError {
+		s.db.TerminateInstance(ctx, instanceID)
+		s.db.CloseBillingSession(ctx, instanceID, time.Now().UTC())
+		inst, _ = s.db.GetInstanceForOrg(ctx, instanceID, orgID)
+		writeJSON(w, http.StatusOK, s.instanceToResponse(inst))
+		return
+	}
+
 	// 4. Terminate via engine.
 	if err := s.engine.Terminate(ctx, instanceID); err != nil {
 		slog.Error("termination failed",

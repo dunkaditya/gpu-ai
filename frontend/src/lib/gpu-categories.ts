@@ -61,9 +61,53 @@ export const GPU_CATEGORIES: GPUCategoryDef[] = [
 ];
 
 export function classifyGPU(gpuModel: string): string {
-  const lower = gpuModel.toLowerCase();
+  const lower = gpuModel.toLowerCase().replace(/_/g, " ");
   for (const cat of GPU_CATEGORIES) {
     if (cat.models.some((m) => lower.includes(m))) return cat.label;
   }
   return "Other";
 }
+
+export const GPU_DISPLAY_NAMES: Record<string, string> = {
+  // Blackwell
+  "b200": "B200",
+  "b300": "B300",
+  "rtx pro 6000": "RTX PRO 6000",
+  "rtx pro 4500": "RTX PRO 4500",
+  "rtx 5090": "RTX 5090",
+  "rtx 5080": "RTX 5080",
+  // Hopper
+  "h200": "H200 SXM",
+  "h100": "H100 SXM",
+  // Ada Lovelace
+  "l40s": "L40S",
+  "l40": "L40",
+  "l4": "L4",
+  "rtx 6000 ada": "RTX 6000 Ada",
+  "rtx 5000 ada": "RTX 5000 Ada",
+  "rtx 4000 ada": "RTX 4000 Ada",
+  "rtx 2000 ada": "RTX 2000 Ada",
+  "rtx 4090": "RTX 4090",
+  "rtx 4080": "RTX 4080",
+  // Ampere
+  "a100": "A100",
+  "a40": "A40",
+  "a30": "A30",
+  "a10": "A10",
+  "rtx a6000": "RTX A6000",
+  "rtx a5000": "RTX A5000",
+  "rtx a4500": "RTX A4500",
+  "rtx a4000": "RTX A4000",
+  "rtx 3090": "RTX 3090",
+  "rtx 3080": "RTX 3080",
+  // Legacy
+  "v100": "V100",
+};
+
+export function getDisplayName(gpuModel: string): string {
+  const normalized = gpuModel.toLowerCase().replace(/_/g, " ");
+  const name = GPU_DISPLAY_NAMES[normalized] ?? normalized;
+  return name.toUpperCase();
+}
+
+export const FEATURED_MODELS = ["rtx_5090", "h100_sxm", "h200_sxm", "b200"];

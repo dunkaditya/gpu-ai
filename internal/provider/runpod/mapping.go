@@ -126,6 +126,34 @@ var regionMap = map[string]string{
 	"CZ": "eu-east",
 	"BG": "eu-east",
 	"IS": "eu-north",
+	// Additional EU.
+	"EU-NL": "eu-west",
+	"EU-GB": "eu-west",
+	"EU-DE": "eu-west",
+	"EU-FR": "eu-west",
+	"NL":    "eu-west",
+	"GB":    "eu-west",
+	"DE":    "eu-west",
+	"FR":    "eu-west",
+	"FI":    "eu-north",
+	// APAC.
+	"AU": "ap-southeast",
+	"JP": "ap-northeast",
+	"TH": "ap-southeast",
+	"TW": "ap-northeast",
+	"MY": "ap-southeast",
+	"SG": "ap-southeast",
+	"IN": "ap-south",
+	"KR": "ap-northeast",
+	"NZ": "ap-southeast",
+	// Middle East.
+	"AE": "me-central",
+	"SA": "me-central",
+	"QA": "me-central",
+	// South America.
+	"BR": "sa-east",
+	// US fallback.
+	"US": "us-east",
 }
 
 // NormalizeRegion maps a RunPod location string to a GPU.ai region code

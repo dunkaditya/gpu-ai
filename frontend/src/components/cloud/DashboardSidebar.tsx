@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ChipLogo } from "@/components/ui/ChipLogo";
 
 /* ── Icon Components ── */
 
@@ -124,11 +125,12 @@ function SidebarContent({ pathname, onNavClick }: { pathname: string; onNavClick
     <>
       {/* Logo */}
       <div className="flex items-center h-14 px-5 border-b border-border">
-        <Link
-          href="/"
-          className="font-sans text-lg font-bold tracking-tight text-text"
-        >
-          GPU.ai
+        <Link href="/" className="flex items-center gap-0.5">
+          <ChipLogo size={28} />
+          <span className="font-sans text-[18px] font-bold tracking-[-0.5px]">
+            <span className="text-white">gpu</span>
+            <span className="gradient-text">.ai</span>
+          </span>
         </Link>
       </div>
 

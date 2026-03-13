@@ -506,7 +506,9 @@ func TestNormalizeRegion(t *testing.T) {
 		{"EU-RO-1", "eu-east", "EU-RO-1"},
 		{"CA-MTL-1", "ca-central", "CA-MTL-1"},
 		{"", "unknown", "Unknown"},
-		{"JP-TK-1", "unknown", "JP-TK-1"},
+		{"JP-TK-1", "ap-northeast", "JP-TK-1"},
+		{"AU-SYD-1", "ap-southeast", "AU-SYD-1"},
+		{"TH-BKK-1", "ap-southeast", "TH-BKK-1"},
 	}
 
 	for _, tt := range tests {

@@ -2,17 +2,17 @@
 
 @theme inline {
   /* ── 60% Backgrounds ── */
-  --color-bg: #09090f;
-  --color-bg-alt: #0c0c14;
-  --color-bg-card: #111119;
-  --color-bg-card-hover: #16161f;
+  --color-bg: #000000;
+  --color-bg-alt: #0a0a0a;
+  --color-bg-card: #0a0a0a;
+  --color-bg-card-hover: #111111;
 
   /* ── 30% Text & Borders ── */
-  --color-text: #e2e2ea;
-  --color-text-muted: #8585a0;
-  --color-text-dim: #5c5c78;
-  --color-border: #18182a;
-  --color-border-light: #252538;
+  --color-text: #ededed;
+  --color-text-muted: #9a9a9a;
+  --color-text-dim: #707070;
+  --color-border: #333333;
+  --color-border-light: #444444;
 
   /* ── Radius ── */
   --radius-card: 10px;
@@ -410,6 +410,38 @@ body {
   }
 }
 
+/* ── Snake Border Hover Effect ── */
+.snake-border {
+  position: relative;
+}
+
+.snake-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 60%,
+    var(--color-purple) 80%,
+    var(--color-purple-light) 90%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.snake-border:hover::before {
+  opacity: 1;
+  animation: spin-border 2.5s linear infinite;
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up {
@@ -422,5 +454,9 @@ body {
   }
   .scroll-track {
     animation: none;
+  }
+  .snake-border:hover::before {
+    animation: none;
+    opacity: 0;
   }
 }
