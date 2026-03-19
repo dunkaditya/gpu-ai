@@ -76,8 +76,13 @@ export const GPU_DISPLAY_NAMES: Record<string, string> = {
   "rtx pro 4500": "RTX PRO 4500",
   "rtx 5090": "RTX 5090",
   "rtx 5080": "RTX 5080",
-  // Hopper
+  // Hopper (exact canonical names from API)
+  "h200 sxm": "H200 SXM",
+  "h200 nvl": "H200 NVL",
   "h200": "H200 SXM",
+  "h100 sxm": "H100 SXM",
+  "h100 nvl": "H100 NVL",
+  "h100 pcie": "H100 PCIe",
   "h100": "H100 SXM",
   // Ada Lovelace
   "l40s": "L40S",
@@ -89,7 +94,9 @@ export const GPU_DISPLAY_NAMES: Record<string, string> = {
   "rtx 2000 ada": "RTX 2000 Ada",
   "rtx 4090": "RTX 4090",
   "rtx 4080": "RTX 4080",
-  // Ampere
+  // Ampere (exact canonical names from API)
+  "a100 80gb": "A100",
+  "a100 40gb": "A100 40GB",
   "a100": "A100",
   "a40": "A40",
   "a30": "A30",
@@ -109,5 +116,3 @@ export function getDisplayName(gpuModel: string): string {
   const name = GPU_DISPLAY_NAMES[normalized] ?? normalized;
   return name.toUpperCase();
 }
-
-export const FEATURED_MODELS = ["rtx_5090", "h100_sxm", "h200_sxm", "b200"];

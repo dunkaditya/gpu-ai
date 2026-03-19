@@ -6,7 +6,7 @@ import type { IconName } from "@/components/ui/Icon";
 
 export function Features() {
   return (
-    <Section id="features">
+    <Section id="features" className="pt-20 md:pt-24">
       <SectionHeader label="Features" title="Built for teams that ship" />
 
       <div className="grid gap-6 md:grid-cols-3">

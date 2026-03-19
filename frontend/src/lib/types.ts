@@ -100,3 +100,63 @@ export interface PaginatedResponse<T> {
   next_cursor?: string
   items: T[]
 }
+
+// Matches internal/pricing/types.go
+export interface CompetitorEntry {
+  name: string
+  price: number | null
+}
+
+export interface GPUComparison {
+  gpu_model: string
+  display_name: string
+  vram_gb: number
+  gpuai_price: number | null
+  available_count: number
+  competitors: CompetitorEntry[]
+  savings_pct: number | null
+}
+
+export interface PricingComparisonResponse {
+  featured_models: string[]
+  gpus: GPUComparison[]
+  competitor_names: string[]
+  updated_at: string
+}
+
+// Credit Balance types
+export interface BalanceResponse {
+  balance_cents: number
+  balance_dollars: number
+  auto_pay_enabled: boolean
+  auto_pay_threshold_cents: number
+  auto_pay_amount_cents: number
+}
+
+export interface TransactionResponse {
+  id: string
+  type: 'credit_purchase' | 'auto_pay' | 'credit_code' | 'usage_deduction' | 'adjustment'
+  amount_cents: number
+  amount_dollars: number
+  balance_after_cents: number
+  description: string
+  reference_id?: string
+  created_at: string
+}
+
+export interface TransactionsListResponse {
+  transactions: TransactionResponse[]
+  has_more: boolean
+  next_cursor?: string
+}
+
+export interface PurchaseCreditsResponse {
+  checkout_url: string
+  session_id: string
+}
+
+export interface RedeemCodeResponse {
+  amount_cents: number
+  amount_dollars: number
+  new_balance_cents: number
+}

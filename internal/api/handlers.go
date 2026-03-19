@@ -166,7 +166,23 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 4. Build engine-level provision request.
+	// 4. Check credit balance — block launch if balance is zero or negative.
+	bal, err := s.db.EnsureOrgBalance(ctx, orgID)
+	if err != nil {
+		slog.Error("failed to check org balance",
+			slog.String("org_id", orgID),
+			slog.String("error", err.Error()),
+		)
+		writeProblem(w, http.StatusInternalServerError, "internal-error", "Failed to process request")
+		return
+	}
+	if bal.BalanceCents <= 0 {
+		writeProblem(w, http.StatusPaymentRequired, "insufficient_balance",
+			"Add credits before launching an instance.")
+		return
+	}
+
+	// 5. Build engine-level provision request.
 	provReq := provision.ProvisionRequest{
 		OrgID:           orgID,
 		UserID:          userID,
@@ -195,7 +211,7 @@ func (s *Server) handleCreateInstance(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(err, provision.ErrSSHKeysNotFound) {
 			writeProblem(w, http.StatusBadRequest, "ssh-keys-not-found",
-				"None of the provided SSH key IDs were found")
+				"No SSH keys found. Add an SSH key before launching an instance.")
 			return
 		}
 		if errors.Is(err, provision.ErrSpendingLimitReached) {

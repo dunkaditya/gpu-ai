@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -48,7 +49,98 @@ export default function RootLayout({
   );
 
   if (clerkKey) {
-    return <ClerkProvider>{inner}</ClerkProvider>;
+    return (
+      <ClerkProvider
+        localization={{
+          signIn: {
+            start: {
+              title: "Sign in",
+              subtitle: "",
+            },
+          },
+          signUp: {
+            start: {
+              title: "Create your account",
+              subtitle: "",
+            },
+          },
+        }}
+        appearance={{
+          baseTheme: dark,
+          layout: {
+            logoPlacement: "none",
+          },
+          variables: {
+            colorPrimary: "#7c6bf0",
+            colorBackground: "#0a0a0a",
+            colorInputBackground: "#111111",
+            colorInputText: "#ededed",
+            colorText: "#ededed",
+            colorTextSecondary: "#9a9a9a",
+            borderRadius: "10px",
+            fontFamily: "var(--font-necto-mono), monospace",
+          },
+          elements: {
+            card: {
+              backgroundColor: "#0a0a0a",
+              border: "1px solid #333333",
+              boxShadow: "0 0 40px rgba(124, 107, 240, 0.08)",
+            },
+            headerTitle: {
+              fontFamily: "var(--font-vremena-grotesk), sans-serif",
+              letterSpacing: "-0.02em",
+            },
+            headerSubtitle: {
+              color: "#9a9a9a",
+            },
+            socialButtonsBlockButton: {
+              backgroundColor: "#111111",
+              border: "1px solid #333333",
+              color: "#ededed",
+              "&:hover": {
+                backgroundColor: "#1a1a1a",
+                borderColor: "#444444",
+              },
+            },
+            formFieldInput: {
+              backgroundColor: "#111111",
+              border: "1px solid #333333",
+              color: "#ededed",
+              "&:focus": {
+                borderColor: "#7c6bf0",
+                boxShadow: "0 0 0 2px rgba(124, 107, 240, 0.25)",
+              },
+            },
+            formButtonPrimary: {
+              background:
+                "linear-gradient(135deg, #6b5ce0 0%, #5244c4 60%, #4a3ab8 100%)",
+              "&:hover": {
+                background:
+                  "linear-gradient(135deg, #7c6bf0 0%, #6b5ce0 60%, #5244c4 100%)",
+                boxShadow: "0 0 28px rgba(124, 107, 240, 0.35)",
+              },
+            },
+            footerActionLink: {
+              color: "#7c6bf0",
+              "&:hover": {
+                color: "#9a8cff",
+              },
+            },
+            dividerLine: {
+              backgroundColor: "#333333",
+            },
+            dividerText: {
+              color: "#707070",
+            },
+            identityPreviewEditButton: {
+              color: "#7c6bf0",
+            },
+          },
+        }}
+      >
+        {inner}
+      </ClerkProvider>
+    );
   }
 
   return inner;

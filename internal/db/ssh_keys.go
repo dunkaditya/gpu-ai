@@ -106,6 +106,31 @@ func (p *Pool) GetSSHKeysByUserID(ctx context.Context, userID string) ([]SSHKey,
 	return keys, rows.Err()
 }
 
+// GetSSHKeysByOrgID retrieves all SSH keys belonging to an organization.
+// Used as fallback when the launching user has no personal keys.
+func (p *Pool) GetSSHKeysByOrgID(ctx context.Context, orgID string) ([]SSHKey, error) {
+	rows, err := p.pool.Query(ctx,
+		`SELECT ssh_key_id, org_id, user_id, name, public_key, fingerprint, created_at
+		 FROM ssh_keys WHERE org_id = $1
+		 ORDER BY created_at DESC`,
+		orgID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var keys []SSHKey
+	for rows.Next() {
+		var k SSHKey
+		if err := rows.Scan(&k.SSHKeyID, &k.OrgID, &k.UserID, &k.Name, &k.PublicKey, &k.Fingerprint, &k.CreatedAt); err != nil {
+			return nil, err
+		}
+		keys = append(keys, k)
+	}
+	return keys, rows.Err()
+}
+
 // CountSSHKeysByOrg returns the number of SSH keys for an organization.
 // Used to enforce the per-org 50-key limit.
 func (p *Pool) CountSSHKeysByOrg(ctx context.Context, orgID string) (int, error) {

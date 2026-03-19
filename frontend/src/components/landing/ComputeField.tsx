@@ -36,7 +36,7 @@ export function ComputeField() {
     let mouseX = -9999;
     let mouseY = -9999;
     const isMobile = window.innerWidth < 768;
-    const nodeCount = isMobile ? 80 : 240;
+    const nodeCount = isMobile ? 96 : 288;
 
     // Depth-aware colors: far nodes are dimmer
     const baseColors = [
@@ -267,7 +267,12 @@ export function ComputeField() {
   }, []);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[43] overflow-hidden">
+    <div
+      className="pointer-events-none absolute inset-0 z-[43] overflow-hidden"
+      style={{
+        clipPath: `inset(0 calc((100% - min(100%, 1400px)) / 2))`,
+      }}
+    >
       <canvas ref={canvasRef} className="absolute inset-0" />
     </div>
   );

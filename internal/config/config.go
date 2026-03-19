@@ -45,6 +45,10 @@ type Config struct {
 	// Must match the meter configured in Stripe Dashboard.
 	StripeMeterEventName string
 
+	// StripeWebhookSecret is the signing secret for Stripe webhook signature verification.
+	// Required for processing checkout.session.completed and payment_intent events.
+	StripeWebhookSecret string
+
 	// PricingMarkupPct is the percentage markup applied to provider prices for retail pricing.
 	// Default: 15.0 (15% markup). Set via PRICING_MARKUP_PCT env var.
 	PricingMarkupPct float64
@@ -94,8 +98,8 @@ func Load() (*Config, error) {
 		slog.Info("Stripe not configured, billing metering disabled")
 	}
 
-	// Parse pricing markup percentage (default 15.0%).
-	pricingMarkupPctStr := getEnvDefault("PRICING_MARKUP_PCT", "15.0")
+	// Parse pricing markup percentage (default 6.0%).
+	pricingMarkupPctStr := getEnvDefault("PRICING_MARKUP_PCT", "6.0")
 	pricingMarkupPct, err := strconv.ParseFloat(pricingMarkupPctStr, 64)
 	if err != nil {
 		return nil, fmt.Errorf("PRICING_MARKUP_PCT must be a valid number: %w", err)
@@ -125,6 +129,7 @@ func Load() (*Config, error) {
 		GpuctlPublicURL:      os.Getenv("GPUCTL_PUBLIC_URL"),
 		StripeAPIKey:         os.Getenv("STRIPE_API_KEY"),
 		StripeMeterEventName: os.Getenv("STRIPE_METER_EVENT_NAME"),
+		StripeWebhookSecret:  os.Getenv("STRIPE_WEBHOOK_SECRET"),
 		PricingMarkupPct:     pricingMarkupPct,
 		FRPBindPort:          frpBindPort,
 		FRPToken:             frpToken,

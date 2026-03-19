@@ -1,19 +1,22 @@
 // ── Navigation ──
 
 export const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Docs", href: "/docs" },
-  { label: "Enterprise", href: "/enterprise" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "How It Works", href: "/#how-it-works" },
+] as const;
+
+export const COMPANY_LINKS = [
+  { label: "About", href: "/about" },
+  { label: "Careers", href: "/careers" },
 ] as const;
 
 // ── Hero Stats ──
 
 export const HERO_STATS = [
-  { value: 12, suffix: "+", label: "GPU Providers" },
+  { value: 10, suffix: "+", label: "GPU Models" },
   { value: 30, suffix: "%", label: "Avg Savings" },
   { value: 60, prefix: "<", suffix: "s", label: "Deploy Time" },
-  { value: 99, suffix: ".9%", label: "Uptime SLA" },
 ] as const;
 
 // ── Features ──
@@ -21,9 +24,9 @@ export const HERO_STATS = [
 export const FEATURES = [
   {
     icon: "globe",
-    title: "12+ Providers, One API",
+    title: "Real-Time Price Comparison",
     description:
-      "GPU.ai aggregates inventory from RunPod, Lambda, CoreWeave, and more. You pick the GPU — we find the cheapest available instance in real time.",
+      "GPU.ai continuously compares prices across cloud providers so you always get the lowest rate. No need to check five dashboards — we surface the best deal automatically.",
   },
   {
     icon: "zap",
@@ -33,9 +36,9 @@ export const FEATURES = [
   },
   {
     icon: "shield",
-    title: "Private WireGuard Networking",
+    title: "Per-Second Billing, No Minimums",
     description:
-      "Every instance gets a private WireGuard tunnel out of the box. Your data stays encrypted in transit between your machines and your GPUs.",
+      "Pay only for what you use, billed by the second. No reserved contracts, no hourly rounding, no minimum commitments. Shut down and stop paying instantly.",
   },
 ] as const;
 
@@ -46,19 +49,19 @@ export const HOW_IT_WORKS = [
     step: 1,
     title: "Pick your GPU",
     description:
-      "Choose the model, VRAM, and quantity you need. GPU.ai scans every provider to find the lowest available price across on-demand and spot inventory.",
+      "Select a model and quantity — we find the lowest price across all providers.",
   },
   {
     step: 2,
     title: "Deploy instantly",
     description:
-      "One command spins up your instance with a private WireGuard tunnel, SSH access, and a pre-configured ML environment — all in under 60 seconds.",
+      "One command gives you SSH access to a ready ML environment in under 60 seconds.",
   },
   {
     step: 3,
     title: "Pay per second",
     description:
-      "No reserved contracts or minimums. You're billed per second of actual usage, and GPU.ai automatically selects the cheapest provider for your workload.",
+      "No contracts or minimums. Billed per second, cheapest provider auto-selected.",
   },
 ] as const;
 
@@ -85,72 +88,89 @@ export const CODE_EXAMPLE = [
 
 // ── Pricing Table ──
 
-export const COMPETITOR_NAMES = ["AWS", "GCP", "Lambda"] as const;
+import type { PricingComparisonResponse } from "./types";
 
-export const PRICING_DATA = [
-  {
-    gpu: "H100 SXM",
-    vram: "80 GB",
-    gpuai: 2.49,
-    competitors: [
-      { name: "AWS", price: 4.15 },
-      { name: "GCP", price: 3.98 },
-      { name: "Lambda", price: 2.99 },
-    ],
-    savings: 40,
-  },
-  {
-    gpu: "A100 SXM",
-    vram: "80 GB",
-    gpuai: 1.29,
-    competitors: [
-      { name: "AWS", price: 2.48 },
-      { name: "GCP", price: 2.21 },
-      { name: "Lambda", price: 1.69 },
-    ],
-    savings: 42,
-  },
-  {
-    gpu: "L40S",
-    vram: "48 GB",
-    gpuai: 0.89,
-    competitors: [
-      { name: "AWS", price: 1.52 },
-      { name: "GCP", price: 1.40 },
-      { name: "Lambda", price: 1.10 },
-    ],
-    savings: 41,
-  },
-  {
-    gpu: "RTX 4090",
-    vram: "24 GB",
-    gpuai: 0.44,
-    competitors: [
-      { name: "AWS", price: 0.89 },
-      { name: "GCP", price: 0.79 },
-      { name: "Lambda", price: 0.59 },
-    ],
-    savings: 51,
-  },
-  {
-    gpu: "A10G",
-    vram: "24 GB",
-    gpuai: 0.39,
-    competitors: [
-      { name: "AWS", price: 0.75 },
-      { name: "GCP", price: 0.65 },
-      { name: "Lambda", price: 0.55 },
-    ],
-    savings: 48,
-  },
-] as const;
+export const COMPETITOR_NAMES = ["Lambda", "CoreWeave", "AWS"] as const;
+
+// Fallback pricing data — shown immediately while API loads.
+// Matches the structure of PricingComparisonResponse for SWR fallback.
+export const PRICING_FALLBACK: PricingComparisonResponse = {
+  featured_models: ["h200_sxm", "h100_sxm", "b200", "a100_80gb"],
+  competitor_names: ["Lambda", "CoreWeave", "AWS"],
+  updated_at: "",
+  gpus: [
+    {
+      gpu_model: "h200_sxm",
+      display_name: "H200 SXM",
+      vram_gb: 141,
+      gpuai_price: 3.81,
+      available_count: 48,
+      competitors: [
+        { name: "Lambda", price: 4.99 },
+        { name: "CoreWeave", price: 6.31 },
+        { name: "AWS", price: 4.97 },
+      ],
+      savings_pct: 28,
+    },
+    {
+      gpu_model: "h100_sxm",
+      display_name: "H100 SXM",
+      vram_gb: 80,
+      gpuai_price: 2.64,
+      available_count: 124,
+      competitors: [
+        { name: "Lambda", price: 3.29 },
+        { name: "CoreWeave", price: 6.16 },
+        { name: "AWS", price: 3.93 },
+      ],
+      savings_pct: 24,
+    },
+    {
+      gpu_model: "b200",
+      display_name: "B200",
+      vram_gb: 192,
+      gpuai_price: 5.29,
+      available_count: 16,
+      competitors: [
+        { name: "Lambda", price: 6.08 },
+        { name: "CoreWeave", price: 8.60 },
+        { name: "AWS", price: 14.24 },
+      ],
+      savings_pct: 18,
+    },
+    {
+      gpu_model: "a100_80gb",
+      display_name: "A100",
+      vram_gb: 80,
+      gpuai_price: 2.00,
+      available_count: 256,
+      competitors: [
+        { name: "Lambda", price: 2.06 },
+        { name: "CoreWeave", price: 2.70 },
+        { name: "AWS", price: 5.12 },
+      ],
+      savings_pct: 8,
+    },
+  ],
+};
+
+// Legacy flat format for any components still using it.
+export const PRICING_DATA = PRICING_FALLBACK.gpus.map((g) => ({
+  gpu: g.display_name,
+  vram: `${g.vram_gb} GB`,
+  gpuai: g.gpuai_price ?? 0,
+  competitors: g.competitors
+    .filter((c): c is { name: string; price: number } => c.price !== null)
+    .map((c) => ({ name: c.name, price: c.price })),
+  savings: g.savings_pct ?? 0,
+}));
 
 // ── Footer Links ──
 
 export const FOOTER_LINKS = {
   Product: [
-    { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/#pricing" },
     { label: "CLI", href: "/docs/cli" },
     { label: "API", href: "/docs/api" },
   ],

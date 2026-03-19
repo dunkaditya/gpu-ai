@@ -148,10 +148,10 @@ func (e *Engine) Provision(ctx context.Context, req ProvisionRequest) (*Provisio
 			return nil, fmt.Errorf("provision: look up ssh keys: %w", err)
 		}
 	} else {
-		// No key IDs provided -- auto-include all of user's keys.
-		sshKeys, err = e.db.GetSSHKeysByUserID(ctx, req.UserID)
+		// No key IDs provided -- auto-include all org keys.
+		sshKeys, err = e.db.GetSSHKeysByOrgID(ctx, req.OrgID)
 		if err != nil {
-			return nil, fmt.Errorf("provision: look up user ssh keys: %w", err)
+			return nil, fmt.Errorf("provision: look up org ssh keys: %w", err)
 		}
 	}
 	if len(sshKeys) == 0 {

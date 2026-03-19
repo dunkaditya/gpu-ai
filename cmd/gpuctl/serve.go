@@ -14,6 +14,7 @@ import (
 	"github.com/gpuai/gpuctl/internal/api"
 	"github.com/gpuai/gpuctl/internal/availability"
 	"github.com/gpuai/gpuctl/internal/billing"
+	"github.com/gpuai/gpuctl/internal/competitor"
 	"github.com/gpuai/gpuctl/internal/health"
 )
 
@@ -72,20 +73,29 @@ func runServe(args []string) {
 	go availPoller.Start(ctx)
 	slog.Info("availability poller started", "interval", "30s", "markup_pct", deps.Config.PricingMarkupPct)
 
+	// Create competitor pricing cache and start background scraper.
+	competitorCache := competitor.NewCache(deps.Redis, 24*time.Hour)
+	competitorPoller := competitor.NewPoller(competitorCache, 30*time.Minute, logger)
+	go competitorPoller.Start(ctx)
+	slog.Info("competitor pricing poller started", "interval", "30m")
+
+	// Create billing service (Stripe metering + payments).
+	billingSvc := billing.NewBillingService(deps.Config.StripeAPIKey, deps.Config.StripeMeterEventName, deps.Config.StripeWebhookSecret, logger)
+
 	// Create API server.
 	srv := api.NewServer(api.ServerDeps{
-		DB:         deps.DB,
-		Redis:      deps.Redis,
-		Config:     deps.Config,
-		Engine:     deps.Engine,
-		AvailCache: availCache,
+		DB:              deps.DB,
+		Redis:           deps.Redis,
+		Config:          deps.Config,
+		Engine:          deps.Engine,
+		AvailCache:      availCache,
+		Providers:       deps.Registry,
+		CompetitorCache: competitorCache,
+		Billing:         billingSvc,
 	})
 
 	// Wire SSE status events from provisioning engine to API server.
 	deps.Engine.SetOnStatusChange(srv.PublishStatusChange)
-
-	// Create billing service (Stripe metering).
-	billingSvc := billing.NewBillingService(deps.Config.StripeAPIKey, deps.Config.StripeMeterEventName, logger)
 
 	// Create and start billing ticker.
 	billingTicker := billing.NewBillingTicker(billing.TickerDeps{

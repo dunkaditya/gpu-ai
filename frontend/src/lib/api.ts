@@ -5,6 +5,11 @@ import type {
   UsageResponse,
   CreateInstanceRequest,
   SpendingLimitResponse,
+  PricingComparisonResponse,
+  BalanceResponse,
+  PurchaseCreditsResponse,
+  RedeemCodeResponse,
+  TransactionsListResponse,
 } from './types'
 
 const API_BASE = '/api/v1'
@@ -134,4 +139,67 @@ export async function setSpendingLimit(limitDollars: number): Promise<SpendingLi
 export async function deleteSpendingLimit(): Promise<void> {
   const res = await fetch(`${API_BASE}/billing/spending-limit`, { method: 'DELETE' })
   if (!res.ok && res.status !== 204) throw new Error('Failed to delete spending limit')
+}
+
+// Pricing Comparison
+export async function fetchPricingComparison(): Promise<PricingComparisonResponse> {
+  const res = await fetch(`${API_BASE}/pricing/comparison`)
+  if (!res.ok) throw new Error('Failed to fetch pricing comparison')
+  return res.json()
+}
+
+// Credit Balance
+export async function fetchBalance(): Promise<BalanceResponse> {
+  const res = await fetch(`${API_BASE}/billing/balance`)
+  if (!res.ok) throw new Error('Failed to fetch balance')
+  return res.json()
+}
+
+export async function purchaseCredits(amountCents: number, successUrl: string, cancelUrl: string): Promise<PurchaseCreditsResponse> {
+  const res = await fetch(`${API_BASE}/billing/credits/purchase`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount_cents: amountCents, success_url: successUrl, cancel_url: cancelUrl }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || 'Failed to purchase credits')
+  }
+  return res.json()
+}
+
+export async function redeemCreditCode(code: string): Promise<RedeemCodeResponse> {
+  const res = await fetch(`${API_BASE}/billing/credits/redeem`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || 'Failed to redeem code')
+  }
+  return res.json()
+}
+
+export async function updateAutoPay(enabled: boolean, thresholdCents: number, amountCents: number): Promise<BalanceResponse> {
+  const res = await fetch(`${API_BASE}/billing/auto-pay`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled, threshold_cents: thresholdCents, amount_cents: amountCents }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || 'Failed to update auto-pay')
+  }
+  return res.json()
+}
+
+export async function fetchTransactions(limit?: number, before?: string): Promise<TransactionsListResponse> {
+  const params = new URLSearchParams()
+  if (limit) params.set('limit', String(limit))
+  if (before) params.set('before', before)
+  const qs = params.toString()
+  const res = await fetch(`${API_BASE}/billing/transactions${qs ? `?${qs}` : ''}`)
+  if (!res.ok) throw new Error('Failed to fetch transactions')
+  return res.json()
 }

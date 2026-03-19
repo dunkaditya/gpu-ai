@@ -1,9 +1,13 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { OrganizationSwitcher, useOrganization } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { ChipLogo } from "@/components/ui/ChipLogo";
+
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 /* ── Icon Components ── */
 
@@ -83,8 +87,8 @@ const primaryNav: NavItem[] = [
 const managementNav: NavItem[] = [
   { label: "SSH Keys", href: "/cloud/ssh-keys", icon: <SSHKeysIcon /> },
   { label: "Billing", href: "/cloud/billing", icon: <BillingIcon /> },
+  { label: "Team", href: "/cloud/team", icon: <TeamIcon /> },
   { label: "API Keys", href: "/cloud/api-keys", icon: <APIKeysIcon />, comingSoon: true },
-  { label: "Team", href: "/cloud/team", icon: <TeamIcon />, comingSoon: true },
 ];
 
 const bottomNav: NavItem[] = [
@@ -120,9 +124,31 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
 
 /* ── Sidebar Content (shared between desktop and mobile) ── */
 
+/** Watches Clerk org changes and does a hard navigation to refresh data. */
+function OrgChangeReloader() {
+  const { organization, isLoaded } = useOrganization();
+  const prevOrgId = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const currentId = organization?.id ?? null;
+    if (prevOrgId.current === undefined) {
+      prevOrgId.current = currentId;
+      return;
+    }
+    if (prevOrgId.current !== currentId) {
+      prevOrgId.current = currentId;
+      window.location.assign("/cloud/instances");
+    }
+  }, [organization?.id, isLoaded]);
+
+  return null;
+}
+
 function SidebarContent({ pathname, onNavClick }: { pathname: string; onNavClick?: () => void }) {
   return (
     <>
+      {hasClerk && <OrgChangeReloader />}
       {/* Logo */}
       <div className="flex items-center h-14 px-5 border-b border-border">
         <Link href="/" className="flex items-center gap-0.5">
@@ -133,6 +159,28 @@ function SidebarContent({ pathname, onNavClick }: { pathname: string; onNavClick
           </span>
         </Link>
       </div>
+
+      {/* Organization Switcher */}
+      {hasClerk && (
+        <div className="px-3 py-3 border-b border-border">
+          <OrganizationSwitcher
+            hidePersonal={false}
+            afterCreateOrganizationUrl="/cloud/instances"
+            afterSelectOrganizationUrl="/cloud/instances"
+            afterLeaveOrganizationUrl="/cloud/instances"
+            appearance={{
+              elements: {
+                rootBox: "w-full",
+                organizationSwitcherTrigger:
+                  "w-full justify-between rounded-md border border-border bg-bg-card/50 px-3 py-2 text-sm text-text hover:bg-bg-card-hover transition-colors",
+                organizationSwitcherTriggerIcon: "text-text-muted",
+                organizationPreviewMainIdentifier: "text-text text-sm",
+                organizationPreviewSecondaryIdentifier: "text-text-muted",
+              },
+            }}
+          />
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 flex flex-col px-3 py-4">

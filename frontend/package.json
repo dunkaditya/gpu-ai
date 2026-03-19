@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.39.0",
+    "@clerk/themes": "^2.4.57",
     "clsx": "^2.1.1",
+    "motion": "^12.38.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "resend": "^6.9.4",
     "swr": "^2.4.1",
     "tailwind-merge": "^3.5.0",
     "use-debounce": "^10.1.0"

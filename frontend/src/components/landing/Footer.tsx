@@ -10,14 +10,14 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-5">
           {/* Brand */}
           <div className="md:col-span-1">
-            <a href="/" className="mb-4 flex items-center gap-2">
-              <ChipLogo size={22} />
-              <span className="type-ui font-semibold tracking-[-0.3px]">
+            <a href="/" className="flex items-center gap-0.5">
+              <ChipLogo size={28} />
+              <span className="font-sans text-[18px] font-bold tracking-[-0.5px]">
                 <span className="text-white">gpu</span>
-                <span className="text-purple">.ai</span>
+                <span className="gradient-text">.ai</span>
               </span>
             </a>
-            <p className="type-ui-sm mt-3 leading-[1.6] text-text-dim">
+            <p className="type-ui-sm mt-2 leading-[1.6] text-text-dim">
               The GPU cloud built to save you money.
             </p>
           </div>

@@ -3,7 +3,7 @@ import Link from "next/link";
 interface EmptyStateProps {
   icon: React.ReactNode;
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   action?: { label: string; href?: string; onClick?: () => void };
 }
 

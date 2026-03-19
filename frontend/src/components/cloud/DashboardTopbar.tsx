@@ -1,7 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
+import useSWR from "swr";
+import { gracefulFetcher } from "@/lib/api";
+import type { BalanceResponse } from "@/lib/types";
 
 const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -77,8 +81,9 @@ export function DashboardTopbar({ onMenuToggle }: { onMenuToggle?: () => void })
         </div>
       </div>
 
-      {/* User section */}
-      <div className="flex items-center gap-4">
+      {/* Balance + User section */}
+      <div className="flex items-center gap-3">
+        <BalancePill />
         {hasClerk ? (
           <UserButton
             appearance={{
@@ -97,5 +102,31 @@ export function DashboardTopbar({ onMenuToggle }: { onMenuToggle?: () => void })
         )}
       </div>
     </header>
+  );
+}
+
+function BalancePill() {
+  const { data } = useSWR<BalanceResponse>(
+    "/api/v1/billing/balance",
+    gracefulFetcher,
+    { refreshInterval: 15000 }
+  );
+
+  if (!data) return null;
+
+  const dollars = (data.balance_cents / 100).toFixed(2);
+
+  return (
+    <Link
+      href="/cloud/billing"
+      className="flex items-center gap-0 rounded-md border border-border bg-bg-card hover:bg-bg-card-hover transition-colors overflow-hidden"
+    >
+      <span className="px-2.5 py-1 type-ui-xs font-mono text-text">
+        ${dollars}
+      </span>
+      <span className="px-1.5 py-1 bg-green text-bg font-bold type-ui-xs">
+        +
+      </span>
+    </Link>
   );
 }

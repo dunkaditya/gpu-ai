@@ -124,6 +124,15 @@ func (p *Pool) GetOrgStripeCustomerID(ctx context.Context, orgID string) (string
 	return *customerID, nil
 }
 
+// SetStripeCustomerID sets the Stripe customer ID for an organization.
+func (p *Pool) SetStripeCustomerID(ctx context.Context, orgID, customerID string) error {
+	_, err := p.pool.Exec(ctx,
+		`UPDATE organizations SET stripe_customer_id = $2 WHERE organization_id = $1`,
+		orgID, customerID,
+	)
+	return err
+}
+
 // GetOrgIDByClerkOrgID retrieves the internal organization UUID by Clerk org ID.
 // Returns ErrNotFound if no matching organization exists.
 func (p *Pool) GetOrgIDByClerkOrgID(ctx context.Context, clerkOrgID string) (string, error) {

@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useSWR from "swr";
+import { fetcher } from "@/lib/api";
+import { PRICING_FALLBACK } from "@/lib/constants";
+import type { PricingComparisonResponse } from "@/lib/types";
 
 interface PriceBarProps {
   name: string;
@@ -47,30 +51,37 @@ function PriceBar({ name, price, maxP, isSelf, delay }: PriceBarProps) {
   );
 }
 
-const GPUS = [
-  { name: "H200 SXM", vram: "141 GB", price: 1.89, avail: 48 },
-  { name: "H100 SXM", vram: "80 GB", price: 1.29, avail: 124 },
-  { name: "B200 SXM", vram: "192 GB", price: 3.19, avail: 16 },
-  { name: "A100 SXM", vram: "80 GB", price: 0.79, avail: 256 },
-] as const;
-
-const COMPS: Record<string, Record<string, number>> = {
-  "H200 SXM": { Lambda: 3.99, RunPod: 3.49, AWS: 6.98 },
-  "H100 SXM": { Lambda: 2.99, RunPod: 2.49, AWS: 3.9 },
-  "B200 SXM": { Lambda: 5.74, CoreWeave: 5.5 },
-  "A100 SXM": { Lambda: 1.48, RunPod: 1.64, AWS: 3.4 },
-};
+// Select top 4 GPUs for the widget tabs.
+const WIDGET_GPU_COUNT = 4;
 
 export function PricingWidget() {
+  const { data } = useSWR<PricingComparisonResponse>(
+    "/api/v1/pricing/comparison",
+    fetcher,
+    { fallbackData: PRICING_FALLBACK, revalidateOnFocus: false },
+  );
   const [selGpu, setSelGpu] = useState(0);
 
-  const gpu = GPUS[selGpu];
-  const comps = COMPS[gpu.name];
-  const compArr = Object.entries(comps);
-  const maxP = Math.max(gpu.price, ...compArr.map(([, v]) => v));
-  const savePct = Math.round(
-    (1 - gpu.price / (compArr.reduce((a, [, v]) => a + v, 0) / compArr.length)) * 100,
-  );
+  const allGpus = data?.gpus ?? PRICING_FALLBACK.gpus;
+  // Filter to GPUs that have a GPU.ai price, take top N.
+  const gpus = allGpus
+    .filter((g) => g.gpuai_price !== null)
+    .slice(0, WIDGET_GPU_COUNT);
+
+  if (gpus.length === 0) return null;
+
+  const safeIdx = selGpu < gpus.length ? selGpu : 0;
+  const gpu = gpus[safeIdx];
+  const price = gpu.gpuai_price!;
+
+  // Build competitor bars (only those with a price for this GPU).
+  const compArr = gpu.competitors
+    .filter((c): c is { name: string; price: number } => c.price !== null);
+  const maxP = Math.max(price, ...compArr.map((c) => c.price));
+  // Calculate savings vs the next highest competitor price (cheapest one above our price).
+  const higherPrices = compArr.map((c) => c.price).filter((p) => p > price);
+  const nextHighest = higherPrices.length > 0 ? Math.min(...higherPrices) : null;
+  const savePct = nextHighest !== null ? Math.round(((nextHighest - price) / nextHighest) * 100) : null;
 
   return (
     <div className="relative w-full max-w-[400px]">
@@ -114,17 +125,17 @@ export function PricingWidget() {
 
         {/* GPU Tabs */}
         <div className="flex border-b border-white/[0.06]">
-          {GPUS.map((g, i) => (
+          {gpus.map((g, i) => (
             <button
-              key={g.name}
+              key={g.gpu_model}
               onClick={() => setSelGpu(i)}
               className={`relative flex-1 px-2 py-3 type-ui-2xs transition-all ${
-                selGpu === i
+                safeIdx === i
                   ? "font-semibold text-white"
                   : "text-text-dim hover:text-text-muted"
               }`}
             >
-              {selGpu === i && (
+              {safeIdx === i && (
                 <div
                   className="absolute inset-0"
                   style={{
@@ -133,7 +144,7 @@ export function PricingWidget() {
                   }}
                 />
               )}
-              <span className="relative">{g.name.split(" ")[0]}</span>
+              <span className="relative">{g.display_name.split(" ")[0]}</span>
             </button>
           ))}
         </div>
@@ -141,37 +152,39 @@ export function PricingWidget() {
         {/* Content */}
         <div className="px-6 py-5">
           <div className="mb-1.5 flex items-baseline justify-between">
-            <span className="text-[16px] font-semibold text-white">{gpu.name}</span>
-            <span className="type-ui-2xs text-text-dim">{gpu.vram}</span>
+            <span className="text-[16px] font-semibold text-white">{gpu.display_name}</span>
+            <span className="type-ui-2xs text-text-dim">{gpu.vram_gb} GB</span>
           </div>
 
           <div className="mb-5 flex items-baseline gap-0.5">
             <span className="text-[32px] font-extrabold tracking-tight text-green">
-              ${gpu.price.toFixed(2)}
+              ${price.toFixed(2)}
             </span>
             <span className="type-ui-sm text-text-dim">/gpu/hr</span>
-            <span
-              className="ml-auto inline-flex items-center rounded-[5px] px-2 py-0.5 type-ui-2xs font-semibold text-green"
-              style={{
-                background: "rgba(34, 197, 94, 0.08)",
-                border: "1px solid rgba(34, 197, 94, 0.15)",
-                boxShadow: "inset 0 0 8px rgba(34, 197, 94, 0.06)",
-              }}
-            >
-              -{savePct}%
-            </span>
+            {savePct !== null && savePct > 0 && (
+              <span
+                className="ml-auto inline-flex items-center rounded-[5px] px-2 py-0.5 type-ui-2xs font-semibold text-green"
+                style={{
+                  background: "rgba(34, 197, 94, 0.08)",
+                  border: "1px solid rgba(34, 197, 94, 0.15)",
+                  boxShadow: "inset 0 0 8px rgba(34, 197, 94, 0.06)",
+                }}
+              >
+                -{savePct}%
+              </span>
+            )}
           </div>
 
           <div className="mb-2.5 text-[10px] font-semibold uppercase tracking-[1px] text-text-dim">
             vs. Competitors
           </div>
 
-          <PriceBar name="GPU.ai" price={gpu.price} maxP={maxP} isSelf delay={0} />
-          {compArr.map(([name, p], i) => (
+          <PriceBar name="GPU.ai" price={price} maxP={maxP} isSelf delay={0} />
+          {compArr.map((c, i) => (
             <PriceBar
-              key={name}
-              name={name}
-              price={p}
+              key={c.name}
+              name={c.name}
+              price={c.price}
               maxP={maxP}
               isSelf={false}
               delay={(i + 1) * 60}
@@ -185,17 +198,17 @@ export function PricingWidget() {
               <div className="flex items-center gap-1.5">
                 <div
                   className={`h-[7px] w-[7px] rounded-full ${
-                    gpu.avail > 30
+                    gpu.available_count > 30
                       ? "bg-green shadow-[0_0_8px_rgba(34,197,94,0.27)]"
                       : "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.27)]"
                   }`}
                 />
-                <span className="type-ui-xs text-text-muted">{gpu.avail} available</span>
+                <span className="type-ui-xs text-text-muted">{gpu.available_count} available</span>
               </div>
-              <span className="type-ui-2xs text-text-dim">Spot · India</span>
+              <span className="type-ui-2xs text-text-dim">On-demand</span>
             </div>
             <a
-              href="/sign-up"
+              href="/cloud/gpu-availability"
               className="mt-3.5 flex w-full items-center justify-center gap-2 rounded-lg py-3 text-[15px] font-semibold text-white transition-all"
               style={{
                 background: "linear-gradient(135deg, #1a9d4a 0%, #16a34a 50%, #15803d 100%)",

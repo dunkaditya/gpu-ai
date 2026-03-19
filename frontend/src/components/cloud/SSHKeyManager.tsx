@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { fetcher, addSSHKey, deleteSSHKey } from "@/lib/api";
@@ -217,7 +218,18 @@ export function SSHKeyManager() {
               </svg>
             }
             title="No SSH keys"
-            description="Add an SSH key to connect to your instances."
+            description={
+              <>
+                You need an SSH key to connect to instances.{" "}
+                <Link
+                  href="/docs/ssh-keys"
+                  target="_blank"
+                  className="text-purple hover:text-purple-light transition-colors"
+                >
+                  Learn how to create one
+                </Link>
+              </>
+            }
           />
         ) : (
           <div>

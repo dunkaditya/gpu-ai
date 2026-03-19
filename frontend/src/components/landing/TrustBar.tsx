@@ -11,6 +11,8 @@ const CUSTOMERS = [
   { name: "US Dept. of Energy", logo: "/logos/doe.png", w: 150, h: 38 },
   { name: "MIT", logo: "/logos/mit.png", w: 44, h: 44 },
   { name: "DeepInfra", logo: "/logos/deepinfra.png", w: 140, h: 38 },
+  { name: "Telegram", logo: "/logos/telegram.png", w: 90, h: 58 },
+  { name: "Cocoon", logo: "/logos/cocoon.png", w: 90, h: 58 },
 ] as const;
 
 export function TrustBar() {
@@ -36,7 +38,7 @@ export function TrustBar() {
         Trusted by researchers &amp; teams at
       </p>
       <div
-        className="relative h-[88px]"
+        className="relative h-[88px] mb-4"
         style={{ marginLeft: inset, marginRight: inset }}
       >
         <div className="absolute inset-0 overflow-hidden">

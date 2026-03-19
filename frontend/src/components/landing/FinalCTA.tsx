@@ -14,12 +14,12 @@ export function FinalCTA() {
           in under 60 seconds
         </h2>
         <p className="type-body-lg mx-auto mt-3 max-w-[440px] text-text-muted">
-          No credit card required. Free tier available.
+          Try our free trial — up to $100 in credits, no credit card required.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button href="/sign-up">Get Started Free</Button>
-          <Button variant="secondary" href="/contact">
-            Talk to Sales
+          <Button href="/free-trial">$100 Free Trial</Button>
+          <Button variant="secondary" href="/cloud/gpu-availability">
+            Launch Instance
           </Button>
         </div>
       </Container>

@@ -4,7 +4,6 @@ import { TrustBar } from "@/components/landing/TrustBar";
 import { PricingTable } from "@/components/landing/PricingTable";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Features } from "@/components/landing/Features";
-import { CodeExample } from "@/components/landing/CodeExample";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
 
@@ -17,11 +16,10 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <Hero />
-        <PricingTable />
         <TrustBar />
-        <HowItWorks />
         <Features />
-        <CodeExample />
+        <PricingTable />
+        <HowItWorks />
         <FinalCTA />
       </main>
       <Footer />

@@ -25,7 +25,7 @@ export function Card({
         "rounded-xl border border-border bg-bg-card",
         paddings[padding],
         hover &&
-          "transition-all duration-200 hover:border-border-light hover:-translate-y-0.5",
+          "snake-border transition-all duration-200 hover:border-transparent hover:-translate-y-0.5",
         className,
       )}
     >

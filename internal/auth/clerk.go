@@ -21,8 +21,12 @@ func ClaimsFromContext(ctx context.Context) (*Claims, bool) {
 	if !ok || sessionClaims == nil {
 		return nil, false
 	}
+	orgID := sessionClaims.ActiveOrganizationID
+	if orgID == "" {
+		orgID = "personal_" + sessionClaims.Subject
+	}
 	return &Claims{
 		UserID: sessionClaims.Subject,
-		OrgID:  sessionClaims.ActiveOrganizationID,
+		OrgID:  orgID,
 	}, true
 }

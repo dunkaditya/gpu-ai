@@ -8,8 +8,11 @@ import (
 	"time"
 
 	"github.com/gpuai/gpuctl/internal/availability"
+	"github.com/gpuai/gpuctl/internal/billing"
+	"github.com/gpuai/gpuctl/internal/competitor"
 	"github.com/gpuai/gpuctl/internal/config"
 	"github.com/gpuai/gpuctl/internal/db"
+	"github.com/gpuai/gpuctl/internal/provider"
 	"github.com/gpuai/gpuctl/internal/provision"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/time/rate"
@@ -24,7 +27,10 @@ type Server struct {
 	engine         *provision.Engine
 	statusBroker   *StatusBroker
 	orgEventBroker *OrgEventBroker
-	availCache     *availability.Cache
+	availCache      *availability.Cache
+	providers       *provider.Registry
+	competitorCache *competitor.Cache
+	billing         *billing.BillingService
 }
 
 // ServerDeps contains the dependencies injected into the Server.
@@ -33,7 +39,10 @@ type ServerDeps struct {
 	Redis      *redis.Client
 	Config     *config.Config
 	Engine     *provision.Engine
-	AvailCache *availability.Cache
+	AvailCache      *availability.Cache
+	Providers       *provider.Registry
+	CompetitorCache *competitor.Cache
+	Billing         *billing.BillingService
 }
 
 // NewServer creates a Server, registers routes, and returns it.
@@ -46,21 +55,29 @@ func NewServer(deps ServerDeps) *Server {
 		engine:         deps.Engine,
 		statusBroker:   NewStatusBroker(),
 		orgEventBroker: NewOrgEventBroker(),
-		availCache:     deps.AvailCache,
+		availCache:      deps.AvailCache,
+		providers:       deps.Providers,
+		competitorCache: deps.CompetitorCache,
+		billing:         deps.Billing,
 	}
 
 	// Health endpoint behind localhost restriction + internal token auth
 	s.mux.Handle("GET /health", LocalhostOnly(InternalAuthMiddleware(deps.Config.InternalAPIToken, http.HandlerFunc(s.handleHealth))))
 
+	// Public pricing comparison endpoint (no auth).
+	s.mux.Handle("GET /api/v1/pricing/comparison",
+		http.HandlerFunc(s.handlePricingComparison))
+
 	// Auth + rate limiting middleware chain.
 	// 10 req/s sustained with burst of 20 per org.
 	clerkAuth := ClerkAuthMiddleware(deps.Config.ClerkSecretKey)
-	requireOrg := RequireOrg
 	rateLimiter := NewOrgRateLimiter(rate.Every(100*time.Millisecond), 20)
 
-	// Middleware chain helper: Clerk auth -> org required -> rate limiter.
+	// Middleware chain helper: Clerk auth -> rate limiter.
+	// No RequireOrg needed — ClaimsFromContext synthesizes a personal org
+	// for users without a Clerk Organization.
 	authChain := func(h http.Handler) http.Handler {
-		return clerkAuth(requireOrg(rateLimiter.Middleware(h)))
+		return clerkAuth(rateLimiter.Middleware(h))
 	}
 
 	// Start rate limiter cleanup goroutine.
@@ -96,6 +113,22 @@ func NewServer(deps ServerDeps) *Server {
 		authChain(http.HandlerFunc(s.handleGetSpendingLimit)))
 	s.mux.Handle("DELETE /api/v1/billing/spending-limit",
 		authChain(http.HandlerFunc(s.handleDeleteSpendingLimit)))
+
+	// Credit balance endpoints.
+	s.mux.Handle("GET /api/v1/billing/balance",
+		authChain(http.HandlerFunc(s.handleGetBalance)))
+	s.mux.Handle("POST /api/v1/billing/credits/purchase",
+		authChain(http.HandlerFunc(s.handlePurchaseCredits)))
+	s.mux.Handle("POST /api/v1/billing/credits/redeem",
+		authChain(http.HandlerFunc(s.handleRedeemCreditCode)))
+	s.mux.Handle("PUT /api/v1/billing/auto-pay",
+		authChain(http.HandlerFunc(s.handleUpdateAutoPay)))
+	s.mux.Handle("GET /api/v1/billing/transactions",
+		authChain(http.HandlerFunc(s.handleGetTransactions)))
+
+	// Stripe webhook (no auth — signature verified in handler).
+	s.mux.Handle("POST /webhooks/stripe",
+		http.HandlerFunc(s.handleStripeWebhook))
 
 	// GPU availability endpoint.
 	s.mux.Handle("GET /api/v1/gpu/available",

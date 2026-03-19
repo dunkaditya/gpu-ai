@@ -54,8 +54,7 @@ func (t *BillingTicker) Start(ctx context.Context) {
 }
 
 // runTick executes a single billing tick.
-// CRITICAL ORDER: spending limits are enforced BEFORE Stripe reporting.
-// This ensures limit enforcement is never delayed by Stripe API latency.
+// CRITICAL ORDER: balance deduction → balance enforcement → spending limits → Stripe reporting.
 func (t *BillingTicker) runTick(ctx context.Context) {
 	// Step 1: Get all active billing sessions.
 	sessions, err := t.db.GetActiveBillingSessions(ctx)
@@ -67,6 +66,8 @@ func (t *BillingTicker) runTick(ctx context.Context) {
 	}
 
 	if len(sessions) == 0 {
+		// Still check auto-pay even with no active sessions.
+		t.processAutoPay(ctx)
 		return
 	}
 
@@ -76,13 +77,120 @@ func (t *BillingTicker) runTick(ctx context.Context) {
 		byOrg[s.OrgID] = append(byOrg[s.OrgID], s)
 	}
 
-	// Step 3: For each org -- LIMITS FIRST.
+	// Step 3: Deduct balance for each org's usage this tick.
+	for orgID, orgSessions := range byOrg {
+		t.deductOrgBalance(ctx, orgID, orgSessions)
+	}
+
+	// Step 4: For each org -- SPENDING LIMITS.
 	for orgID, orgSessions := range byOrg {
 		t.enforceSpendingLimit(ctx, orgID, orgSessions)
 	}
 
-	// Step 4: THEN Stripe reporting.
+	// Step 5: Process auto-pay for orgs below threshold.
+	t.processAutoPay(ctx)
+
+	// Step 6: THEN Stripe reporting.
 	t.reportToStripe(ctx, sessions)
+}
+
+// deductOrgBalance deducts usage cost from the org's credit balance.
+// If balance hits zero, stops all instances for the org.
+func (t *BillingTicker) deductOrgBalance(ctx context.Context, orgID string, sessions []db.BillingSession) {
+	now := time.Now().UTC()
+
+	// Calculate total cost this tick (60 seconds of usage).
+	var totalCostCents int64
+	for _, s := range sessions {
+		// cost = pricePerHour * gpuCount / 3600 * 60 seconds * 100 (to cents)
+		costCents := int64(float64(s.GPUCount) * s.PricePerHour / 3600.0 * 60.0 * 100.0)
+		if costCents < 1 {
+			costCents = 1 // Minimum 1 cent per tick per session.
+		}
+		totalCostCents += costCents
+	}
+
+	if totalCostCents <= 0 {
+		return
+	}
+
+	txn, err := t.db.DeductBalance(ctx, orgID, totalCostCents, "GPU usage", nil)
+	if err != nil {
+		t.logger.Error("billing tick: failed to deduct balance",
+			slog.String("org_id", orgID),
+			slog.Int64("cost_cents", totalCostCents),
+			slog.String("error", err.Error()),
+		)
+		return
+	}
+
+	_ = now // used in log below
+	if txn.BalanceAfterCents <= 0 {
+		t.logger.Warn("BALANCE_DEPLETED: stopping all instances for org",
+			slog.String("org_id", orgID),
+			slog.Int64("balance_after", txn.BalanceAfterCents),
+		)
+		if err := t.engine.StopInstancesForOrg(ctx, orgID); err != nil {
+			t.logger.Error("billing tick: failed to stop instances for depleted balance",
+				slog.String("org_id", orgID),
+				slog.String("error", err.Error()),
+			)
+		}
+	}
+}
+
+// processAutoPay checks all orgs needing auto-pay and charges their payment method.
+func (t *BillingTicker) processAutoPay(ctx context.Context) {
+	if !t.stripe.Enabled() {
+		return
+	}
+
+	orgs, err := t.db.GetOrgsNeedingAutoPay(ctx)
+	if err != nil {
+		t.logger.Error("billing tick: failed to get orgs needing auto-pay",
+			slog.String("error", err.Error()),
+		)
+		return
+	}
+
+	for _, org := range orgs {
+		customerID, err := t.db.GetOrgStripeCustomerID(ctx, org.OrgID)
+		if err != nil || customerID == "" {
+			t.logger.Warn("billing tick: auto-pay org has no stripe customer",
+				slog.String("org_id", org.OrgID),
+			)
+			_ = t.db.UpdateAutoPayTriggered(ctx, org.OrgID)
+			continue
+		}
+
+		piID, err := t.stripe.ChargeDefaultPaymentMethod(ctx, customerID, org.AutoPayAmountCents, org.OrgID)
+		if err != nil {
+			t.logger.Warn("billing tick: auto-pay charge failed",
+				slog.String("org_id", org.OrgID),
+				slog.String("error", err.Error()),
+			)
+			_ = t.db.UpdateAutoPayTriggered(ctx, org.OrgID)
+			continue
+		}
+
+		// Add balance immediately (webhook will deduplicate via reference_id).
+		ref := piID
+		_, err = t.db.AddBalance(ctx, org.OrgID, org.AutoPayAmountCents, "auto_pay",
+			"Auto-pay charge", &ref)
+		if err != nil {
+			t.logger.Error("billing tick: failed to add auto-pay balance",
+				slog.String("org_id", org.OrgID),
+				slog.String("error", err.Error()),
+			)
+		} else {
+			t.logger.Info("auto-pay charged successfully",
+				slog.String("org_id", org.OrgID),
+				slog.Int64("amount_cents", org.AutoPayAmountCents),
+			)
+		}
+
+		_ = t.db.UpdateAutoPayTriggered(ctx, org.OrgID)
+	}
 }
 
 // enforceSpendingLimit checks and enforces spending limits for a single org.

@@ -7,9 +7,10 @@ import { fetcher } from "@/lib/api";
 import { GPUCard } from "@/components/cloud/GPUCard";
 import { LaunchInstanceForm } from "@/components/cloud/LaunchInstanceForm";
 import { EmptyState } from "@/components/cloud/EmptyState";
-import { GPU_CATEGORIES, classifyGPU, FEATURED_MODELS } from "@/lib/gpu-categories";
+import { GPU_CATEGORIES, classifyGPU } from "@/lib/gpu-categories";
 import { getRegionDisplay } from "@/lib/regions";
-import type { AvailableOffering, GPUCardData } from "@/lib/types";
+import { PRICING_FALLBACK } from "@/lib/constants";
+import type { AvailableOffering, GPUCardData, PricingComparisonResponse } from "@/lib/types";
 
 const CATEGORY_LABELS = ["All", ...GPU_CATEGORIES.map((c) => c.label)];
 
@@ -60,6 +61,14 @@ export function GPUAvailabilityTable() {
   const { data, error, isLoading, mutate } = useSWR<{
     available: AvailableOffering[];
   }>("/api/v1/gpu/available", fetcher, { refreshInterval: 30000 });
+
+  const { data: pricingData } = useSWR<PricingComparisonResponse>(
+    "/api/v1/pricing/comparison",
+    fetcher,
+    { fallbackData: PRICING_FALLBACK, refreshInterval: 60000 }
+  );
+
+  const featuredModels = pricingData?.featured_models ?? PRICING_FALLBACK.featured_models;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -169,9 +178,9 @@ export function GPUAvailabilityTable() {
   // Featured cards: filtered by the same filters as the main grid
   const featuredCards = useMemo(() => {
     return cards.filter((c) =>
-      FEATURED_MODELS.some((fm) => c.gpu_model.toLowerCase() === fm)
+      featuredModels.some((fm) => c.gpu_model.toLowerCase() === fm.toLowerCase())
     );
-  }, [cards]);
+  }, [cards, featuredModels]);
 
   function handleLaunch(card: GPUCardData) {
     setLaunchCard(card);
