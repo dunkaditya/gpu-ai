@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { ChipLogo } from "@/components/ui/ChipLogo";
@@ -94,6 +94,14 @@ function SelectField({
 }
 
 export default function ApplyPage() {
+  return (
+    <Suspense>
+      <ApplyPageInner />
+    </Suspense>
+  );
+}
+
+function ApplyPageInner() {
   const searchParams = useSearchParams();
   const roleParam = searchParams.get("role") || "";
   const [submitted, setSubmitted] = useState(false);
