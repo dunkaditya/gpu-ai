@@ -41,7 +41,7 @@ export default function RootLayout({
   const inner = (
     <html lang="en" className="dark">
       <body
-        className={`${vremenaGrotesk.variable} ${nectoMono.variable} antialiased`}
+        className={`${vremenaGrotesk.variable} ${nectoMono.variable} overflow-x-hidden antialiased`}
       >
         {children}
       </body>

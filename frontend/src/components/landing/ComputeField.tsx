@@ -36,7 +36,7 @@ export function ComputeField() {
     let mouseX = -9999;
     let mouseY = -9999;
     const isMobile = window.innerWidth < 768;
-    const nodeCount = isMobile ? 96 : 288;
+    const nodeCount = isMobile ? 160 : 288;
 
     // Depth-aware colors: far nodes are dimmer
     const baseColors = [
