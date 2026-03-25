@@ -135,7 +135,7 @@ export function LaunchInstanceForm({
       {/* Modal */}
       <div className="relative w-full max-w-lg mx-4 bg-bg-card border border-border rounded-[10px] shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
           <h2 className="type-ui-sm font-medium text-text">Launch Instance</h2>
           <button
             onClick={onClose}
@@ -153,7 +153,7 @@ export function LaunchInstanceForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
           {isPreFilled && activeOffering ? (
             /* ---- Pre-filled mode: confirmation card ---- */
             <>

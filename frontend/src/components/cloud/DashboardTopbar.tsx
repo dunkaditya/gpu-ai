@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import useSWR from "swr";
+import { cn } from "@/lib/utils";
 import { gracefulFetcher } from "@/lib/api";
 import type { BalanceResponse } from "@/lib/types";
 
@@ -55,11 +56,11 @@ export function DashboardTopbar({ onMenuToggle }: { onMenuToggle?: () => void })
 
   return (
     <header className="flex items-center justify-between h-14 px-6 bg-bg border-b border-border shrink-0">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         {/* Hamburger menu - mobile only */}
         <button
           onClick={onMenuToggle}
-          className="md:hidden flex items-center justify-center w-8 h-8 rounded-md text-text-muted hover:text-text hover:bg-bg-card transition-colors"
+          className="md:hidden flex items-center justify-center w-8 h-8 rounded-md text-text-muted hover:text-text hover:bg-bg-card transition-colors shrink-0"
           aria-label="Toggle navigation menu"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,12 +69,12 @@ export function DashboardTopbar({ onMenuToggle }: { onMenuToggle?: () => void })
         </button>
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 type-ui-sm">
-          <span className="text-text-dim">Cloud</span>
+        <div className="flex items-center gap-2 type-ui-sm min-w-0 overflow-hidden">
+          <span className="text-text-dim whitespace-nowrap">Cloud</span>
           {breadcrumb.map((crumb, idx) => (
-            <span key={idx} className="flex items-center gap-2">
-              <span className="text-text-dim/40">&gt;</span>
-              <span className={crumb.isLast ? "text-text" : "text-text-dim"}>
+            <span key={idx} className="flex items-center gap-2 min-w-0">
+              <span className="text-text-dim/40 shrink-0">&gt;</span>
+              <span className={cn(crumb.isLast ? "text-text truncate" : "text-text-dim", "whitespace-nowrap")}>
                 {crumb.label}
               </span>
             </span>

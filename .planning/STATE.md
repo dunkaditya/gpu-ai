@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-03-12T01:57:49.938Z"
-last_activity: 2026-03-12 -- Completed 11-03 (Instances table fix and dashboard polish)
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-03-25T20:34:17.763Z"
+last_activity: 2026-03-25 -- Completed 12-01 (Landing page mobile responsive fixes)
 progress:
-  total_phases: 14
+  total_phases: 15
   completed_phases: 13
-  total_plans: 44
-  completed_plans: 43
-  percent: 100
+  total_plans: 47
+  completed_plans: 44
+  percent: 94
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Customers can find available GPUs across providers and provision them instantly through a single interface, with a privacy layer that completely hides the upstream provider.
-**Current focus:** Phase 11: Dashboard UI Redesign -- Linear aesthetic, GPU catalog, instances table fixes
+**Current focus:** Phase 12: Mobile Responsive Website Optimization
 
 ## Current Position
 
-Phase: 11 (Dashboard UI Redesign)
-Plan: 3 of 3 in current phase
-Status: Phase 11 Complete
-Last activity: 2026-03-12 -- Completed 11-03 (Instances table fix and dashboard polish)
+Phase: 12 (Mobile Responsive Website Optimization)
+Plan: 1 of 3 in current phase
+Status: Plan 12-01 Complete
+Last activity: 2026-03-25 -- Completed 12-01 (Landing page mobile responsive fixes)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [██████████] 100%
 | Phase 11 P01 | 3min | 2 tasks | 8 files |
 | Phase 11 P02 | 3min | 2 tasks | 5 files |
 | Phase 11 P03 | 5min | 2 tasks | 6 files |
+| Phase 12 P01 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -253,6 +254,9 @@ Recent decisions affecting current work:
 - [Phase 11-03]: SSH command column uses minmax(200px, 2fr) -- flexible width instead of truncated 260px
 - [Phase 11-03]: Billing summary cards use standard border (no colored left accents) for Linear aesthetic
 - [Phase 11-03]: Progress bars use bg-text-muted for under-70% state -- reduce purple in non-CTA contexts
+- [Phase 12-01]: PricingTable already had mobile cards -- no changes needed
+- [Phase 12-01]: Footer uses sm:grid-cols-2 lg:grid-cols-5 instead of direct md:grid-cols-5 jump
+- [Phase 12-01]: NovacoreLogo negative margin reduced from -mr-12 to -mr-4 on mobile to prevent overflow
 
 ### Roadmap Evolution
 
@@ -260,6 +264,7 @@ Recent decisions affecting current work:
 - Phase 9 added: Replace WireGuard with FRP tunneling
 - Phase 10 added: Frontend dashboard with GPU availability, provisioning, and instance management
 - Phase 11 added: Dashboard UI redesign — clean linear aesthetic, GPU catalog with categories and search, instances table fixes, professional polish
+- Phase 12 added: Mobile responsive website optimization
 
 ### Pending Todos
 
@@ -273,6 +278,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T01:50:11Z
-Stopped at: Completed 11-03-PLAN.md
+Last session: 2026-03-25T20:34:17.759Z
+Stopped at: Completed 12-01-PLAN.md
 Resume file: None

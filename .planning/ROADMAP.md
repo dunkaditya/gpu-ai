@@ -301,7 +301,7 @@ Plans:
   4. All forms are usable on 375px viewport (stacked controls, adequate padding)
   5. No horizontal scroll on any page at 375px
   6. Touch targets >= 44px on all interactive elements
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 12-01-PLAN.md — Fix Footer, PricingWidget, PricingTable, About page logos, Free Trial page padding for mobile

@@ -213,7 +213,7 @@ export function GPUAvailabilityTable() {
   return (
     <>
       {/* Filter toolbar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Search input */}
         <div className="relative w-full sm:w-64">
           <svg
@@ -240,7 +240,7 @@ export function GPUAvailabilityTable() {
         </div>
 
         {/* Category chips */}
-        <div className="flex items-center gap-1 overflow-x-auto flex-1 min-w-0">
+        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto sm:flex-1 sm:min-w-0">
           {CATEGORY_LABELS.map((label) => (
             <button
               key={label}
@@ -256,48 +256,49 @@ export function GPUAvailabilityTable() {
           ))}
         </div>
 
-        {/* Region filter */}
-        <div className="relative">
-          <select
-            value={regionFilter}
-            onChange={(e) => setRegionFilter(e.target.value)}
-            className="appearance-none bg-bg border border-border rounded-md pl-3 pr-8 py-2 type-ui-xs text-text-muted focus:outline-none focus:ring-1 focus:ring-purple/40 focus:border-purple/40 transition-all cursor-pointer"
-          >
-            <option value="">{getRegionDisplay("unknown").flag} All Regions</option>
-            {regions.filter((r) => r !== "unknown").map((r) => {
-              const display = getRegionDisplay(r);
-              return (
-                <option key={r} value={r}>
-                  {display.flag} {display.label}
-                </option>
-              );
-            })}
-          </select>
-          <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim pointer-events-none"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </div>
+        {/* Region filter + Sort button */}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <select
+              value={regionFilter}
+              onChange={(e) => setRegionFilter(e.target.value)}
+              className="appearance-none bg-bg border border-border rounded-md pl-3 pr-8 py-2 type-ui-xs text-text-muted focus:outline-none focus:ring-1 focus:ring-purple/40 focus:border-purple/40 transition-all cursor-pointer"
+            >
+              <option value="">{getRegionDisplay("unknown").flag} All Regions</option>
+              {regions.filter((r) => r !== "unknown").map((r) => {
+                const display = getRegionDisplay(r);
+                return (
+                  <option key={r} value={r}>
+                    {display.flag} {display.label}
+                  </option>
+                );
+              })}
+            </select>
+            <svg
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-dim pointer-events-none"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
 
-        {/* Sort button */}
-        <button
-          onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
-          className="flex items-center gap-1.5 bg-bg border border-border rounded-md px-3 py-2 type-ui-xs text-text-muted hover:text-text hover:border-border-light transition-all"
-        >
-          Price
-          <span className="text-purple">
-            {sortDir === "asc" ? "\u2191" : "\u2193"}
-          </span>
-        </button>
+          <button
+            onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+            className="flex items-center gap-1.5 bg-bg border border-border rounded-md px-3 py-2 type-ui-xs text-text-muted hover:text-text hover:border-border-light transition-all"
+          >
+            Price
+            <span className="text-purple">
+              {sortDir === "asc" ? "\u2191" : "\u2193"}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Featured GPUs section */}

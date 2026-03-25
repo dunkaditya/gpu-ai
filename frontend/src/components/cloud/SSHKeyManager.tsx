@@ -258,7 +258,7 @@ export function SSHKeyManager() {
                   <p className="type-ui-sm text-text font-medium">{key.name}</p>
                 </div>
                 <div>
-                  <code className="type-ui-2xs text-text-muted font-mono bg-bg/60 px-2 py-0.5 rounded">
+                  <code className="type-ui-2xs text-text-muted font-mono bg-bg/60 px-2 py-0.5 rounded break-all">
                     {truncateFingerprint(key.fingerprint)}
                   </code>
                 </div>
