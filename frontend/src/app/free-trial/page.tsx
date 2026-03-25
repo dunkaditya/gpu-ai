@@ -221,7 +221,7 @@ export default function FreeTrialPage() {
             </p>
 
             {/* Perks grid */}
-            <div className="mt-12 grid grid-cols-2 gap-6">
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {TRIAL_PERKS.map((perk, i) => (
                 <div
                   key={perk.label}
@@ -255,7 +255,7 @@ export default function FreeTrialPage() {
             className="animate-fade-up"
             style={{ animationDelay: "0.15s" }}
           >
-            <div className="rounded-[12px] border border-border bg-bg-card/60 p-8 backdrop-blur-sm lg:p-10">
+            <div className="rounded-[12px] border border-border bg-bg-card/60 p-5 sm:p-8 backdrop-blur-sm lg:p-10">
               <h2 className="mb-1 font-sans text-[22px] font-bold tracking-[-0.02em] text-white">
                 Request free trial
               </h2>

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 const VALUES = [
   {
     title: "Transparency",
-    body: "No hidden fees, no opaque pricing tiers, no surprise bills. You see every provider's rate and exactly what we charge on top.",
+    body: "No hidden fees, no opaque pricing tiers, no surprise bills. The rate you see is the rate you pay.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -49,6 +49,7 @@ interface TeamMember {
   bio: string;
   linkedin?: string;
   previous?: { label: string; logo?: React.ReactNode; showPrefix?: boolean }[];
+  photoClassName?: string;
 }
 
 const TEAM: TeamMember[] = [
@@ -61,9 +62,10 @@ const TEAM: TeamMember[] = [
     previous: [{ label: "NovaCore", logo: <NovacoreLogo />, showPrefix: false }],
   },
   {
-    name: "Aryamaan Singhala",
+    name: "Aryamaan Singhania",
     role: "Chief Financial Officer",
     photo: "/team/aryamaan.jpg",
+    photoClassName: "scale-[1.15]",
     bio: "Co-founded NovaCore, India's first GPU cloud with Blackwells.",
     linkedin: "https://www.linkedin.com/in/aryamaansinghania/",
     previous: [
@@ -108,7 +110,7 @@ function BitSyncLogo() {
 }
 
 function NovacoreLogo() {
-  return <Image src="/logos/novacore.png" alt="NovaCore" width={600} height={535} className="h-auto w-[140px] -mr-12 grayscale invert brightness-75" />;
+  return <Image src="/logos/novacore.png" alt="NovaCore" width={600} height={535} className="h-auto w-[100px] sm:w-[140px] -mr-4 sm:-mr-12 grayscale invert brightness-75" />;
 }
 
 function AdvantageLogo() {
@@ -116,28 +118,32 @@ function AdvantageLogo() {
 }
 
 function TotalEnergiesLogo() {
-  return <Image src="/logos/totalenergies.png" alt="TotalEnergies" width={600} height={437} className={`${logoBase} h-[56px]`} />;
+  return <Image src="/logos/totalenergies.png" alt="TotalEnergies" width={600} height={437} className={`${logoBase} h-[40px] sm:h-[56px]`} />;
 }
 
 function IndiaGovLogo() {
-  return <Image src="/logos/india.png" alt="Government of India" width={800} height={687} className="h-[50px] w-auto opacity-70" />;
+  return <Image src="/logos/india.png" alt="Government of India" width={800} height={687} className="h-[36px] sm:h-[50px] w-auto opacity-70" />;
 }
 
-/* ── Advisors ── */
-const ADVISORS: TeamMember[] = [
+function RashiLogo() {
+  return <Image src="/logos/rashi.png" alt="Rashi Group" width={389} height={150} className={`${logoBase} h-[38px] sm:h-[54px]`} />;
+}
+
+/* ── Board Members ── */
+const BOARD_MEMBERS: TeamMember[] = [
   {
     name: "Tuyen Nguyen",
-    role: "Advisor",
+    role: "Board Member",
     photo: "/team/tuyen.png",
     bio: "Founded Saigon Gas Holdings, acquired by TotalEnergies to form TotalEnergies LPG Vietnam.",
     previous: [{ label: "TotalEnergies", logo: <TotalEnergiesLogo />, showPrefix: false }],
   },
   {
     name: "Ashish Singhania",
-    role: "Advisor",
+    role: "Board Member",
     photo: "/team/ashish.png",
     bio: "25+ years in capital markets. Founded Rashi Group, now building hydropower infrastructure for India.",
-    previous: [],
+    previous: [{ label: "Rashi Group", logo: <RashiLogo />, showPrefix: false }],
   },
 ];
 
@@ -221,12 +227,12 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      {/* ═══ Advisors ═══ */}
+      {/* ═══ Board Members ═══ */}
       <section className="border-t border-border">
         <Container className="py-24 md:py-32">
           <div className="mb-12 text-center md:mb-16">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-purple-light">
-              Advisors
+              Board Members
             </p>
             <h2 className="type-h2 mt-3 font-bold text-white">
               Backed by industry leaders
@@ -235,7 +241,7 @@ export default function AboutPage() {
 
           <div className="mx-auto max-w-[640px] rounded-xl border border-border">
             <div className="grid grid-cols-1 sm:grid-cols-2">
-              {ADVISORS.map((t, i) => (
+              {BOARD_MEMBERS.map((t, i) => (
                 <div
                   key={t.name}
                   className={`animate-fade-up group flex flex-col items-center px-6 py-10 text-center ${
@@ -329,7 +335,7 @@ export default function AboutPage() {
                         alt={t.name}
                         width={400}
                         height={400}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className={`h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${t.photoClassName ?? ""}`}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-purple-dim">
