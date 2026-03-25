@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 12 (Mobile Responsive Website Optimization)
-Plan: 1 of 3 in current phase
-Status: Plan 12-01 Complete
-Last activity: 2026-03-25 -- Completed 12-01 (Landing page mobile responsive fixes)
+Plan: 2 of 3 in current phase
+Status: Plan 12-02 Complete
+Last activity: 2026-03-25 -- Completed 12-02 (Dashboard mobile responsive fixes)
 
-Progress: [█████████░] 94%
+Progress: [█████████░] 96%
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [█████████░] 94%
 | Phase 11 P02 | 3min | 2 tasks | 5 files |
 | Phase 11 P03 | 5min | 2 tasks | 6 files |
 | Phase 12 P01 | 2min | 2 tasks | 4 files |
+| Phase 12 P02 | 5min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -257,6 +258,9 @@ Recent decisions affecting current work:
 - [Phase 12-01]: PricingTable already had mobile cards -- no changes needed
 - [Phase 12-01]: Footer uses sm:grid-cols-2 lg:grid-cols-5 instead of direct md:grid-cols-5 jump
 - [Phase 12-01]: NovacoreLogo negative margin reduced from -mr-12 to -mr-4 on mobile to prevent overflow
+- [Phase 12-02]: Dual-layout pattern (hidden md:block + md:hidden) reused from InstancesTable for billing tables
+- [Phase 12-02]: Filter toolbar stacks as flex-col on mobile with sm:flex-row breakpoint
+- [Phase 12-02]: Breadcrumb uses truncate + min-w-0 overflow-hidden for narrow screen containment
 
 ### Roadmap Evolution
 
@@ -278,6 +282,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25T20:34:17.759Z
-Stopped at: Completed 12-01-PLAN.md
+Last session: 2026-03-25T20:35:22Z
+Stopped at: Completed 12-02-PLAN.md
 Resume file: None
