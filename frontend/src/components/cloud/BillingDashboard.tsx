@@ -93,7 +93,7 @@ export function BillingDashboard() {
           <span>{paymentMessage.text}</span>
           <button
             onClick={() => setPaymentMessage(null)}
-            className="text-text-dim hover:text-text ml-4"
+            className="inline-flex items-center justify-center w-10 h-10 sm:w-7 sm:h-7 rounded text-text-dim hover:text-text hover:bg-bg-card-hover/50 transition-colors ml-2 shrink-0"
           >
             ✕
           </button>

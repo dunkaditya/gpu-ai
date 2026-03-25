@@ -174,7 +174,7 @@ export function SSHKeyManager() {
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="btn-primary !py-1.5 !px-3.5 !type-ui-xs"
+              className="btn-primary !py-2.5 !px-3.5 !type-ui-xs sm:!py-1.5"
             >
               Add Key
             </button>
@@ -270,7 +270,7 @@ export function SSHKeyManager() {
                 <div className="md:text-right">
                   <button
                     onClick={() => setDeletingKeyId(key.id)}
-                    className="type-ui-2xs px-2.5 py-1 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors font-medium"
+                    className="type-ui-2xs px-3 py-2.5 sm:px-2.5 sm:py-1 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors font-medium"
                   >
                     Delete
                   </button>

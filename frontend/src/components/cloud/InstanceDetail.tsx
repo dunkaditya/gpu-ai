@@ -73,7 +73,7 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
     <button
       onClick={handleCopy}
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-1 rounded transition-colors type-ui-2xs font-medium",
+        "inline-flex items-center gap-1.5 px-3 py-2.5 sm:px-2 sm:py-1 rounded transition-colors type-ui-2xs font-medium",
         copied
           ? "text-green bg-green-dim"
           : "text-text-dim hover:text-text hover:bg-bg-card-hover"

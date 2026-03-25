@@ -141,7 +141,7 @@ function StatusFilter({
             <button
               key={status}
               onClick={() => toggle(status)}
-              className="flex items-center gap-2.5 w-full px-3 py-1.5 text-left type-ui-sm hover:bg-bg-card-hover transition-colors"
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 sm:py-1.5 text-left type-ui-sm hover:bg-bg-card-hover transition-colors"
             >
               <span
                 className={cn(
@@ -264,7 +264,7 @@ function RegionFilter({
             <button
               key={region}
               onClick={() => toggle(region)}
-              className="flex items-center gap-2.5 w-full px-3 py-1.5 text-left type-ui-sm hover:bg-bg-card-hover transition-colors"
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 sm:py-1.5 text-left type-ui-sm hover:bg-bg-card-hover transition-colors"
             >
               <span
                 className={cn(
@@ -329,7 +329,7 @@ function CopyButton({
     <button
       onClick={handleCopy}
       className={cn(
-        "inline-flex items-center justify-center w-7 h-7 rounded transition-colors shrink-0",
+        "inline-flex items-center justify-center w-10 h-10 sm:w-7 sm:h-7 rounded transition-colors shrink-0",
         copied
           ? "text-green bg-green-dim"
           : "text-text-dim hover:text-text hover:bg-bg-card-hover"
@@ -436,7 +436,7 @@ function EditableName({
 
   return (
     <div
-      className="group/name flex flex-col cursor-pointer"
+      className="group/name flex flex-col cursor-pointer min-h-[44px] sm:min-h-0 justify-center"
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -641,7 +641,7 @@ function MobileCards({
                     setTerminatingId(instance.id);
                   }}
                   className={cn(
-                    "type-ui-2xs px-2 py-1 rounded border transition-colors font-medium",
+                    "type-ui-2xs px-3 py-2.5 sm:px-2 sm:py-1 rounded border transition-colors font-medium",
                     "border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
                   )}
                 >
@@ -865,7 +865,7 @@ export function InstancesTable({
                 onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                 disabled={safePage === 0}
                 className={cn(
-                  "inline-flex items-center justify-center w-7 h-7 rounded transition-colors",
+                  "inline-flex items-center justify-center w-10 h-10 sm:w-7 sm:h-7 rounded transition-colors",
                   safePage === 0
                     ? "text-text-dim/30 cursor-not-allowed"
                     : "text-text-dim hover:text-text hover:bg-bg-card-hover"
@@ -880,7 +880,7 @@ export function InstancesTable({
                 onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage >= totalPages - 1}
                 className={cn(
-                  "inline-flex items-center justify-center w-7 h-7 rounded transition-colors",
+                  "inline-flex items-center justify-center w-10 h-10 sm:w-7 sm:h-7 rounded transition-colors",
                   safePage >= totalPages - 1
                     ? "text-text-dim/30 cursor-not-allowed"
                     : "text-text-dim hover:text-text hover:bg-bg-card-hover"

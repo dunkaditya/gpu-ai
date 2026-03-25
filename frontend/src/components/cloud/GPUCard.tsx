@@ -107,7 +107,7 @@ export function GPUCard({ card, onLaunch }: GPUCardProps) {
         {card.total_available > 0 ? (
           <button
             onClick={handleLaunch}
-            className="btn-primary px-4 py-1.5 rounded-md type-ui-xs font-medium"
+            className="btn-primary px-4 py-2.5 sm:py-1.5 rounded-md type-ui-xs font-medium"
           >
             Launch
           </button>
