@@ -105,7 +105,7 @@ function NavLink({ item, pathname, onClick }: { item: NavItem; pathname: string;
       href={item.href}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-1.5 type-ui-sm transition-colors",
+        "flex items-center gap-3 px-3 py-3 sm:py-1.5 type-ui-sm transition-colors",
         isActive
           ? "border-l-2 border-purple text-text"
           : "border-l-2 border-transparent text-text-muted hover:text-text"

@@ -64,7 +64,7 @@ export function ConfirmDialog({
       />
 
       {/* Modal card */}
-      <div className="relative bg-bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+      <div className="relative bg-bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 p-4 sm:p-6">
         <h2
           id="confirm-dialog-title"
           className="type-h5 font-sans text-text"
@@ -74,19 +74,19 @@ export function ConfirmDialog({
         <p className="mt-2 type-ui-sm text-text-muted">{message}</p>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 mt-6">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3 mt-6">
           <button
             ref={cancelRef}
             onClick={onCancel}
             disabled={loading}
-            className="btn-secondary type-ui-sm"
+            className="btn-secondary type-ui-sm py-2.5 sm:py-2 w-full sm:w-auto"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`px-4 py-2 rounded-lg type-ui-sm font-medium transition-all disabled:opacity-50 ${
+            className={`px-4 py-2.5 sm:py-2 rounded-lg type-ui-sm font-medium transition-all disabled:opacity-50 w-full sm:w-auto ${
               confirmVariant === "danger"
                 ? "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/20"
                 : "btn-primary"

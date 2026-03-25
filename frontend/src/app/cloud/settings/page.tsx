@@ -184,7 +184,7 @@ export default function SettingsPage() {
                   type="submit"
                   disabled={saving || !limitInput}
                   className={cn(
-                    "btn-primary whitespace-nowrap",
+                    "btn-primary whitespace-nowrap w-full sm:w-auto",
                     (saving || !limitInput) &&
                       "opacity-50 cursor-not-allowed"
                   )}
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setShowRemoveConfirm(true)}
-                  className="px-4 py-2.5 rounded-lg type-ui-sm font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors whitespace-nowrap"
+                  className="px-4 py-2.5 rounded-lg type-ui-sm font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 transition-colors whitespace-nowrap w-full sm:w-auto"
                 >
                   Remove
                 </button>
@@ -261,7 +261,7 @@ export default function SettingsPage() {
                   type="submit"
                   disabled={saving || !limitInput}
                   className={cn(
-                    "btn-primary whitespace-nowrap",
+                    "btn-primary whitespace-nowrap w-full sm:w-auto",
                     (saving || !limitInput) &&
                       "opacity-50 cursor-not-allowed"
                   )}
