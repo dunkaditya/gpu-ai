@@ -64,3 +64,4 @@ infra/wireguard/*.key
 # Misc
 *.log
 tmp/
+.vercel
