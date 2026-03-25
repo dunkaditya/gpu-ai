@@ -80,7 +80,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <div className="p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-5">
           {error ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <p className="type-ui-sm text-red-400">
@@ -160,7 +160,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Update form */}
-              <form onSubmit={handleSetLimit} className="flex gap-3 items-end">
+              <form onSubmit={handleSetLimit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <div className="flex-1">
                   <label className="type-ui-2xs text-text-dim font-medium block mb-1.5">
                     Update Limit
@@ -237,7 +237,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Set limit form */}
-              <form onSubmit={handleSetLimit} className="flex gap-3 items-end">
+              <form onSubmit={handleSetLimit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <div className="flex-1">
                   <label className="type-ui-2xs text-text-dim font-medium block mb-1.5">
                     Monthly Limit

@@ -504,96 +504,161 @@ function TransactionHistorySection({ data }: { data?: TransactionsListResponse |
       <div className="px-5 py-3 border-b border-border">
         <h3 className="type-ui-sm text-text font-medium">Transaction History</h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border">
-              <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
-                Date
-              </th>
-              <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
-                Type
-              </th>
-              <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
-                Description
-              </th>
-              <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">
-                Amount
-              </th>
-              <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">
-                Balance
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.length === 0 ? (
-              <tr>
-                <td colSpan={5}>
-                  <EmptyState
-                    icon={
-                      <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                        <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
-                        <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
-                      </svg>
-                    }
-                    title="No transactions yet"
-                    description="Add credits or launch an instance to start tracking."
-                  />
-                </td>
+      {/* Desktop table */}
+      <div className="hidden md:block">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
+                  Date
+                </th>
+                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
+                  Type
+                </th>
+                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">
+                  Description
+                </th>
+                <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">
+                  Amount
+                </th>
+                <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">
+                  Balance
+                </th>
               </tr>
-            ) : (
-              transactions.map((tx) => {
-                const info = TX_TYPE_LABELS[tx.type] ?? {
-                  label: tx.type,
-                  color: "text-text-muted bg-bg-card-hover",
-                };
-                return (
-                  <tr
-                    key={tx.id}
-                    className="border-b border-border/50 hover:bg-bg-card transition-colors"
-                  >
-                    <td className="px-4 py-3">
-                      <span className="type-ui-xs text-text-muted">
-                        {formatDate(tx.created_at)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "type-ui-2xs font-medium rounded-full px-2 py-0.5",
-                          info.color
-                        )}
-                      >
-                        {info.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="type-ui-sm text-text-muted">
-                        {tx.description || "--"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span
-                        className={cn(
-                          "type-ui-sm font-mono",
-                          tx.amount_cents >= 0 ? "text-green" : "text-text"
-                        )}
-                      >
-                        {tx.amount_cents >= 0 ? "+" : ""}${formatCents(Math.abs(tx.amount_cents))}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="type-ui-sm font-mono text-text-muted">
-                        ${formatCents(tx.balance_after_cents)}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {transactions.length === 0 ? (
+                <tr>
+                  <td colSpan={5}>
+                    <EmptyState
+                      icon={
+                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                          <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+                          <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
+                          <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
+                        </svg>
+                      }
+                      title="No transactions yet"
+                      description="Add credits or launch an instance to start tracking."
+                    />
+                  </td>
+                </tr>
+              ) : (
+                transactions.map((tx) => {
+                  const info = TX_TYPE_LABELS[tx.type] ?? {
+                    label: tx.type,
+                    color: "text-text-muted bg-bg-card-hover",
+                  };
+                  return (
+                    <tr
+                      key={tx.id}
+                      className="border-b border-border/50 hover:bg-bg-card transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <span className="type-ui-xs text-text-muted">
+                          {formatDate(tx.created_at)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={cn(
+                            "type-ui-2xs font-medium rounded-full px-2 py-0.5",
+                            info.color
+                          )}
+                        >
+                          {info.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="type-ui-sm text-text-muted">
+                          {tx.description || "--"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span
+                          className={cn(
+                            "type-ui-sm font-mono",
+                            tx.amount_cents >= 0 ? "text-green" : "text-text"
+                          )}
+                        >
+                          {tx.amount_cents >= 0 ? "+" : ""}${formatCents(Math.abs(tx.amount_cents))}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="type-ui-sm font-mono text-text-muted">
+                          ${formatCents(tx.balance_after_cents)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Mobile card layout */}
+      <div className="md:hidden">
+        {transactions.length === 0 ? (
+          <EmptyState
+            icon={
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
+                <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
+              </svg>
+            }
+            title="No transactions yet"
+            description="Add credits or launch an instance to start tracking."
+          />
+        ) : (
+          <div className="space-y-3 p-4">
+            {transactions.map((tx) => {
+              const info = TX_TYPE_LABELS[tx.type] ?? {
+                label: tx.type,
+                color: "text-text-muted bg-bg-card-hover",
+              };
+              return (
+                <div
+                  key={tx.id}
+                  className="bg-bg-card rounded-[10px] border border-border p-4 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="type-ui-xs text-text-muted">
+                      {formatDate(tx.created_at)}
+                    </span>
+                    <span
+                      className={cn(
+                        "type-ui-2xs font-medium rounded-full px-2 py-0.5",
+                        info.color
+                      )}
+                    >
+                      {info.label}
+                    </span>
+                  </div>
+                  {tx.description && (
+                    <p className="type-ui-sm text-text-muted">{tx.description}</p>
+                  )}
+                  <div className="flex items-center justify-between pt-1">
+                    <span
+                      className={cn(
+                        "type-ui-sm font-mono",
+                        tx.amount_cents >= 0 ? "text-green" : "text-text"
+                      )}
+                    >
+                      {tx.amount_cents >= 0 ? "+" : ""}${formatCents(Math.abs(tx.amount_cents))}
+                    </span>
+                    <span className="type-ui-xs font-mono text-text-dim">
+                      Bal: ${formatCents(tx.balance_after_cents)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -680,99 +745,189 @@ function UsageTab() {
 
       {/* Sessions Table */}
       <div className="rounded-[10px] border border-border bg-bg-card/50 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">GPU</th>
-                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Count</th>
-                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Rate</th>
-                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Started</th>
-                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Ended</th>
-                <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Duration</th>
-                <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border/50">
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <td key={j} className="px-4 py-3">
-                        <div className="h-4 bg-bg-card-hover rounded animate-pulse w-16" />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : sessions.length === 0 ? (
-                <tr>
-                  <td colSpan={7}>
-                    <EmptyState
-                      icon={
-                        <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                          <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-                          <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
-                          <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
-                        </svg>
-                      }
-                      title="No billing sessions in this period"
-                      description="Launch an instance to start tracking usage."
-                    />
-                  </td>
+        {/* Desktop table */}
+        <div className="hidden md:block">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">GPU</th>
+                  <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Count</th>
+                  <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Rate</th>
+                  <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Started</th>
+                  <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Ended</th>
+                  <th className="type-ui-2xs text-left text-text-dim font-medium uppercase tracking-wider px-4 py-3">Duration</th>
+                  <th className="type-ui-2xs text-right text-text-dim font-medium uppercase tracking-wider px-4 py-3">Cost</th>
                 </tr>
-              ) : (
-                sessions.map((session) => (
-                  <tr
-                    key={session.id}
-                    className="border-b border-border/50 hover:bg-bg-card transition-colors"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {session.is_active && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot shrink-0" />
-                        )}
-                        <span className="type-ui-sm text-text font-medium">{session.gpu_type}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="type-ui-sm text-text font-mono">x{session.gpu_count}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="type-ui-sm text-text-muted font-mono">
-                        ${session.price_per_hour.toFixed(2)}/hr
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="type-ui-xs text-text-muted">{formatDate(session.started_at)}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {session.ended_at ? (
-                        <span className="type-ui-xs text-text-muted">{formatDate(session.ended_at)}</span>
-                      ) : (
-                        <span className="type-ui-xs inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 bg-green-dim text-green font-medium">
-                          <span className="h-1.5 w-1.5 rounded-full bg-green" />
-                          Active
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="type-ui-sm text-text-muted font-mono">
-                        {formatDuration(session.duration_seconds)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="type-ui-sm text-text font-mono">
-                        ${(session.total_cost ?? session.estimated_cost ?? 0).toFixed(2)}
-                      </span>
-                      {session.is_active && session.estimated_cost != null && (
-                        <p className="type-ui-2xs text-text-dim">est.</p>
-                      )}
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <tr key={i} className="border-b border-border/50">
+                      {Array.from({ length: 7 }).map((_, j) => (
+                        <td key={j} className="px-4 py-3">
+                          <div className="h-4 bg-bg-card-hover rounded animate-pulse w-16" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : sessions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7}>
+                      <EmptyState
+                        icon={
+                          <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                            <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+                            <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
+                            <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
+                          </svg>
+                        }
+                        title="No billing sessions in this period"
+                        description="Launch an instance to start tracking usage."
+                      />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  sessions.map((session) => (
+                    <tr
+                      key={session.id}
+                      className="border-b border-border/50 hover:bg-bg-card transition-colors"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {session.is_active && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot shrink-0" />
+                          )}
+                          <span className="type-ui-sm text-text font-medium">{session.gpu_type}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="type-ui-sm text-text font-mono">x{session.gpu_count}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="type-ui-sm text-text-muted font-mono">
+                          ${session.price_per_hour.toFixed(2)}/hr
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="type-ui-xs text-text-muted">{formatDate(session.started_at)}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {session.ended_at ? (
+                          <span className="type-ui-xs text-text-muted">{formatDate(session.ended_at)}</span>
+                        ) : (
+                          <span className="type-ui-xs inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 bg-green-dim text-green font-medium">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green" />
+                            Active
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="type-ui-sm text-text-muted font-mono">
+                          {formatDuration(session.duration_seconds)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="type-ui-sm text-text font-mono">
+                          ${(session.total_cost ?? session.estimated_cost ?? 0).toFixed(2)}
+                        </span>
+                        {session.is_active && session.estimated_cost != null && (
+                          <p className="type-ui-2xs text-text-dim">est.</p>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile card layout */}
+        <div className="md:hidden">
+          {isLoading ? (
+            <div className="space-y-3 p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-bg-card rounded-[10px] border border-border p-4 animate-pulse space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 bg-bg-card-hover rounded w-24" />
+                    <div className="h-4 bg-bg-card-hover rounded-full w-14" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-4 bg-bg-card-hover rounded w-16" />
+                    <div className="h-4 bg-bg-card-hover rounded w-20" />
+                    <div className="h-4 bg-bg-card-hover rounded w-12" />
+                    <div className="h-4 bg-bg-card-hover rounded w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : sessions.length === 0 ? (
+            <EmptyState
+              icon={
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                  <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M1 6h14" stroke="currentColor" strokeWidth="1.5" />
+                  <rect x="3" y="8.5" width="4" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" />
+                </svg>
+              }
+              title="No billing sessions in this period"
+              description="Launch an instance to start tracking usage."
+            />
+          ) : (
+            <div className="space-y-3 p-4">
+              {sessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="bg-bg-card rounded-[10px] border border-border p-4 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {session.is_active && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-green animate-pulse-dot shrink-0" />
+                      )}
+                      <span className="type-ui-sm text-text font-medium">{session.gpu_type}</span>
+                    </div>
+                    {session.ended_at ? (
+                      <span className="type-ui-2xs text-text-dim">Ended</span>
+                    ) : (
+                      <span className="type-ui-2xs inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 bg-green-dim text-green font-medium">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green" />
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="type-ui-2xs text-text-dim uppercase">Count</p>
+                      <p className="type-ui-sm text-text font-mono">x{session.gpu_count}</p>
+                    </div>
+                    <div>
+                      <p className="type-ui-2xs text-text-dim uppercase">Rate</p>
+                      <p className="type-ui-sm text-text-muted font-mono">${session.price_per_hour.toFixed(2)}/hr</p>
+                    </div>
+                    <div>
+                      <p className="type-ui-2xs text-text-dim uppercase">Duration</p>
+                      <p className="type-ui-sm text-text-muted font-mono">{formatDuration(session.duration_seconds)}</p>
+                    </div>
+                    <div>
+                      <p className="type-ui-2xs text-text-dim uppercase">Cost</p>
+                      <p className="type-ui-sm text-text font-mono">
+                        ${(session.total_cost ?? session.estimated_cost ?? 0).toFixed(2)}
+                        {session.is_active && session.estimated_cost != null && (
+                          <span className="text-text-dim ml-1">est.</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-1 type-ui-2xs text-text-dim">
+                    <span>{formatDate(session.started_at)}</span>
+                    <span>{session.ended_at ? formatDate(session.ended_at) : "Running"}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
