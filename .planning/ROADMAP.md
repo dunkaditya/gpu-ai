@@ -288,3 +288,22 @@ Plans:
 - [ ] 11-01-PLAN.md — Design system refinement (Linear tokens, film grain scoping, btn-primary/btn-secondary), shared EmptyState component, GPU category constants, sidebar/topbar polish
 - [ ] 11-02-PLAN.md — GPU catalog with category tabs and debounced search, GPU card and launch modal redesign
 - [ ] 11-03-PLAN.md — Instances table CSS grid fix, professional polish across billing/SSH keys/settings pages
+
+### Phase 12: Mobile responsive website optimization
+
+**Goal:** Make the entire GPU.ai frontend fully mobile-responsive -- fix landing page layouts (footer, pricing widget, about page logos), add mobile card layouts for dashboard billing tables, stack form controls vertically on mobile, fix GPU filter toolbar layout, ensure all touch targets meet 44px minimum, and eliminate horizontal scroll on all pages at 375px viewport width
+**Requirements**: MOBILE-01, MOBILE-02, MOBILE-03, MOBILE-04, MOBILE-05, MOBILE-06
+**Depends on:** Phase 11
+**Success Criteria** (what must be TRUE):
+  1. Landing page renders correctly at 375px width with no horizontal scroll
+  2. Dashboard sidebar opens/closes on mobile (already working, verified)
+  3. Billing tables have mobile card layouts (transaction history + usage sessions)
+  4. All forms are usable on 375px viewport (stacked controls, adequate padding)
+  5. No horizontal scroll on any page at 375px
+  6. Touch targets >= 44px on all interactive elements
+**Plans:** 3 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Fix Footer, PricingWidget, PricingTable, About page logos, Free Trial page padding for mobile
+- [ ] 12-02-PLAN.md — Fix dashboard layout padding, billing table mobile cards, settings form, GPU filter toolbar, topbar breadcrumb, SSH fingerprints, launch modal
+- [ ] 12-03-PLAN.md — Touch target sizing on icon buttons, confirm dialog mobile fix, final responsive polish pass
