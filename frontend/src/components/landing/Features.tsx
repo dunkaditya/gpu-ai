@@ -18,7 +18,7 @@ export function Features() {
             <h3 className="type-h5 mb-2 font-semibold text-white">
               {feature.title}
             </h3>
-            <p className="type-body leading-[1.7] text-text-muted">
+            <p className="hidden type-body leading-[1.7] text-text-muted md:block">
               {feature.description}
             </p>
           </Card>

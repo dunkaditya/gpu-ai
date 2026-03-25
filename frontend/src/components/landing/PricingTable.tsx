@@ -148,9 +148,9 @@ export function PricingTable() {
                 .map((c) => (
                   <div
                     key={c.name}
-                    className="flex-1 rounded-lg bg-bg-alt p-2 text-center"
+                    className="min-w-0 flex-1 rounded-lg bg-bg-alt p-2 text-center"
                   >
-                    <span className="type-ui-2xs block text-text-dim">
+                    <span className="type-ui-2xs block truncate text-text-dim">
                       {c.name}
                     </span>
                     <span className="type-ui text-text-muted line-through decoration-text-dim/30">
