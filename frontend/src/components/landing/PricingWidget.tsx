@@ -129,7 +129,7 @@ export function PricingWidget() {
             <button
               key={g.gpu_model}
               onClick={() => setSelGpu(i)}
-              className={`relative flex-1 px-2 py-3 type-ui-2xs transition-all ${
+              className={`relative flex-1 min-w-0 px-2 py-3 text-[10px] sm:text-[11px] transition-all ${
                 safeIdx === i
                   ? "font-semibold text-white"
                   : "text-text-dim hover:text-text-muted"
