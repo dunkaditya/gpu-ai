@@ -3,7 +3,11 @@
 export const NAV_LINKS = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
-  { label: "How It Works", href: "/#how-it-works" },
+] as const;
+
+export const PRODUCTS_LINKS = [
+  { label: "On-Demand", href: "/products/on-demand" },
+  { label: "Buildouts", href: "/products/buildouts" },
 ] as const;
 
 export const COMPANY_LINKS = [
@@ -170,24 +174,20 @@ export const PRICING_DATA = PRICING_FALLBACK.gpus.map((g) => ({
 export const FOOTER_LINKS = {
   Product: [
     { label: "Features", href: "/#features" },
+    { label: "On-Demand GPUs", href: "/products/on-demand" },
+    { label: "Custom Buildouts", href: "/products/buildouts" },
     { label: "Pricing", href: "/#pricing" },
-    { label: "CLI", href: "/docs/cli" },
-    { label: "API", href: "/docs/api" },
   ],
   Company: [
     { label: "About", href: "/about" },
-    { label: "Blog", href: "/blog" },
     { label: "Careers", href: "/careers" },
-    { label: "Contact", href: "/contact" },
   ],
   Resources: [
-    { label: "Documentation", href: "/docs" },
-    { label: "Status", href: "/status" },
+    { label: "Documentation", href: "/docs/ssh-keys" },
     { label: "Changelog", href: "/changelog" },
   ],
   Legal: [
     { label: "Privacy", href: "/privacy" },
     { label: "Terms", href: "/terms" },
-    { label: "Security", href: "/security" },
   ],
 } as const;

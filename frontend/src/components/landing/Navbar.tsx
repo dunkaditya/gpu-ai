@@ -3,9 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ChipLogo } from "@/components/ui/ChipLogo";
-import { NAV_LINKS, COMPANY_LINKS } from "@/lib/constants";
+import { NAV_LINKS, PRODUCTS_LINKS, COMPANY_LINKS } from "@/lib/constants";
 
-function CompanyDropdown() {
+function NavDropdown({
+  label,
+  links,
+}: {
+  label: string;
+  links: ReadonlyArray<{ readonly label: string; readonly href: string }>;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -25,7 +31,7 @@ function CompanyDropdown() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 type-ui font-medium uppercase tracking-[0.08em] text-text-muted transition-colors hover:text-white"
       >
-        Company
+        {label}
         <svg
           className={`h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           fill="none"
@@ -57,14 +63,14 @@ function CompanyDropdown() {
           }}
         >
           <div className="flex min-w-[380px]">
-            {COMPANY_LINKS.map((link) => (
+            {links.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className="group flex-1 rounded-lg px-5 py-4 transition-colors hover:bg-white/[0.04]"
+                className="group flex-1 rounded-lg px-5 py-4 text-center transition-colors hover:bg-white/[0.04]"
               >
-                <span className="flex items-center gap-1.5 text-[14px] font-semibold text-white">
+                <span className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap text-[14px] font-semibold text-white">
                   {link.label}
                   <svg
                     className="h-3 w-3 text-text-dim opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0.5"
@@ -89,9 +95,37 @@ function CompanyDropdown() {
   );
 }
 
+const BANNER_HEIGHT = 36;
+
+function TopBanner({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div
+      className="fixed top-0 left-0 right-0 z-[51] flex items-center justify-center gap-2 bg-purple/90 px-4 text-center"
+      style={{ height: BANNER_HEIGHT }}
+    >
+      <a
+        href="/products/buildouts"
+        className="type-ui-sm font-medium text-white hover:underline"
+      >
+        GPU.ai now offers custom GPU buildouts &rarr;
+      </a>
+      <button
+        onClick={onDismiss}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 transition-colors hover:text-white"
+        aria-label="Dismiss"
+      >
+        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(true);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -99,11 +133,16 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const navTop = bannerVisible ? BANNER_HEIGHT : 0;
+
   return (
+    <>
+    {bannerVisible && <TopBanner onDismiss={() => setBannerVisible(false)} />}
     <nav
-      className={`fixed top-0 z-50 w-full border-b border-border transition-all duration-300 ${
+      className={`fixed z-50 w-full border-b border-border transition-all duration-300 ${
         scrolled ? "glass" : "bg-bg/80 backdrop-blur-sm"
       }`}
+      style={{ top: navTop }}
     >
       <div className="mx-auto flex h-[88px] max-w-[1250px] items-center justify-between px-6">
         {/* Logo */}
@@ -126,7 +165,8 @@ export function Navbar() {
               {link.label}
             </a>
           ))}
-          <CompanyDropdown />
+          <NavDropdown label="Products" links={PRODUCTS_LINKS} />
+          <NavDropdown label="Company" links={COMPANY_LINKS} />
         </div>
 
         {/* Desktop CTA */}
@@ -175,6 +215,19 @@ export function Navbar() {
               </a>
             ))}
             <span className="type-ui-sm uppercase tracking-[0.06em] text-text-dim">
+              Products
+            </span>
+            {PRODUCTS_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="type-ui-sm pl-3 text-text-muted transition-colors hover:text-white"
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+            <span className="type-ui-sm uppercase tracking-[0.06em] text-text-dim">
               Company
             </span>
             {COMPANY_LINKS.map((link) => (
@@ -198,5 +251,6 @@ export function Navbar() {
         </div>
       )}
     </nav>
+    </>
   );
 }
